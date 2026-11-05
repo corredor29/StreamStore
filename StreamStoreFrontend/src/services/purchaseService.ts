@@ -1,5 +1,6 @@
 import { api, mockDelay, USE_MOCKS } from './api'
 import type { Compra, MetodoPago, PagoPayload, PagoResultado, CarritoItem } from '@/types'
+import { accountService } from './accountService'
 
 /** Métodos de pago disponibles en la demostración. Daviplata es independiente. */
 export const METODOS_PAGO: ReadonlyArray<{ id: MetodoPago; label: string; descripcion: string }> = [
@@ -7,8 +8,66 @@ export const METODOS_PAGO: ReadonlyArray<{ id: MetodoPago; label: string; descri
   { id: 'DAVIPLATA', label: 'Daviplata', descripcion: 'Billetera digital (simulada)' },
 ]
 
+// Historial inicial realista de compras para demostración
+export const mockComprasIniciales: Compra[] = [
+  {
+    id: 5001,
+    usuarioId: 1,
+    fecha: new Date(Date.now() - 4 * 24 * 60 * 60 * 1000).toISOString(),
+    fechaPago: new Date(Date.now() - 4 * 24 * 60 * 60 * 1000).toISOString(),
+    total: 38000,
+    estado: 'PAGADA',
+    detalles: [
+      {
+        id: 1,
+        productoId: 1,
+        producto: { id: 1, plataformaId: 1, plataforma: { id: 1, nombre: 'Netflix', slug: 'netflix', color: '#E50914' }, nombre: 'Netflix Cuenta Completa', tipo: 'CUENTA_COMPLETA', duracionDias: 30, precio: 38000, stock: 3, activo: true },
+        cantidad: 1,
+        precioUnitario: 38000,
+        subtotal: 38000,
+      },
+    ],
+  },
+  {
+    id: 5002,
+    usuarioId: 1,
+    fecha: new Date(Date.now() - 28 * 24 * 60 * 60 * 1000).toISOString(),
+    fechaPago: new Date(Date.now() - 28 * 24 * 60 * 60 * 1000).toISOString(),
+    total: 9000,
+    estado: 'PAGADA',
+    detalles: [
+      {
+        id: 2,
+        productoId: 4,
+        producto: { id: 4, plataformaId: 2, plataforma: { id: 2, nombre: 'Disney+', slug: 'disney', color: '#113CCF' }, nombre: 'Disney+ Pantalla', tipo: 'PANTALLA', duracionDias: 30, precio: 9000, stock: 6, activo: true },
+        cantidad: 1,
+        precioUnitario: 9000,
+        subtotal: 9000,
+      },
+    ],
+  },
+  {
+    id: 5003,
+    usuarioId: 1,
+    fecha: new Date(Date.now() - 35 * 24 * 60 * 60 * 1000).toISOString(),
+    fechaPago: new Date(Date.now() - 35 * 24 * 60 * 60 * 1000).toISOString(),
+    total: 28000,
+    estado: 'PAGADA',
+    detalles: [
+      {
+        id: 3,
+        productoId: 7,
+        producto: { id: 7, plataformaId: 4, plataforma: { id: 4, nombre: 'Max', slug: 'max', color: '#7B2FF7' }, nombre: 'Max Cuenta Completa', tipo: 'CUENTA_COMPLETA', duracionDias: 30, precio: 28000, stock: 1, activo: true },
+        cantidad: 1,
+        precioUnitario: 28000,
+        subtotal: 28000,
+      },
+    ],
+  },
+]
+
 // Almacén en memoria de compras creadas durante la sesión para modo mock
-export const mockComprasRealizadas: Compra[] = []
+export const mockComprasRealizadas: Compra[] = [...mockComprasIniciales]
 
 export const purchaseService = {
   /** Crea una compra PENDIENTE a partir del carrito del usuario. */
@@ -62,6 +121,9 @@ export const purchaseService = {
 
       compra.estado = 'PAGADA'
       compra.fechaPago = new Date().toISOString()
+
+      // ACTIVACIÓN AUTOMÁTICA DE LOS SERVICIOS DE LA COMPRA
+      accountService.activarServiciosDeCompra(compra)
 
       return mockDelay<PagoResultado>({
         compra,
