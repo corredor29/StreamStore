@@ -20,9 +20,6 @@ const cart = useCartStore()
 
 const modalidadSeleccionada = ref<TipoProducto>('CUENTA_COMPLETA')
 
-// Estado y datos de Scrollytelling
-const activeStoryIndex = ref(0)
-const storyCardRefs = ref<HTMLElement[]>([])
 
 const scrollyPlatforms = [
   {
@@ -115,34 +112,7 @@ const scrollyPlatforms = [
   }
 ]
 
-function scrollToStoryPlatform(index: number) {
-  activeStoryIndex.value = index
-  const el = storyCardRefs.value[index]
-  if (el) {
-    el.scrollIntoView({ behavior: 'smooth', block: 'center' })
-  }
-}
 
-function handleStoryObserver() {
-  if (typeof IntersectionObserver === 'undefined') return
-  const observer = new IntersectionObserver(
-    (entries) => {
-      entries.forEach((entry) => {
-        if (entry.isIntersecting) {
-          const idx = Number(entry.target.getAttribute('data-story-index'))
-          if (!isNaN(idx)) {
-            activeStoryIndex.value = idx
-          }
-        }
-      })
-    },
-    { threshold: 0.5, rootMargin: '-10% 0px -20% 0px' }
-  )
-
-  storyCardRefs.value.forEach((card) => {
-    if (card) observer.observe(card)
-  })
-}
 
 // Estado de la Animación Cinemática Tipo Netflix
 const showNetflixIntro = ref(false)
@@ -249,7 +219,6 @@ onMounted(() => {
     window.addEventListener('scroll', handleScroll, { passive: true })
   }
   startCinematicIntro()
-  setTimeout(() => handleStoryObserver(), 500)
 })
 
 onUnmounted(() => {
@@ -272,14 +241,6 @@ const heroDarkenStyle = computed(() => {
   const p = Math.min(1, Math.max(0, scrollY.value / 260))
   return {
     opacity: p.toFixed(2),
-  }
-})
-
-const sectionRevealStyle = computed(() => {
-  const p = Math.min(1, Math.max(0, (scrollY.value - 60) / 240))
-  return {
-    opacity: p.toFixed(2),
-    transform: `translate3d(0, ${((1 - p) * 30).toFixed(1)}px, 0)`,
   }
 })
 
@@ -470,11 +431,11 @@ const formatCOP = (val: number) => {
 
       <!-- CONTENIDO CENTRAL DEL HERO (IDÉNTICO A HBO MAX) -->
       <div
-        class="container-app relative z-10 text-center max-w-4xl mx-auto py-16 sm:py-24 flex flex-col items-center justify-center space-y-6 transition-all duration-150 ease-out will-change-transform"
+        class="container-app relative z-10 text-center max-w-4xl mx-auto pt-28 sm:pt-40 pb-16 flex flex-col items-center justify-center space-y-6 transition-all duration-150 ease-out will-change-transform"
         :style="heroContentStyle"
       >
-        <!-- Nombre Stream Store con los Colores Oficiales del Logo -->
-        <div class="flex flex-col items-center justify-center space-y-2">
+        <!-- Nombre Stream Store con los Colores Oficiales del Logo (Alineado ópticamente con la intro para evitar desnivel) -->
+        <div class="flex flex-col items-center justify-center space-y-2 mt-8 sm:mt-14">
           <h1 class="font-display text-5xl sm:text-7xl md:text-8xl lg:text-9xl font-black uppercase tracking-tight select-none leading-none drop-shadow-[0_15px_45px_rgba(0,0,0,0.95)]">
             <span class="text-white drop-shadow-[0_10px_25px_rgba(0,0,0,0.9)]">STREAM</span>
             <span class="block sm:inline sm:ml-4 bg-gradient-to-r from-[#8057FF] via-[#9B51E0] to-[#06B6D4] bg-clip-text text-transparent filter drop-shadow-[0_0_40px_rgba(6,182,212,0.5)]">STORE</span>
@@ -532,203 +493,335 @@ const formatCOP = (val: number) => {
       </div>
     </section>
 
-    <!-- ================= 2. EXPERIENCIA SCROLLYTELLING (APARICIÓN FLUIDA Y CINEMÁTICA) ================= -->
-    <section id="plataformas" class="relative bg-black scroll-mt-6">
+    <!-- ================= 2. CABECERA: ELIGE EL MEJOR PLAN PARA TI ================= -->
+    <section id="planes-intro" class="relative bg-black pt-20 pb-12 text-center overflow-hidden">
+      <!-- Resplandor ambiental superior -->
+      <div class="absolute top-0 left-1/2 -translate-x-1/2 w-3/4 max-w-3xl h-32 bg-gradient-to-b from-[#8057FF]/15 via-[#06B6D4]/10 to-transparent blur-3xl pointer-events-none" />
 
-      <!-- CONTENEDOR DE FONDOS FIJOS CON CROSSFADE INTERACTIVO (FOTOS DE PERSONAS VIENDO CADA PLATAFORMA) -->
-      <div class="sticky top-0 h-screen w-full overflow-hidden pointer-events-none z-0">
-        <div
-          v-for="(sp, idx) in scrollyPlatforms"
-          :key="sp.id"
-          class="absolute inset-0 bg-cover bg-center transition-all duration-1000 ease-out"
-          :class="activeStoryIndex === idx ? 'opacity-50 scale-100' : 'opacity-0 scale-105'"
-          :style="{ backgroundImage: `url('${sp.bgImage}')` }"
-        >
-          <!-- Viñeta oscura cinemática y resplandor ambiental del color de la plataforma -->
-          <div class="absolute inset-0 bg-gradient-to-r from-black via-black/75 to-black/90 pointer-events-none" />
-          <div class="absolute inset-0 bg-gradient-to-t from-black via-transparent to-black/90 pointer-events-none" />
-          
-          <!-- Halo ambiental luminoso correspondiente a la plataforma activa -->
-          <div
-            class="absolute top-1/3 left-1/3 size-[500px] rounded-full blur-[140px] opacity-25 pointer-events-none transition-colors duration-700"
-            :style="{ backgroundColor: sp.color }"
-          />
-        </div>
-      </div>
+      <div class="container-app relative z-10 max-w-3xl mx-auto space-y-6">
+        <h2 class="font-display text-4xl sm:text-6xl font-black text-white uppercase tracking-tight leading-[1.05] drop-shadow-2xl">
+          ELIGE EL MEJOR <br />
+          <span class="bg-gradient-to-r from-[#8057FF] via-[#A855F7] to-[#06B6D4] bg-clip-text text-transparent">
+            PLAN PARA TI
+          </span>
+        </h2>
 
-      <!-- CONTENIDO FOREGROUND (SCROLLYTELLING DIVIDIDO EN 2 COLUMNAS) -->
-      <div
-        class="relative z-10 container-app -mt-[100vh] pt-10 sm:pt-14 pb-32 transition-all duration-200 ease-out will-change-transform"
-        :style="sectionRevealStyle"
-      >
-        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-14 items-start">
-          
-          <!-- COLUMNA IZQUIERDA: TEXTO QUE ASCIENDE Y QUEDA FIJO / STICKY CON EL SELECTOR -->
-          <div class="lg:col-span-5 lg:sticky lg:top-16 flex flex-col justify-start space-y-7 py-4">
-            <div class="space-y-4">
-              
+        <p class="text-sm sm:text-base text-slate-300/90 font-sans max-w-xl mx-auto leading-relaxed">
+          Recorre cada una de nuestras plataformas oficiales con activación inmediata en 4K Ultra HD y garantía total de 30 días.
+        </p>
 
-              <!-- Título que asciende con fuerza y elegancia -->
-              <h2 class="font-display text-3xl sm:text-5xl lg:text-6xl font-black text-white uppercase tracking-tight leading-[1.05] drop-shadow-2xl">
-                ELIGE EL MEJOR <br />
-                <span class="bg-gradient-to-r from-brand-300 via-cyan-300 to-white bg-clip-text text-transparent">
-                  PLAN PARA TI
-                </span>
-              </h2>
-
-              <p class="text-sm sm:text-base text-slate-300/90 leading-relaxed font-sans max-w-md">
-                Desliza hacia abajo para recorrer cada una de las principales plataformas en una experiencia cinematográfica. Cuentas completas y perfiles individuales con activación inmediata.
-              </p>
-
-              <!-- Selector de Modalidad (Cuentas Completas vs Pantallas Individuales) -->
-              <div class="pt-2">
-                <div class="flex p-1 rounded-full border border-white/20 bg-black/70 backdrop-blur-xl w-full max-w-sm shadow-xl">
-                  <button
-                    type="button"
-                    class="flex-1 py-2.5 px-4 rounded-full text-xs font-black transition-all duration-300 cursor-pointer text-center"
-                    :class="
-                      modalidadSeleccionada === 'CUENTA_COMPLETA'
-                        ? 'bg-white text-neutral-950 shadow-lg'
-                        : 'text-slate-400 hover:text-white'
-                    "
-                    @click="modalidadSeleccionada = 'CUENTA_COMPLETA'"
-                  >
-                    Cuentas Completas
-                  </button>
-                  <button
-                    type="button"
-                    class="flex-1 py-2.5 px-4 rounded-full text-xs font-black transition-all duration-300 cursor-pointer text-center"
-                    :class="
-                      modalidadSeleccionada === 'PANTALLA'
-                        ? 'bg-cyan-400 text-neutral-950 shadow-lg'
-                        : 'text-slate-400 hover:text-white'
-                    "
-                    @click="modalidadSeleccionada = 'PANTALLA'"
-                  >
-                    Pantallas (PIN)
-                  </button>
-                </div>
-              </div>
-            </div>
-
-            <!-- Navegación Interactiva de Plataformas / Indicador de Progreso -->
-            <div class="hidden lg:flex flex-col gap-2.5 border-t border-white/10 pt-6">
-              <span class="text-[10px] font-mono uppercase tracking-[0.25em] text-slate-400">Plataformas Disponibles:</span>
-              <div class="flex flex-wrap gap-2">
-                <button
-                  v-for="(sp, idx) in scrollyPlatforms"
-                  :key="sp.id"
-                  type="button"
-                  class="px-3.5 py-1.5 rounded-full text-xs font-bold transition-all duration-300 border flex items-center gap-2 cursor-pointer"
-                  :class="
-                    activeStoryIndex === idx
-                      ? 'bg-white text-neutral-950 border-white shadow-[0_0_20px_rgba(255,255,255,0.4)] scale-105'
-                      : 'border-white/20 text-slate-400 hover:text-white hover:border-white/50 bg-black/40'
-                  "
-                  @click="scrollToStoryPlatform(idx)"
-                >
-                  <span class="size-1.5 rounded-full" :style="{ backgroundColor: sp.color }" />
-                  <span>{{ sp.nombre.split(' ')[0] }}</span>
-                </button>
-              </div>
-            </div>
-          </div>
-
-          <!-- COLUMNA DERECHA: CAPÍTULOS DE CADA PLATAFORMA QUE ASCIENDEN CON EL SCROLL -->
-          <div class="lg:col-span-7 space-y-24 sm:space-y-36">
-            <div
-              v-for="(sp, idx) in scrollyPlatforms"
-              :key="sp.id"
-              :ref="(el) => { if (el) storyCardRefs[idx] = el as HTMLElement }"
-              :data-story-index="idx"
-              class="min-h-[60vh] sm:min-h-[75vh] flex items-center justify-center transition-all duration-700 ease-out transform"
+        <!-- Selector de Modalidad (Cuentas Completas vs Pantallas Individuales) -->
+        <div class="pt-2 flex justify-center">
+          <div class="flex p-1.5 rounded-full border border-white/20 bg-black/80 backdrop-blur-xl w-full max-w-sm shadow-2xl">
+            <button
+              type="button"
+              class="flex-1 py-3 px-5 rounded-full text-xs sm:text-sm font-black transition-all duration-300 cursor-pointer text-center"
               :class="
-                activeStoryIndex === idx
-                  ? 'opacity-100 translate-y-0 scale-100'
-                  : 'opacity-25 translate-y-8 scale-95 pointer-events-none'
+                modalidadSeleccionada === 'CUENTA_COMPLETA'
+                  ? 'bg-white text-neutral-950 shadow-lg scale-100'
+                  : 'text-slate-400 hover:text-white'
               "
+              @click="modalidadSeleccionada = 'CUENTA_COMPLETA'"
             >
-              <!-- Tarjeta Cinemática de la Plataforma -->
-              <div
-                class="w-full rounded-3xl border border-white/20 bg-black/80 backdrop-blur-2xl p-6 sm:p-10 shadow-2xl relative overflow-hidden transition-all duration-500 hover:border-white/40"
-                :style="{ boxShadow: activeStoryIndex === idx ? `0 20px 60px ${sp.color}25` : undefined }"
-              >
-                <!-- Línea Neón Superior de la Plataforma -->
-                <div
-                  class="absolute top-0 left-0 right-0 h-1.5 transition-all duration-500"
-                  :style="{ backgroundColor: sp.color, boxShadow: `0 0 20px ${sp.color}` }"
-                />
-
-                <div class="space-y-6">
-                  <!-- Cabecera de la Tarjeta -->
-                  <div class="flex items-start justify-between gap-4">
-                    <div>
-                      <span class="text-xs font-mono uppercase tracking-wider font-bold" :style="{ color: sp.color }">
-                        {{ sp.tag }}
-                      </span>
-                      <h3 class="font-display text-2xl sm:text-3xl font-black text-white mt-1">
-                        {{ sp.nombre }}
-                      </h3>
-                      <p class="text-xs sm:text-sm text-cyan-300 font-medium mt-0.5">
-                        {{ sp.headline }}
-                      </p>
-                    </div>
-
-                    <span class="rounded-full px-3 py-1 text-xs font-bold text-emerald-400 border border-emerald-500/30 bg-emerald-500/10 flex items-center gap-1.5 shrink-0">
-                      <span class="size-1.5 rounded-full bg-emerald-400 animate-pulse" />
-                      Disponible
-                    </span>
-                  </div>
-
-                  <p class="text-xs sm:text-sm text-slate-300 leading-relaxed font-sans">
-                    {{ sp.desc }}
-                  </p>
-
-                  <!-- Checklist de Beneficios Premium -->
-                  <ul class="space-y-2.5 border-y border-white/10 py-4 my-4">
-                    <li
-                      v-for="(feat, fIdx) in sp.features"
-                      :key="fIdx"
-                      class="flex items-center gap-3 text-xs sm:text-sm text-white/90 font-medium"
-                    >
-                      <CheckCircle2 class="size-4 shrink-0 text-cyan-400" />
-                      <span>{{ feat }}</span>
-                    </li>
-                  </ul>
-
-                  <!-- Precios y Botón de Compra Directo -->
-                  <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pt-2">
-                    <div>
-                      <span class="text-[11px] font-mono uppercase text-slate-400 block">
-                        {{ modalidadSeleccionada === 'CUENTA_COMPLETA' ? 'Precio Cuenta Completa 30 días' : 'Precio 1 Pantalla con PIN 30 días' }}
-                      </span>
-                      <div class="flex items-baseline gap-2">
-                        <span class="font-display text-3xl sm:text-4xl font-black text-white">
-                          {{ formatCOP(modalidadSeleccionada === 'CUENTA_COMPLETA' ? sp.precioCompleta : sp.precioPantalla) }}
-                        </span>
-                        <span class="text-xs text-slate-400">/ mes</span>
-                      </div>
-                    </div>
-
-                    <button
-                      type="button"
-                      class="w-full sm:w-auto inline-flex items-center justify-center rounded-full text-sm font-black py-3.5 px-8 shadow-xl transition-all duration-200 hover:scale-105 active:scale-95 cursor-pointer gap-2"
-                      :style="{ backgroundColor: sp.color, color: '#ffffff', boxShadow: `0 0 30px ${sp.color}50` }"
-                      @click="comprarPlataforma(sp)"
-                    >
-                      <span>{{ modalidadSeleccionada === 'CUENTA_COMPLETA' ? 'Comprar Cuenta Completa' : 'Comprar Pantalla Individual' }}</span>
-                      <ArrowRight class="size-4" />
-                    </button>
-                  </div>
-                </div>
-              </div>
-            </div>
+              Cuentas Completas
+            </button>
+            <button
+              type="button"
+              class="flex-1 py-3 px-5 rounded-full text-xs sm:text-sm font-black transition-all duration-300 cursor-pointer text-center"
+              :class="
+                modalidadSeleccionada === 'PANTALLA'
+                  ? 'bg-cyan-400 text-neutral-950 shadow-lg scale-100'
+                  : 'text-slate-400 hover:text-white'
+              "
+              @click="modalidadSeleccionada = 'PANTALLA'"
+            >
+              Pantallas (PIN)
+            </button>
           </div>
         </div>
       </div>
     </section>
 
-    <!-- ================= 3. GARANTÍAS Y BENEFICIOS ================= -->
+    <!-- ================= 3. CAPÍTULOS SCROLLYTELLING POR PLATAFORMA (ALTERNADO IZQ / DER CON OSCURIDAD TOTAL) ================= -->
+    <div id="plataformas-showcase" class="space-y-0 bg-black">
+      <div
+        v-for="(sp, idx) in scrollyPlatforms"
+        :key="sp.id"
+      >
+        <!-- Transición previa a oscuridad total -->
+        <div class="h-20 sm:h-28 bg-gradient-to-b from-black via-black to-black pointer-events-none" />
+
+        <!-- Sección de la Plataforma -->
+        <section
+          :id="'plataforma-' + sp.slug"
+          class="relative min-h-[90vh] flex items-center justify-center overflow-hidden py-16 sm:py-24 bg-black"
+        >
+          <!-- FOTO DE REFERENCIA CINEMÁTICA DE FONDO (PERSONAS DISFRUTANDO EL SERVICIO) -->
+          <div
+            class="absolute inset-0 bg-cover bg-center transition-transform duration-1000 ease-out opacity-40 scale-100"
+            :style="{ backgroundImage: `url('${sp.bgImage}')` }"
+          >
+            <!-- Viñetas de Fundido a Negro Profundo (Arriba, Abajo y Laterales) -->
+            <div class="absolute inset-0 bg-gradient-to-b from-black via-black/75 to-black pointer-events-none" />
+            <div class="absolute inset-0 bg-gradient-to-r from-black via-transparent to-black pointer-events-none" />
+            <div class="absolute inset-0 bg-[radial-gradient(circle_at_center,transparent_15%,rgba(0,0,0,0.85)_85%)] pointer-events-none" />
+
+            <!-- Resplandor ambiental con el color distintivo de la plataforma -->
+            <div
+              class="absolute top-1/2 -translate-y-1/2 size-[650px] rounded-full blur-[170px] opacity-25 pointer-events-none transition-all duration-700"
+              :class="idx % 2 === 0 ? 'right-10' : 'left-10'"
+              :style="{ backgroundColor: sp.color }"
+            />
+          </div>
+
+          <!-- CONTENIDO EN 2 COLUMNAS ALTERNADAS (ZIG-ZAG) -->
+          <div class="container-app relative z-10 w-full">
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-14 items-center">
+
+              <!-- ================= CASO 1: ÍNDICE PAR (NETFLIX, MAX) -> INFORMACIÓN A LA IZQUIERDA, TARJETA A LA DERECHA ================= -->
+              <template v-if="idx % 2 === 0">
+                <!-- COLUMNA IZQUIERDA: INFORMACIÓN Y PROPUESTA DE VALOR DE LA PLATAFORMA -->
+                <div class="lg:col-span-6 space-y-6 text-left">
+                  <!-- Tag de la Plataforma -->
+                  <div class="inline-flex items-center gap-2.5 px-3.5 py-1.5 rounded-full border border-white/15 bg-white/5 backdrop-blur-md">
+                    <span class="size-2 rounded-full animate-ping" :style="{ backgroundColor: sp.color }" />
+                    <span class="text-xs font-mono uppercase tracking-[0.2em] font-bold" :style="{ color: sp.color }">
+                      {{ sp.tag }}
+                    </span>
+                  </div>
+
+                  <!-- Título e Impacto -->
+                  <div class="space-y-3">
+                    <h3 class="font-display text-3xl sm:text-5xl font-black text-white uppercase tracking-tight leading-tight drop-shadow-xl">
+                      {{ sp.nombre }}
+                    </h3>
+                    <p class="text-base sm:text-lg text-cyan-300 font-medium">
+                      {{ sp.headline }}
+                    </p>
+                  </div>
+
+                  <!-- Descripción -->
+                  <p class="text-sm sm:text-base text-slate-300/90 leading-relaxed font-sans max-w-xl">
+                    {{ sp.desc }}
+                  </p>
+
+                  <!-- Checklist de Beneficios Exclusivos -->
+                  <div class="space-y-3 pt-2">
+                    <div
+                      v-for="(feat, fIdx) in sp.features"
+                      :key="fIdx"
+                      class="flex items-center gap-3 text-xs sm:text-sm text-slate-200"
+                    >
+                      <div class="size-5 rounded-full flex items-center justify-center shrink-0" :style="{ backgroundColor: `${sp.color}25` }">
+                        <CheckCircle2 class="size-3.5" :style="{ color: sp.color }" />
+                      </div>
+                      <span class="font-medium">{{ feat }}</span>
+                    </div>
+                  </div>
+
+                  <!-- Badge de Garantía Oficial -->
+                  <div class="inline-flex items-center gap-3 p-3 rounded-2xl border border-white/10 bg-white/5 backdrop-blur-md mt-4">
+                    <ShieldCheck class="size-5 text-emerald-400 shrink-0" />
+                    <span class="text-xs text-slate-300 font-medium">
+                      Garantía ininterrumpida de 30 días · Reemplazo automático 24/7
+                    </span>
+                  </div>
+                </div>
+
+                <!-- COLUMNA DERECHA: TARJETA DE PRECIO Y COMPRA DIRECTA -->
+                <div class="lg:col-span-6 flex justify-center lg:justify-end">
+                  <div
+                    class="w-full max-w-lg rounded-3xl border border-white/20 bg-gradient-to-b from-black/90 to-[#0B0E1F]/95 backdrop-blur-2xl p-7 sm:p-9 shadow-2xl relative overflow-hidden transition-all duration-300 hover:scale-[1.02]"
+                    :style="{
+                      boxShadow: `0 25px 70px -15px ${sp.color}35, 0 0 1px 1px ${sp.color}50`
+                    }"
+                  >
+                    <!-- Línea Neón Superior -->
+                    <div
+                      class="absolute top-0 left-0 right-0 h-1.5"
+                      :style="{ backgroundColor: sp.color, boxShadow: `0 0 25px ${sp.color}` }"
+                    />
+
+                    <!-- Cabecera de Tarjeta -->
+                    <div class="flex items-start justify-between gap-4 mb-6">
+                      <div>
+                        <span class="text-xs font-mono uppercase tracking-wider font-bold" :style="{ color: sp.color }">
+                          {{ modalidadSeleccionada === 'CUENTA_COMPLETA' ? 'PLAN CUENTA COMPLETA' : 'PLAN PANTALLA PRIVADA' }}
+                        </span>
+                        <h4 class="font-display text-2xl sm:text-3xl font-black text-white mt-1">
+                          {{ sp.nombre }}
+                        </h4>
+                      </div>
+
+                      <span class="rounded-full px-3 py-1 text-xs font-bold text-emerald-400 border border-emerald-500/30 bg-emerald-500/10 flex items-center gap-1.5 shrink-0">
+                        <span class="size-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                        Inmediato
+                      </span>
+                    </div>
+
+                    <!-- Precio Dinámico -->
+                    <div class="p-5 rounded-2xl border border-white/10 bg-white/5 mb-6">
+                      <span class="text-[11px] font-mono uppercase text-slate-400 block mb-1">
+                        {{ modalidadSeleccionada === 'CUENTA_COMPLETA' ? 'Precio Suscripción 30 días' : 'Precio Perfil Individual con PIN' }}
+                      </span>
+                      <div class="flex items-baseline gap-2">
+                        <span class="font-display text-4xl sm:text-5xl font-black text-white tracking-tight">
+                          {{ formatCOP(modalidadSeleccionada === 'CUENTA_COMPLETA' ? sp.precioCompleta : sp.precioPantalla) }}
+                        </span>
+                        <span class="text-xs sm:text-sm text-slate-400 font-medium">/ 30 días</span>
+                      </div>
+                      <p class="text-[11px] text-cyan-300/90 mt-1 font-mono">
+                        {{ modalidadSeleccionada === 'CUENTA_COMPLETA' ? 'Acceso total a todos los perfiles' : '1 Pantalla exclusiva protegida con PIN' }}
+                      </p>
+                    </div>
+
+                    <!-- Botón de Compra Directo -->
+                    <button
+                      type="button"
+                      class="w-full inline-flex items-center justify-center rounded-full text-base font-black py-4 px-8 shadow-xl transition-all duration-200 hover:scale-105 active:scale-95 cursor-pointer gap-2 uppercase tracking-wider text-white"
+                      :style="{ backgroundColor: sp.color, boxShadow: `0 0 35px ${sp.color}50` }"
+                      @click="comprarPlataforma(sp)"
+                    >
+                      <span>Comprar Ahora</span>
+                      <ArrowRight class="size-4" />
+                    </button>
+
+                    <!-- Métodos de Pago y Entrega -->
+                    <div class="mt-4 pt-4 border-t border-white/10 flex items-center justify-between text-[11px] text-slate-400">
+                      <span>⚡ Entrega en &lt; 10s</span>
+                      <span>💳 Bancolombia · Nequi · Nu</span>
+                    </div>
+                  </div>
+                </div>
+              </template>
+
+              <!-- ================= CASO 2: ÍNDICE IMPAR (DISNEY+, PRIME) -> TARJETA A LA IZQUIERDA, INFORMACIÓN A LA DERECHA ================= -->
+              <template v-else>
+                <!-- COLUMNA IZQUIERDA: TARJETA DE PRECIO Y COMPRA DIRECTA -->
+                <div class="lg:col-span-6 flex justify-center lg:justify-start order-2 lg:order-1">
+                  <div
+                    class="w-full max-w-lg rounded-3xl border border-white/20 bg-gradient-to-b from-black/90 to-[#0B0E1F]/95 backdrop-blur-2xl p-7 sm:p-9 shadow-2xl relative overflow-hidden transition-all duration-300 hover:scale-[1.02]"
+                    :style="{
+                      boxShadow: `0 25px 70px -15px ${sp.color}35, 0 0 1px 1px ${sp.color}50`
+                    }"
+                  >
+                    <!-- Línea Neón Superior -->
+                    <div
+                      class="absolute top-0 left-0 right-0 h-1.5"
+                      :style="{ backgroundColor: sp.color, boxShadow: `0 0 25px ${sp.color}` }"
+                    />
+
+                    <!-- Cabecera de Tarjeta -->
+                    <div class="flex items-start justify-between gap-4 mb-6">
+                      <div>
+                        <span class="text-xs font-mono uppercase tracking-wider font-bold" :style="{ color: sp.color }">
+                          {{ modalidadSeleccionada === 'CUENTA_COMPLETA' ? 'PLAN CUENTA COMPLETA' : 'PLAN PANTALLA PRIVADA' }}
+                        </span>
+                        <h4 class="font-display text-2xl sm:text-3xl font-black text-white mt-1">
+                          {{ sp.nombre }}
+                        </h4>
+                      </div>
+
+                      <span class="rounded-full px-3 py-1 text-xs font-bold text-emerald-400 border border-emerald-500/30 bg-emerald-500/10 flex items-center gap-1.5 shrink-0">
+                        <span class="size-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                        Inmediato
+                      </span>
+                    </div>
+
+                    <!-- Precio Dinámico -->
+                    <div class="p-5 rounded-2xl border border-white/10 bg-white/5 mb-6">
+                      <span class="text-[11px] font-mono uppercase text-slate-400 block mb-1">
+                        {{ modalidadSeleccionada === 'CUENTA_COMPLETA' ? 'Precio Suscripción 30 días' : 'Precio Perfil Individual con PIN' }}
+                      </span>
+                      <div class="flex items-baseline gap-2">
+                        <span class="font-display text-4xl sm:text-5xl font-black text-white tracking-tight">
+                          {{ formatCOP(modalidadSeleccionada === 'CUENTA_COMPLETA' ? sp.precioCompleta : sp.precioPantalla) }}
+                        </span>
+                        <span class="text-xs sm:text-sm text-slate-400 font-medium">/ 30 días</span>
+                      </div>
+                      <p class="text-[11px] text-cyan-300/90 mt-1 font-mono">
+                        {{ modalidadSeleccionada === 'CUENTA_COMPLETA' ? 'Acceso total a todos los perfiles' : '1 Pantalla exclusiva protegida con PIN' }}
+                      </p>
+                    </div>
+
+                    <!-- Botón de Compra Directo -->
+                    <button
+                      type="button"
+                      class="w-full inline-flex items-center justify-center rounded-full text-base font-black py-4 px-8 shadow-xl transition-all duration-200 hover:scale-105 active:scale-95 cursor-pointer gap-2 uppercase tracking-wider text-white"
+                      :style="{ backgroundColor: sp.color, boxShadow: `0 0 35px ${sp.color}50` }"
+                      @click="comprarPlataforma(sp)"
+                    >
+                      <span>Comprar Ahora</span>
+                      <ArrowRight class="size-4" />
+                    </button>
+
+                    <!-- Métodos de Pago y Entrega -->
+                    <div class="mt-4 pt-4 border-t border-white/10 flex items-center justify-between text-[11px] text-slate-400">
+                      <span>⚡ Entrega en &lt; 10s</span>
+                      <span>💳 Bancolombia · Nequi · Nu</span>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- COLUMNA DERECHA: INFORMACIÓN Y PROPUESTA DE VALOR DE LA PLATAFORMA -->
+                <div class="lg:col-span-6 space-y-6 text-left order-1 lg:order-2">
+                  <!-- Tag de la Plataforma -->
+                  <div class="inline-flex items-center gap-2.5 px-3.5 py-1.5 rounded-full border border-white/15 bg-white/5 backdrop-blur-md">
+                    <span class="size-2 rounded-full animate-ping" :style="{ backgroundColor: sp.color }" />
+                    <span class="text-xs font-mono uppercase tracking-[0.2em] font-bold" :style="{ color: sp.color }">
+                      {{ sp.tag }}
+                    </span>
+                  </div>
+
+                  <!-- Título e Impacto -->
+                  <div class="space-y-3">
+                    <h3 class="font-display text-3xl sm:text-5xl font-black text-white uppercase tracking-tight leading-tight drop-shadow-xl">
+                      {{ sp.nombre }}
+                    </h3>
+                    <p class="text-base sm:text-lg text-cyan-300 font-medium">
+                      {{ sp.headline }}
+                    </p>
+                  </div>
+
+                  <!-- Descripción -->
+                  <p class="text-sm sm:text-base text-slate-300/90 leading-relaxed font-sans max-w-xl">
+                    {{ sp.desc }}
+                  </p>
+
+                  <!-- Checklist de Beneficios Exclusivos -->
+                  <div class="space-y-3 pt-2">
+                    <div
+                      v-for="(feat, fIdx) in sp.features"
+                      :key="fIdx"
+                      class="flex items-center gap-3 text-xs sm:text-sm text-slate-200"
+                    >
+                      <div class="size-5 rounded-full flex items-center justify-center shrink-0" :style="{ backgroundColor: `${sp.color}25` }">
+                        <CheckCircle2 class="size-3.5" :style="{ color: sp.color }" />
+                      </div>
+                      <span class="font-medium">{{ feat }}</span>
+                    </div>
+                  </div>
+
+                  <!-- Badge de Garantía Oficial -->
+                  <div class="inline-flex items-center gap-3 p-3 rounded-2xl border border-white/10 bg-white/5 backdrop-blur-md mt-4">
+                    <ShieldCheck class="size-5 text-emerald-400 shrink-0" />
+                    <span class="text-xs text-slate-300 font-medium">
+                      Garantía ininterrumpida de 30 días · Reemplazo automático 24/7
+                    </span>
+                  </div>
+                </div>
+              </template>
+
+            </div>
+          </div>
+        </section>
+
+        <!-- Transición posterior a oscuridad total (Se vuelve a oscurecer) -->
+        <div class="h-20 sm:h-28 bg-gradient-to-b from-black via-black to-black pointer-events-none" />
+      </div>
+    </div>
+
+    <!-- ================= 4. GARANTÍAS Y BENEFICIOS ================= -->
     <section class="container-app">
       <div class="rounded-3xl border border-white/10 bg-white/5 p-8 sm:p-12 relative overflow-hidden backdrop-blur-md">
         <div class="absolute -right-20 -bottom-20 size-64 rounded-full bg-brand-500/10 blur-3xl pointer-events-none" />
