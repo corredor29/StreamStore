@@ -2,8 +2,17 @@ import dotenv from "dotenv"
 
 dotenv.config()
 
+const env = process.env.NODE_ENV ?? "development"
+
+const secreto = (nombre: string, valorDesarrollo: string) => {
+    const valor = process.env[nombre]
+    if (valor) return valor
+    if (env === "production") throw new Error(`Falta la variable de entorno ${nombre}`)
+    return valorDesarrollo
+}
+
 export const config = {
-    env: process.env.NODE_ENV ?? "development",
+    env,
     port: Number(process.env.PORT ?? 3000),
     appTimezone: process.env.APP_TIMEZONE ?? "America/Bogota",
     db: {
@@ -15,8 +24,21 @@ export const config = {
         timezone: process.env.DB_TIMEZONE ?? "-05:00"
     },
     jwt: {
-        secret: process.env.JWT_SECRET ?? "dev_secret",
+        secret: secreto("JWT_SECRET", "dev_secret"),
         expiresIn: process.env.JWT_EXPIRES_IN ?? "1d"
     },
-    corsOrigin: process.env.CORS_ORIGIN ?? "http://localhost:5173"
+    aesSecret: secreto("AES_SECRET", "dev_aes_secret_cambiar"),
+    corsOrigin: process.env.CORS_ORIGIN ?? "http://localhost:5173",
+    clientUrl: (process.env.CLIENT_URL ?? process.env.CORS_ORIGIN ?? "http://localhost:5173").replace(/\/$/, ""),
+    mail: {
+        host: process.env.MAIL_HOST ?? "sandbox.smtp.mailtrap.io",
+        port: Number(process.env.MAIL_PORT ?? 2525),
+        user: process.env.MAIL_USER ?? "",
+        pass: process.env.MAIL_PASS ?? "",
+        from: process.env.MAIL_FROM ?? "StreamStore <no-reply@streamstore.test>"
+    },
+    cron: {
+        enabled: (process.env.CRON_ENABLED ?? "true") === "true",
+        schedule: process.env.CRON_SCHEDULE ?? "0 8 * * *"
+    }
 }

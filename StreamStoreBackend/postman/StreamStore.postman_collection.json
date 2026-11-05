@@ -1,0 +1,1776 @@
+{
+    "info": {
+        "name": "StreamStore API",
+        "description": "Colección del reto StreamStore. Ejecuta las carpetas en orden con el Runner: los logins guardan los tokens y cada paso guarda los IDs que usa el siguiente. Antes de correrla: `npm run db:reset` y `npm run dev`.",
+        "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+    },
+    "auth": {
+        "type": "bearer",
+        "bearer": [
+            {
+                "key": "token",
+                "value": "{{token}}",
+                "type": "string"
+            }
+        ]
+    },
+    "variable": [
+        {
+            "key": "baseUrl",
+            "value": "http://localhost:3000/api"
+        },
+        {
+            "key": "token",
+            "value": ""
+        },
+        {
+            "key": "adminToken",
+            "value": ""
+        },
+        {
+            "key": "productoId",
+            "value": ""
+        },
+        {
+            "key": "itemId",
+            "value": ""
+        },
+        {
+            "key": "compraId",
+            "value": ""
+        },
+        {
+            "key": "servicioId",
+            "value": ""
+        },
+        {
+            "key": "plataformaId",
+            "value": ""
+        },
+        {
+            "key": "productoAdminId",
+            "value": ""
+        },
+        {
+            "key": "cuentaId",
+            "value": ""
+        },
+        {
+            "key": "resetToken",
+            "value": ""
+        }
+    ],
+    "item": [
+        {
+            "name": "0. Salud",
+            "item": [
+                {
+                    "name": "Health",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "pm.test(\"Status 2xx\", () => pm.expect(pm.response.code).to.be.within(200, 299))"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{baseUrl}}/health",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "health"
+                            ]
+                        },
+                        "auth": {
+                            "type": "noauth"
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            "name": "1. Auth",
+            "item": [
+                {
+                    "name": "Registro de cliente",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "pm.test(\"Status 2xx\", () => pm.expect(pm.response.code).to.be.within(200, 299))"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/auth/register",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "auth",
+                                "register"
+                            ]
+                        },
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"nombre\": \"Cliente Postman\",\n    \"email\": \"postman{{$timestamp}}@streamstore.test\",\n    \"password\": \"Postman123*\",\n    \"telefono\": \"+57 300 123 4567\"\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        },
+                        "auth": {
+                            "type": "noauth"
+                        }
+                    }
+                },
+                {
+                    "name": "Login cliente",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "pm.test(\"Status 2xx\", () => pm.expect(pm.response.code).to.be.within(200, 299))",
+                                    "const d = pm.response.json().data",
+                                    "if (d) pm.collectionVariables.set(\"token\", d.token)"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/auth/login",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "auth",
+                                "login"
+                            ]
+                        },
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"email\": \"cliente1@streamstore.test\",\n    \"password\": \"Cliente123*\"\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        },
+                        "auth": {
+                            "type": "noauth"
+                        }
+                    }
+                },
+                {
+                    "name": "Login admin",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "pm.test(\"Status 2xx\", () => pm.expect(pm.response.code).to.be.within(200, 299))",
+                                    "const d = pm.response.json().data",
+                                    "if (d) pm.collectionVariables.set(\"adminToken\", d.token)"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/auth/login",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "auth",
+                                "login"
+                            ]
+                        },
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"email\": \"admin@streamstore.test\",\n    \"password\": \"Admin123*\"\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        },
+                        "auth": {
+                            "type": "noauth"
+                        }
+                    }
+                },
+                {
+                    "name": "Usuario actual",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "pm.test(\"Status 2xx\", () => pm.expect(pm.response.code).to.be.within(200, 299))"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{baseUrl}}/auth/me",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "auth",
+                                "me"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Recuperar contraseña",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "pm.test(\"Status 2xx\", () => pm.expect(pm.response.code).to.be.within(200, 299))"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/auth/recuperar",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "auth",
+                                "recuperar"
+                            ]
+                        },
+                        "description": "Siempre responde 200 con el mismo mensaje. En desarrollo el token aparece en la consola del servidor; cópialo en la variable resetToken.",
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"email\": \"cliente2@streamstore.test\"\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        },
+                        "auth": {
+                            "type": "noauth"
+                        }
+                    }
+                },
+                {
+                    "name": "Restablecer contraseña",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "pm.test(\"200 con token válido o 400 si resetToken está vacío/vencido\", () => pm.expect([200, 400]).to.include(pm.response.code))"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/auth/restablecer",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "auth",
+                                "restablecer"
+                            ]
+                        },
+                        "description": "Usa el token del enlace del correo (variable resetToken).",
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"token\": \"{{resetToken}}\",\n    \"password\": \"Cliente123*\"\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        },
+                        "auth": {
+                            "type": "noauth"
+                        }
+                    }
+                },
+                {
+                    "name": "Cerrar sesión",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "pm.test(\"Status 2xx\", () => pm.expect(pm.response.code).to.be.within(200, 299))"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "header": [],
+                        "url": {
+                            "raw": "{{baseUrl}}/auth/logout",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "auth",
+                                "logout"
+                            ]
+                        },
+                        "auth": {
+                            "type": "noauth"
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            "name": "2. Catálogo",
+            "item": [
+                {
+                    "name": "Plataformas activas",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "pm.test(\"Status 2xx\", () => pm.expect(pm.response.code).to.be.within(200, 299))"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{baseUrl}}/plataformas",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "plataformas"
+                            ]
+                        },
+                        "auth": {
+                            "type": "noauth"
+                        }
+                    }
+                },
+                {
+                    "name": "Productos con stock",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "pm.test(\"Status 2xx\", () => pm.expect(pm.response.code).to.be.within(200, 299))",
+                                    "const p = pm.response.json().data.find((x) => x.tipo === \"pantalla\" && x.stock > 1)",
+                                    "if (p) pm.collectionVariables.set(\"productoId\", p.id)"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{baseUrl}}/productos",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "productos"
+                            ]
+                        },
+                        "auth": {
+                            "type": "noauth"
+                        }
+                    }
+                },
+                {
+                    "name": "Productos filtrados",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "pm.test(\"Status 2xx\", () => pm.expect(pm.response.code).to.be.within(200, 299))"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{baseUrl}}/productos?plataforma=Netflix&tipo=pantalla",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "productos"
+                            ],
+                            "query": [
+                                {
+                                    "key": "plataforma",
+                                    "value": "Netflix"
+                                },
+                                {
+                                    "key": "tipo",
+                                    "value": "pantalla"
+                                }
+                            ]
+                        },
+                        "auth": {
+                            "type": "noauth"
+                        }
+                    }
+                },
+                {
+                    "name": "Detalle de producto",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "pm.test(\"Status 2xx\", () => pm.expect(pm.response.code).to.be.within(200, 299))"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{baseUrl}}/productos/{{productoId}}",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "productos",
+                                "{{productoId}}"
+                            ]
+                        },
+                        "auth": {
+                            "type": "noauth"
+                        }
+                    }
+                },
+                {
+                    "name": "Detalle de plataforma",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "pm.test(\"Status 2xx\", () => pm.expect(pm.response.code).to.be.within(200, 299))"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{baseUrl}}/plataformas/1",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "plataformas",
+                                "1"
+                            ]
+                        },
+                        "auth": {
+                            "type": "noauth"
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            "name": "3. Carrito",
+            "item": [
+                {
+                    "name": "Agregar producto",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "pm.test(\"Status 2xx\", () => pm.expect(pm.response.code).to.be.within(200, 299))",
+                                    "const d = pm.response.json().data",
+                                    "if (d) pm.collectionVariables.set(\"itemId\", d.items[0].id)"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/carrito",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "carrito"
+                            ]
+                        },
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"producto_id\": \"{{productoId}}\",\n    \"cantidad\": 1\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        }
+                    }
+                },
+                {
+                    "name": "Ver carrito",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "pm.test(\"Status 2xx\", () => pm.expect(pm.response.code).to.be.within(200, 299))"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{baseUrl}}/carrito",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "carrito"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Cambiar cantidad",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "pm.test(\"Status 2xx\", () => pm.expect(pm.response.code).to.be.within(200, 299))"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "PATCH",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/carrito/{{itemId}}",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "carrito",
+                                "{{itemId}}"
+                            ]
+                        },
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"cantidad\": 2\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        }
+                    }
+                },
+                {
+                    "name": "Quitar ítem",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "pm.test(\"Status 2xx\", () => pm.expect(pm.response.code).to.be.within(200, 299))"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "DELETE",
+                        "header": [],
+                        "url": {
+                            "raw": "{{baseUrl}}/carrito/{{itemId}}",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "carrito",
+                                "{{itemId}}"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Vaciar carrito",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "pm.test(\"Status 2xx\", () => pm.expect(pm.response.code).to.be.within(200, 299))"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "DELETE",
+                        "header": [],
+                        "url": {
+                            "raw": "{{baseUrl}}/carrito",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "carrito"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Agregar de nuevo (para comprar)",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "pm.test(\"Status 2xx\", () => pm.expect(pm.response.code).to.be.within(200, 299))"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/carrito",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "carrito"
+                            ]
+                        },
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"producto_id\": \"{{productoId}}\",\n    \"cantidad\": 1\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            "name": "4. Compras",
+            "item": [
+                {
+                    "name": "Checkout (compra pendiente)",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "pm.test(\"Status 2xx\", () => pm.expect(pm.response.code).to.be.within(200, 299))",
+                                    "const d = pm.response.json().data",
+                                    "if (d) pm.collectionVariables.set(\"compraId\", d.id)"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/compras",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "compras"
+                            ]
+                        },
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"metodo_pago\": \"simulado\"\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        }
+                    }
+                },
+                {
+                    "name": "Pagar (simulado)",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "pm.test(\"Status 2xx\", () => pm.expect(pm.response.code).to.be.within(200, 299))",
+                                    "pm.test(\"Compra pagada\", () => pm.expect(pm.response.json().data.estado).to.eql(\"pagada\"))"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "header": [],
+                        "url": {
+                            "raw": "{{baseUrl}}/compras/{{compraId}}/pagar",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "compras",
+                                "{{compraId}}",
+                                "pagar"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Mis compras",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "pm.test(\"Status 2xx\", () => pm.expect(pm.response.code).to.be.within(200, 299))"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{baseUrl}}/compras/mias",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "compras",
+                                "mias"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Detalle de compra",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "pm.test(\"Status 2xx\", () => pm.expect(pm.response.code).to.be.within(200, 299))"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{baseUrl}}/compras/{{compraId}}",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "compras",
+                                "{{compraId}}"
+                            ]
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            "name": "5. Servicios",
+            "item": [
+                {
+                    "name": "Mis servicios",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "pm.test(\"Status 2xx\", () => pm.expect(pm.response.code).to.be.within(200, 299))",
+                                    "const s = pm.response.json().data.find((x) => !x.renovado)",
+                                    "if (s) pm.collectionVariables.set(\"servicioId\", s.id)"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{baseUrl}}/servicios/mios",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "servicios",
+                                "mios"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Detalle de servicio",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "pm.test(\"Status 2xx\", () => pm.expect(pm.response.code).to.be.within(200, 299))"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{baseUrl}}/servicios/{{servicioId}}",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "servicios",
+                                "{{servicioId}}"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Renovar (agrega al carrito)",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "pm.test(\"Status 2xx\", () => pm.expect(pm.response.code).to.be.within(200, 299))"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "header": [],
+                        "url": {
+                            "raw": "{{baseUrl}}/servicios/{{servicioId}}/renovar",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "servicios",
+                                "{{servicioId}}",
+                                "renovar"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Vaciar carrito (limpieza)",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "pm.test(\"Status 2xx\", () => pm.expect(pm.response.code).to.be.within(200, 299))"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "DELETE",
+                        "header": [],
+                        "url": {
+                            "raw": "{{baseUrl}}/carrito",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "carrito"
+                            ]
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            "name": "6. Admin",
+            "item": [
+                {
+                    "name": "Usuarios",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "pm.test(\"Status 2xx\", () => pm.expect(pm.response.code).to.be.within(200, 299))"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{baseUrl}}/admin/usuarios",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "admin",
+                                "usuarios"
+                            ]
+                        },
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{adminToken}}",
+                                    "type": "string"
+                                }
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Plataformas (todas)",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "pm.test(\"Status 2xx\", () => pm.expect(pm.response.code).to.be.within(200, 299))"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{baseUrl}}/admin/plataformas",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "admin",
+                                "plataformas"
+                            ]
+                        },
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{adminToken}}",
+                                    "type": "string"
+                                }
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Crear plataforma",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "pm.test(\"Status 2xx\", () => pm.expect(pm.response.code).to.be.within(200, 299))",
+                                    "const d = pm.response.json().data",
+                                    "if (d) pm.collectionVariables.set(\"plataformaId\", d.id)"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/admin/plataformas",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "admin",
+                                "plataformas"
+                            ]
+                        },
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"nombre\": \"Plataforma {{$timestamp}}\",\n    \"descripcion\": \"Creada desde Postman\",\n    \"max_pantallas\": 3\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        },
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{adminToken}}",
+                                    "type": "string"
+                                }
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Actualizar plataforma",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "pm.test(\"Status 2xx\", () => pm.expect(pm.response.code).to.be.within(200, 299))"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "PATCH",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/admin/plataformas/{{plataformaId}}",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "admin",
+                                "plataformas",
+                                "{{plataformaId}}"
+                            ]
+                        },
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"descripcion\": \"Actualizada\"\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        },
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{adminToken}}",
+                                    "type": "string"
+                                }
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Productos (incluye inactivos)",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "pm.test(\"Status 2xx\", () => pm.expect(pm.response.code).to.be.within(200, 299))"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{baseUrl}}/admin/productos",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "admin",
+                                "productos"
+                            ]
+                        },
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{adminToken}}",
+                                    "type": "string"
+                                }
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Productos con stock bajo",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "pm.test(\"Status 2xx\", () => pm.expect(pm.response.code).to.be.within(200, 299))"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{baseUrl}}/admin/productos/stock-bajo",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "admin",
+                                "productos",
+                                "stock-bajo"
+                            ]
+                        },
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{adminToken}}",
+                                    "type": "string"
+                                }
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Crear producto",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "pm.test(\"Status 2xx\", () => pm.expect(pm.response.code).to.be.within(200, 299))",
+                                    "const d = pm.response.json().data",
+                                    "if (d) pm.collectionVariables.set(\"productoAdminId\", d.id)"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/admin/productos",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "admin",
+                                "productos"
+                            ]
+                        },
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"plataforma_id\": \"{{plataformaId}}\",\n    \"nombre\": \"Pantalla 30 días\",\n    \"tipo\": \"pantalla\",\n    \"precio\": 9000,\n    \"duracion_dias\": 30,\n    \"stock_minimo\": 2\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        },
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{adminToken}}",
+                                    "type": "string"
+                                }
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Actualizar producto",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "pm.test(\"Status 2xx\", () => pm.expect(pm.response.code).to.be.within(200, 299))"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "PATCH",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/admin/productos/{{productoAdminId}}",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "admin",
+                                "productos",
+                                "{{productoAdminId}}"
+                            ]
+                        },
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"precio\": 9500\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        },
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{adminToken}}",
+                                    "type": "string"
+                                }
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Cargar cuenta (crea sus pantallas)",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "pm.test(\"Status 2xx\", () => pm.expect(pm.response.code).to.be.within(200, 299))",
+                                    "const d = pm.response.json().data",
+                                    "if (d) pm.collectionVariables.set(\"cuentaId\", d.id)"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/admin/cuentas",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "admin",
+                                "cuentas"
+                            ]
+                        },
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"plataforma_id\": \"{{plataformaId}}\",\n    \"email\": \"cuenta{{$timestamp}}@streamstore-demo.test\",\n    \"password\": \"Demo-Postman-1!\"\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        },
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{adminToken}}",
+                                    "type": "string"
+                                }
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Inventario de cuentas",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "pm.test(\"Status 2xx\", () => pm.expect(pm.response.code).to.be.within(200, 299))"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{baseUrl}}/admin/cuentas?plataforma_id={{plataformaId}}",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "admin",
+                                "cuentas"
+                            ],
+                            "query": [
+                                {
+                                    "key": "plataforma_id",
+                                    "value": "{{plataformaId}}"
+                                }
+                            ]
+                        },
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{adminToken}}",
+                                    "type": "string"
+                                }
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Detalle de cuenta",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "pm.test(\"Status 2xx\", () => pm.expect(pm.response.code).to.be.within(200, 299))"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{baseUrl}}/admin/cuentas/{{cuentaId}}",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "admin",
+                                "cuentas",
+                                "{{cuentaId}}"
+                            ]
+                        },
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{adminToken}}",
+                                    "type": "string"
+                                }
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Compras con filtros",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "pm.test(\"Status 2xx\", () => pm.expect(pm.response.code).to.be.within(200, 299))"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{baseUrl}}/admin/compras?estado=pagada",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "admin",
+                                "compras"
+                            ],
+                            "query": [
+                                {
+                                    "key": "estado",
+                                    "value": "pagada"
+                                }
+                            ]
+                        },
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{adminToken}}",
+                                    "type": "string"
+                                }
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Resumen de ventas y stock",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "pm.test(\"Status 2xx\", () => pm.expect(pm.response.code).to.be.within(200, 299))"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{baseUrl}}/admin/resumen",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "admin",
+                                "resumen"
+                            ]
+                        },
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{adminToken}}",
+                                    "type": "string"
+                                }
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Todos los servicios",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "pm.test(\"Status 2xx\", () => pm.expect(pm.response.code).to.be.within(200, 299))"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{baseUrl}}/admin/servicios",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "admin",
+                                "servicios"
+                            ]
+                        },
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{adminToken}}",
+                                    "type": "string"
+                                }
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Ejecutar revisión de vencimientos",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "pm.test(\"Status 2xx\", () => pm.expect(pm.response.code).to.be.within(200, 299))"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "header": [],
+                        "url": {
+                            "raw": "{{baseUrl}}/admin/cron/ejecutar",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "admin",
+                                "cron",
+                                "ejecutar"
+                            ]
+                        },
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{adminToken}}",
+                                    "type": "string"
+                                }
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Desactivar producto",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "pm.test(\"Status 2xx\", () => pm.expect(pm.response.code).to.be.within(200, 299))"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "DELETE",
+                        "header": [],
+                        "url": {
+                            "raw": "{{baseUrl}}/admin/productos/{{productoAdminId}}",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "admin",
+                                "productos",
+                                "{{productoAdminId}}"
+                            ]
+                        },
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{adminToken}}",
+                                    "type": "string"
+                                }
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Desactivar plataforma",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "pm.test(\"Status 2xx\", () => pm.expect(pm.response.code).to.be.within(200, 299))"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "DELETE",
+                        "header": [],
+                        "url": {
+                            "raw": "{{baseUrl}}/admin/plataformas/{{plataformaId}}",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "admin",
+                                "plataformas",
+                                "{{plataformaId}}"
+                            ]
+                        },
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{adminToken}}",
+                                    "type": "string"
+                                }
+                            ]
+                        }
+                    }
+                }
+            ]
+        }
+    ]
+}

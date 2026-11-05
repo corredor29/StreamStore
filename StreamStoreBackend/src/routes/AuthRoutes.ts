@@ -1,10 +1,14 @@
 import { Router } from "express"
-import { loginController, meController } from "../controllers/AuthController"
-import { ValidateSchema } from "../middlewares/ValidateSchema"
+import { AuthController } from "../controllers/AuthController"
 import { AuthMiddleware } from "../middlewares/AuthMiddleware"
-import { loginSchema } from "../validators/AuthValidator"
+import { validateSchema } from "../middlewares/ValidateSchema"
+import { loginSchema, recuperarSchema, registerSchema, restablecerSchema } from "../validators/AuthValidators"
 
-export const authRoutes = Router()
+export const AuthRoutes = Router()
 
-authRoutes.post("/login", ValidateSchema(loginSchema), loginController)
-authRoutes.get("/me", AuthMiddleware, meController)
+AuthRoutes.post("/register", validateSchema(registerSchema), AuthController.register)
+AuthRoutes.post("/login", validateSchema(loginSchema), AuthController.login)
+AuthRoutes.get("/me", AuthMiddleware, AuthController.me)
+AuthRoutes.post("/logout", AuthController.logout)
+AuthRoutes.post("/recuperar", validateSchema(recuperarSchema), AuthController.recuperar)
+AuthRoutes.post("/restablecer", validateSchema(restablecerSchema), AuthController.restablecer)
