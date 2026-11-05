@@ -8,6 +8,7 @@
         "build": "tsc",
         "start": "node dist/src/server.js",
         "type-check": "tsc --noEmit",
+        "migrate": "tsx src/database/migrate.ts",
         "db:reset": "tsx src/database/seed.ts",
         "seed": "tsx src/database/seed.ts"
     },
