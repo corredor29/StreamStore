@@ -81,17 +81,17 @@ onMounted(() => {
 
 <template>
   <div class="container-app py-8 sm:py-12">
-    <!-- Encabezado del catálogo -->
-    <header class="mb-8">
-      <div class="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-brand-300">
-        <Sparkles class="size-4" aria-hidden="true" />
-        <span>Catálogo oficial</span>
+    <!-- Encabezado del catálogo (Stitch Board 3) -->
+    <header class="mb-10 text-center max-w-3xl mx-auto space-y-3">
+      <div class="inline-flex items-center gap-2 rounded-full border border-cyan-400/30 bg-cyan-950/40 px-3.5 py-1 text-xs font-mono font-semibold uppercase tracking-widest text-cyan-300">
+        <Sparkles class="size-3.5 text-cyan-400" aria-hidden="true" />
+        <span>Catálogo Oficial de Streaming</span>
       </div>
-      <h1 class="mt-1 font-display text-3xl font-extrabold tracking-tight sm:text-4xl text-fg">
-        Cuentas completas y pantallas
+      <h1 class="font-display text-3xl sm:text-5xl font-black tracking-tight text-fg">
+        Explora el Entretenimiento sin Límites
       </h1>
-      <p class="mt-2 text-sm text-muted sm:text-base max-w-2xl">
-        Entrega inmediata y garantizada tras la confirmación del pago. Escoge la modalidad que mejor se adapte a tu consumo.
+      <p class="text-xs sm:text-sm text-muted max-w-2xl mx-auto leading-relaxed">
+        Nuestras cuentas completas, pantallas individuales y perfiles protegidos al instante con entrega automatizada 24/7 en COP.
       </p>
     </header>
 

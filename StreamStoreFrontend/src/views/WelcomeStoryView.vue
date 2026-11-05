@@ -13,6 +13,7 @@ import {
   Volume2, 
   VolumeX 
 } from '@lucide/vue'
+import AppLogo from '@/components/layout/AppLogo.vue'
 
 const router = useRouter()
 
@@ -221,14 +222,9 @@ onBeforeUnmount(() => {
     <!-- Barra superior de control (Logo, Saltar, Audio, Autoplay) -->
     <header class="relative z-20 flex items-center justify-between px-6 py-6 sm:px-10">
       <div class="flex items-center gap-3">
-        <span class="grid size-10 place-items-center rounded-xl bg-brand-500 text-white shadow-lg shadow-brand-500/40">
-          <Tv class="size-5" aria-hidden="true" />
-        </span>
-        <span class="font-display text-lg font-bold tracking-tight">
-          Stream<span class="text-brand-300">Store</span>
-        </span>
+        <AppLogo size="sm" />
         <span class="ml-2 hidden rounded-full border border-white/20 bg-white/5 px-2.5 py-0.5 text-[10px] uppercase tracking-widest text-white/60 sm:inline-block">
-          Experiencia Scrollytelling
+          Experiencia Audiovisual
         </span>
       </div>
 

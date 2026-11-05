@@ -135,8 +135,8 @@ async function onProcessPayment(payload: { metodo: MetodoPago; marca?: any; ulti
             <ArrowLeft class="size-3.5" aria-hidden="true" />
             <span>Volver al carrito</span>
           </RouterLink>
-          <h1 class="mt-2 font-display text-2xl sm:text-3xl font-black uppercase tracking-tight text-fg">
-            Terminal de Pago y Facturación
+          <h1 class="mt-2 font-display text-2xl sm:text-4xl font-black uppercase tracking-tight text-fg">
+            Finalizar Suscripción
           </h1>
           <p class="mt-1 text-xs text-muted">
             Sesión activa: <strong class="text-fg">{{ auth.usuario?.nombre }}</strong> ({{ auth.usuario?.email }})
@@ -234,7 +234,7 @@ async function onProcessPayment(payload: { metodo: MetodoPago; marca?: any; ulti
             <div class="h-2 w-full bg-gradient-to-r from-brand-500 via-cyan-400 to-emerald-400" />
 
             <div class="p-6">
-              <!-- Encabezado de la Pre-factura -->
+              <!-- Encabezado de la Pre-factura (Stitch Board 4) -->
               <div class="flex items-start justify-between border-b border-line/80 pb-4">
                 <div>
                   <div class="flex items-center gap-1.5">
@@ -246,6 +246,9 @@ async function onProcessPayment(payload: { metodo: MetodoPago; marca?: any; ulti
                   <h3 class="font-display text-lg font-black tracking-tight text-fg mt-0.5">
                     Resumen de Compra
                   </h3>
+                  <span class="text-[9px] font-mono text-muted/70 block mt-0.5">
+                    StreamStore S.A.S. · NIT 901.234.567-8 · Bogotá
+                  </span>
                 </div>
 
                 <div class="text-right">

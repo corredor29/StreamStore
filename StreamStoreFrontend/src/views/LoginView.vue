@@ -1,7 +1,8 @@
 <script setup lang="ts">
 import { reactive, ref } from 'vue'
 import { RouterLink, useRoute, useRouter } from 'vue-router'
-import { Eye, EyeOff, Lock, LogIn, Mail, ShieldAlert, Sparkles, UserCheck } from '@lucide/vue'
+import { Eye, EyeOff, Lock, Mail, ShieldAlert, Sparkles, UserCheck } from '@lucide/vue'
+import AppLogo from '@/components/layout/AppLogo.vue'
 import { useAuthStore } from '@/stores/auth'
 import { DEMO_ACCOUNTS } from '@/services/authService'
 import { loginSchema } from '@/utils/validators'
@@ -87,13 +88,13 @@ async function onSubmit() {
 <template>
   <div class="container-app flex min-h-[calc(100vh-14rem)] items-center justify-center py-12">
     <div class="card w-full max-w-md p-6 sm:p-8">
-      <!-- Encabezado -->
+      <!-- Encabezado con Logotipo StreamStore -->
       <div class="text-center">
-        <div class="mx-auto grid size-12 place-items-center rounded-2xl bg-brand-500/20 text-brand-300">
-          <LogIn class="size-6" aria-hidden="true" />
+        <div class="flex justify-center mb-5">
+          <AppLogo size="lg" />
         </div>
-        <h1 class="mt-4 font-display text-2xl font-bold text-fg sm:text-3xl">
-          Iniciar sesión
+        <h1 class="mt-2 font-display text-2xl font-black text-fg sm:text-3xl tracking-tight">
+          Iniciar Sesión
         </h1>
         <p class="mt-2 text-sm text-muted">
           Ingresa a tu cuenta para gestionar tus servicios de streaming.
