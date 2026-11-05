@@ -23,6 +23,7 @@ CREATE TABLE plataformas (
   nombre VARCHAR(80) NOT NULL UNIQUE,
   descripcion VARCHAR(255) NULL,
   logo_url VARCHAR(255) NULL,
+  portada_url VARCHAR(500) NULL,
   max_pantallas TINYINT UNSIGNED NOT NULL DEFAULT 4,
   activo TINYINT(1) NOT NULL DEFAULT 1,
   created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -46,11 +47,12 @@ CREATE TABLE productos (
 ) ENGINE=InnoDB;
 
 -- password_cifrada: AES-256-GCM (iv:tag:data en hex)
+-- email/password NULL = cuenta pendiente de asignación: se vende igual y el admin entrega las credenciales después
 CREATE TABLE cuentas (
   id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
   plataforma_id INT UNSIGNED NOT NULL,
-  email VARCHAR(150) NOT NULL,
-  password_cifrada VARCHAR(512) NOT NULL,
+  email VARCHAR(150) NULL,
+  password_cifrada VARCHAR(512) NULL,
   total_pantallas TINYINT UNSIGNED NOT NULL DEFAULT 4,
   estado ENUM('disponible','vendida_completa','inactiva') NOT NULL DEFAULT 'disponible',
   created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -135,6 +137,8 @@ CREATE TABLE servicios (
   fecha_inicio DATETIME NOT NULL,
   fecha_vencimiento DATETIME NOT NULL,
   estado ENUM('activo','vencido') NOT NULL DEFAULT 'activo',
+  estado_entrega ENUM('entregado','pendiente_asignacion') NOT NULL DEFAULT 'entregado',
+  entregado_at DATETIME NULL,
   alerta_3d_enviada TINYINT(1) NOT NULL DEFAULT 0,
   alerta_1d_enviada TINYINT(1) NOT NULL DEFAULT 0,
   alerta_vencido_enviada TINYINT(1) NOT NULL DEFAULT 0,
@@ -142,6 +146,7 @@ CREATE TABLE servicios (
   created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
   updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   KEY idx_servicios_vencimiento (estado, fecha_vencimiento),
+  KEY idx_servicios_entrega (estado_entrega),
   UNIQUE KEY uq_servicio_renovacion (renovacion_de_id),
   CONSTRAINT fk_serv_renovacion FOREIGN KEY (renovacion_de_id) REFERENCES servicios(id),
   CONSTRAINT fk_serv_usuario FOREIGN KEY (usuario_id) REFERENCES usuarios(id),

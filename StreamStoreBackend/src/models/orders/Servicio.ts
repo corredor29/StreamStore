@@ -4,6 +4,7 @@ import { Usuario } from "../users/Usuario"
 import { Compra } from "./Compra"
 import { Producto } from "../products/Producto"
 import { TipoProducto } from "../../interfaces/products/Producto"
+import { EstadoEntrega } from "../../interfaces/orders/Servicio"
 import { Cuenta } from "../products/Cuenta"
 import { Pantalla } from "../products/Pantalla"
 
@@ -19,6 +20,9 @@ export class Servicio extends Model {
     @Column({ type: DataType.DATE, allowNull: false }) declare fecha_inicio: Date
     @Column({ type: DataType.DATE, allowNull: false }) declare fecha_vencimiento: Date
     @Column({ type: DataType.ENUM("activo", "vencido"), allowNull: false, defaultValue: "activo" }) declare estado: "activo" | "vencido"
+    @Column({ type: DataType.ENUM("entregado", "pendiente_asignacion"), allowNull: false, defaultValue: "entregado" })
+    declare estado_entrega: EstadoEntrega
+    @Column({ type: DataType.DATE }) declare entregado_at: Date | null
     @Column({ type: DataType.BOOLEAN, allowNull: false, defaultValue: false }) declare alerta_3d_enviada: boolean
     @Column({ type: DataType.BOOLEAN, allowNull: false, defaultValue: false }) declare alerta_1d_enviada: boolean
     @Column({ type: DataType.BOOLEAN, allowNull: false, defaultValue: false }) declare alerta_vencido_enviada: boolean

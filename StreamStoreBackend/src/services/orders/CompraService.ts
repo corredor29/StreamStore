@@ -103,6 +103,12 @@ export class CompraService {
                     pantallas.forEach((x) => servicios.push({ ...base, cuenta_id: x.cuenta_id, pantalla_id: x.id }))
                 }
             }
+            const sinCredenciales = await this.cuentaRepository.idsSinCredenciales([...new Set(servicios.map((s) => s.cuenta_id))], t)
+            for (const s of servicios) {
+                const pendiente = sinCredenciales.has(s.cuenta_id)
+                s.estado_entrega = pendiente ? "pendiente_asignacion" : "entregado"
+                s.entregado_at = pendiente ? null : ahora
+            }
             await this.servicioRepository.bulkCreate(servicios, t)
             await this.repository.marcarPagada(compra, {
                 metodo_pago: metodoPago ?? compra.metodo_pago,

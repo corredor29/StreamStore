@@ -5,10 +5,12 @@ import { ServicioRepository } from "../../repositories/orders/ServicioRepository
 import { CarritoService } from "../../services/cart/CarritoService"
 import { ServicioService } from "../../services/orders/ServicioService"
 import { ApiResponse } from "../../utils/apiResponse"
+import { CuentaRepository } from "../../repositories/products/CuentaRepository"
 import { IdParam } from "../../validators/CommonValidators"
+import { AsignarCredencialesInput, ListServiciosQuery } from "../../validators/orders/ServicioValidators"
 
 const servicioRepository = new ServicioRepository()
-const service = new ServicioService(servicioRepository)
+const service = new ServicioService(servicioRepository, new CuentaRepository())
 const carritoService = new CarritoService(new CarritoRepository(), new ProductoRepository(), servicioRepository)
 
 export class ServicioController {
@@ -40,7 +42,19 @@ export class ServicioController {
 
     static async listTodos(_req: Request, res: Response) {
         try {
-            return ApiResponse.success(res, "Servicios", await service.listTodos())
+            const { entrega } = res.locals.query as ListServiciosQuery
+            return ApiResponse.success(res, "Servicios", await service.listTodos(entrega))
+        } catch (error) {
+            return ApiResponse.error(res, error)
+        }
+    }
+
+    static async asignarCredenciales(req: Request, res: Response) {
+        try {
+            const { id } = res.locals.params as IdParam
+            const data = await service.asignarCredenciales(id, req.body as AsignarCredencialesInput)
+            const mensaje = data.notificado ? "Credenciales asignadas y enviadas al cliente" : "Credenciales asignadas"
+            return ApiResponse.success(res, mensaje, data)
         } catch (error) {
             return ApiResponse.error(res, error)
         }

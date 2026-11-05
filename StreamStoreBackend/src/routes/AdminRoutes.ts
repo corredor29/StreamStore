@@ -9,7 +9,10 @@ import { UsuarioController } from "../controllers/users/UsuarioController"
 import { AuthMiddleware, RoleMiddleware } from "../middlewares/AuthMiddleware"
 import { validateSchema } from "../middlewares/ValidateSchema"
 import { idParamSchema } from "../validators/CommonValidators"
+import { UploadController } from "../controllers/UploadController"
+import { uploadImagen } from "../middlewares/UploadMiddleware"
 import { listComprasQuerySchema } from "../validators/orders/CompraValidators"
+import { asignarCredencialesSchema, listServiciosQuerySchema } from "../validators/orders/ServicioValidators"
 import { createCuentaSchema, listCuentasQuerySchema } from "../validators/products/CuentaValidators"
 import { createPlataformaSchema, updatePlataformaSchema } from "../validators/products/PlataformaValidators"
 import { createProductoSchema, listProductosQuerySchema, updateProductoSchema } from "../validators/products/ProductoValidators"
@@ -21,6 +24,8 @@ const id = validateSchema(idParamSchema, "params")
 AdminRoutes.use(AuthMiddleware, RoleMiddleware("admin"))
 
 AdminRoutes.get("/usuarios", UsuarioController.list)
+
+AdminRoutes.post("/upload", uploadImagen("imagen"), UploadController.subirPortada)
 
 AdminRoutes.get("/plataformas", PlataformaController.listTodas)
 AdminRoutes.post("/plataformas", validateSchema(createPlataformaSchema), PlataformaController.create)
@@ -41,5 +46,7 @@ AdminRoutes.post("/cuentas", validateSchema(createCuentaSchema), CuentaControlle
 
 AdminRoutes.get("/compras", validateSchema(listComprasQuerySchema, "query"), CompraController.listTodas)
 AdminRoutes.get("/resumen", CompraController.resumen)
-AdminRoutes.get("/servicios", ServicioController.listTodos)
+AdminRoutes.get("/servicios", validateSchema(listServiciosQuerySchema, "query"), ServicioController.listTodos)
+AdminRoutes.patch("/servicios/:id/credenciales", id, validateSchema(asignarCredencialesSchema), ServicioController.asignarCredenciales)
+AdminRoutes.put("/servicios/:id/credenciales", id, validateSchema(asignarCredencialesSchema), ServicioController.asignarCredenciales)
 AdminRoutes.post("/cron/ejecutar", AlertaController.ejecutar)

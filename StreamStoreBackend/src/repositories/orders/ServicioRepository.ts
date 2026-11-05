@@ -5,7 +5,7 @@ import { Plataforma } from "../../models/products/Plataforma"
 import { Producto } from "../../models/products/Producto"
 import { Servicio } from "../../models/orders/Servicio"
 import { Usuario } from "../../models/users/Usuario"
-import { FlagsAlerta, NuevoServicio } from "../../interfaces/orders/Servicio"
+import { EstadoEntrega, FlagsAlerta, NuevoServicio } from "../../interfaces/orders/Servicio"
 
 const includeResumen = [
     { model: Producto, attributes: ["id", "nombre", "tipo"] },
@@ -29,11 +29,20 @@ export class ServicioRepository {
         return Servicio.findAll({ where: { usuario_id: usuarioId }, include: includeCredenciales, order: [["fecha_vencimiento", "ASC"]] })
     }
 
-    findAllConUsuario() {
+    findAllConUsuario(entrega?: EstadoEntrega) {
         return Servicio.findAll({
+            where: entrega ? { estado_entrega: entrega } : {},
             include: [...includeResumen, { model: Usuario, attributes: ["id", "nombre", "email"] }],
             order: [["fecha_vencimiento", "ASC"]]
         })
+    }
+
+    findConCredencialesYUsuario(id: number) {
+        return Servicio.findByPk(id, { include: [...includeCredenciales, { model: Usuario, attributes: ["id", "nombre", "email"] }] })
+    }
+
+    marcarEntregado(servicio: Servicio, t: Transaction) {
+        return servicio.update({ estado_entrega: "entregado", entregado_at: new Date() }, { transaction: t })
     }
 
     findConCredenciales(id: number, usuarioId?: number) {

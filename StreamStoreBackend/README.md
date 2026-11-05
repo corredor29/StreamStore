@@ -79,11 +79,13 @@ Seeds: 4 plataformas (Netflix, Disney+, Prime Video, Max), 2 productos por plata
 
 ## Postman
 
-Importa [`postman/StreamStore.postman_collection.json`](postman/StreamStore.postman_collection.json): 44 peticiones en 7 carpetas (Salud, Auth, Catálogo, Carrito, Compras, Servicios, Admin).
+Importa [`postman/StreamStore.postman_collection.json`](postman/StreamStore.postman_collection.json): 57 peticiones en 8 carpetas (Salud, Auth, Catálogo, Carrito, Compras, Servicios, Admin, Portadas y entrega de credenciales).
 
 1. `npm run db:reset` y `npm run dev`.
 2. Si tu API no está en `http://localhost:3000/api`, cambia la variable `baseUrl` de la colección.
 3. Ejecútala completa con el **Runner** en orden: los logins guardan `token` y `adminToken`, y cada paso guarda el ID que usa el siguiente (producto → carrito → compra → pago → servicio → renovación).
+
+En "Subir portada" selecciona una imagen en el campo `imagen` (form-data) antes de correrla.
 
 Para probar "Restablecer contraseña", copia en la variable `resetToken` el token que imprime la consola del servidor después de "Recuperar contraseña".
 
@@ -120,10 +122,10 @@ Auth: `Authorization: Bearer <token>` (o cookie httpOnly `token`).
 | POST | /api/compras/:id/pagar | cliente | pago simulado transaccional. Body opcional `{ metodo_pago? }` |
 | GET | /api/compras/mias | cliente | historial |
 | GET | /api/compras/:id | cliente | detalle con ítems |
-| GET | /api/servicios/mios | cliente | servicios con vencimiento, `dias_restantes`, `estado` (`activo`\|`por_vencer`\|`vencido`), `credenciales` (`null` si venció), `renovado` y `renovacion_de_id` |
+| GET | /api/servicios/mios | cliente | servicios con vencimiento, `dias_restantes`, `estado` (`activo`\|`por_vencer`\|`vencido`), `estado_entrega` (`entregado`|`pendiente_asignacion`), `credenciales` (`null` si venció o aún no se entregan), `renovado` y `renovacion_de_id` |
 | POST | /api/servicios/:id/renovar | cliente | agrega al carrito la renovación de ese servicio (RF-12). Ver "Renovaciones" |
-| POST | /api/admin/cuentas | admin | `{ plataforma_id, email, password }` → crea `max_pantallas` pantallas según la plataforma |
-| GET | /api/admin/cuentas?plataforma_id= | admin | inventario (sin password) |
+| POST | /api/admin/cuentas | admin | `{ plataforma_id, email, password }` → crea `max_pantallas` pantallas según la plataforma. Sin `email`/`password` la cuenta queda pendiente de asignación; con `cantidad` (1-50) crea varias pendientes y devuelve un arreglo |
+| GET | /api/admin/cuentas?plataforma_id=&credenciales= | admin | inventario (sin password) con `credenciales_asignadas`; `credenciales` = `asignadas`|`pendientes` |
 | CRUD | /api/admin/plataformas[/:id] | admin | GET, POST, PUT/PATCH, DELETE (borrado lógico: `activo=false`) |
 | CRUD | /api/admin/productos[/:id] | admin | GET, POST, PUT/PATCH, DELETE (borrado lógico) |
 | GET | /api/admin/compras?estado=&desde=&hasta= | admin | ventas con filtros |
@@ -140,9 +142,38 @@ Auth: `Authorization: Bearer <token>` (o cookie httpOnly `token`).
 | GET | /api/productos?plataforma_id= | filtro por id |
 | GET | /api/servicios/:id | detalle con credenciales (dueño o admin) |
 | GET | /api/admin/usuarios | usuarios sin password |
-| GET | /api/admin/servicios | todos los servicios |
+| GET | /api/admin/servicios?entrega= | todos los servicios; `entrega=pendiente_asignacion` lista los que esperan credenciales |
+| PATCH/PUT | /api/admin/servicios/:id/credenciales | entrega credenciales. Ver "Inventario sin credenciales" |
+| POST | /api/admin/upload | sube una portada (`multipart/form-data`, campo `imagen`). Ver "Portadas" |
 | GET | /api/admin/productos/stock-bajo | productos con `stock <= stock_minimo` |
 | GET | /api/admin/cuentas/:id | una cuenta con sus pantallas |
+
+## Portadas
+
+`POST /api/admin/upload` recibe una imagen en el campo `imagen` (`multipart/form-data`): JPG, PNG, WEBP o GIF de hasta `UPLOAD_MAX_MB` (2 MB por defecto). Se revisa la firma real del archivo, no solo el tipo que declara el cliente.
+
+- Se guarda en `UPLOAD_DIR/portadas` (por defecto `uploads/`, fuera de git) con un nombre aleatorio y se sirve en `/uploads/portadas/<archivo>`.
+- Responde `201 { url, ruta, nombre_original, tipo, tamano }`. `url` usa `PUBLIC_URL`.
+- El frontend guarda esa `url` como `portada_url` al crear o editar la plataforma (`POST/PATCH /api/admin/plataformas`). `portada_url: null` la quita.
+- Errores: 400 sin archivo o con otro campo, 413 si pesa más del límite, 415 si no es una imagen permitida.
+
+## Inventario sin credenciales
+
+El admin puede cargar cuentas solo con la plataforma y entregar el correo, la contraseña y el PIN después de la compra.
+
+1. `POST /api/admin/cuentas { plataforma_id, cantidad? }` sin `email`/`password`: crea la cuenta y sus pantallas, que cuentan para el stock y se venden normal. Al vender, se usan primero las cuentas que ya tienen credenciales.
+2. Si al pagar el servicio cae en una cuenta sin credenciales, queda con `estado_entrega: "pendiente_asignacion"` y el cliente ve `credenciales: null` en Mis servicios.
+3. `GET /api/admin/servicios?entrega=pendiente_asignacion` lista lo que falta entregar.
+4. `PATCH /api/admin/servicios/:id/credenciales`:
+
+   | Campo | Uso |
+   |---|---|
+   | `email`, `password` | van juntos; se guardan en la cuenta (cifrado AES). Obligatorios si la cuenta aún no tiene credenciales |
+   | `pin`, `perfil` | servicio de pantalla: cambian su pantalla |
+   | `pantallas: [{ numero, pin?, perfil? }]` | servicio de cuenta completa: cambian esas pantallas |
+   | `notificar` | por defecto `true`: envía al cliente un correo con sus datos de acceso |
+
+   Marca el servicio como `entregado` (`entregado_at`) y responde el detalle con `credenciales` y `notificado`. También sirve para corregir credenciales ya entregadas. Las credenciales quedan en la cuenta: los demás servicios de esa cuenta siguen pendientes hasta que el admin los entregue.
 
 ## Renovaciones (RF-12)
 
@@ -161,6 +192,7 @@ Para una base creada antes de estos cambios (sin perder datos), aplicar en orden
 mysql -u root streamStoreDb < database/migrations/20261105_add_max_pantallas_plataformas.sql
 mysql -u root streamStoreDb < database/migrations/20261105_renovacion_servicios.sql
 mysql -u root streamStoreDb < database/migrations/20261105_usuarios_telefono_y_reset.sql
+mysql -u root streamStoreDb < database/migrations/20261105_portadas_y_entrega_credenciales.sql
 ```
 
 Son idempotentes (revisan `information_schema`), se pueden correr más de una vez. `npm run db:reset` recrea todo desde cero.

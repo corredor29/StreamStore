@@ -4,6 +4,9 @@ export type EstadoServicio = "activo" | "por_vencer" | "vencido"
 
 export type TipoAlerta = "3_dias" | "1_dia" | "vencimiento"
 
+// pendiente_asignacion: se vendió una cuenta sin credenciales y el admin aún no las entrega
+export type EstadoEntrega = "entregado" | "pendiente_asignacion"
+
 export type NuevoServicio = {
     usuario_id: number
     compra_id: number
@@ -14,6 +17,8 @@ export type NuevoServicio = {
     fecha_inicio: Date
     fecha_vencimiento: Date
     renovacion_de_id?: number | null
+    estado_entrega?: EstadoEntrega
+    entregado_at?: Date | null
 }
 
 export interface FlagsAlerta {
