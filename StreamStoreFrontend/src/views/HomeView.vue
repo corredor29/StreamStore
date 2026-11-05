@@ -294,7 +294,7 @@ const formatCOP = (val: number) => {
               introStage === 'logo' ? 'opacity-30 scale-100 blur-sm' : '',
               introStage === 'mosaic' ? 'opacity-90 scale-105' : '',
             ]"
-            style="background-image: url('/hero_cinema_wall.jpg');"
+            style="background-image: url('/hbo_max_mosaic_bg.jpg');"
           >
             <!-- Capa de brillo y viñeta cinematográfica -->
             <div class="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-black/80" />
@@ -336,88 +336,93 @@ const formatCOP = (val: number) => {
       </Transition>
     </Teleport>
 
-    <!-- ================= 1. CINEMATIC WEBSITE HERO (MOSAICO STREAMING ESTILO NETFLIX) ================= -->
-    <section class="relative min-h-[90vh] flex items-center justify-center overflow-hidden border-b border-line">
-      <!-- FONDO: MOSAICO DE PANTALLAS DE ENTRETENIMIENTO (WALL OF SCREENS) CON ANIMACIÓN KEN BURNS -->
+    <!-- ================= 1. CINEMATIC WEBSITE HERO (ESTILO HBO MAX) ================= -->
+    <section class="relative min-h-[92vh] flex items-center justify-center overflow-hidden border-b border-white/10 bg-black">
+      <!-- FONDO: MOSAICO DE ENTRETENIMIENTO AL ESTILO HBO MAX -->
       <div
-        class="absolute inset-0 bg-cover bg-center transition-transform duration-[25000ms] ease-out kenburns-bg"
-        style="background-image: url('/hero_cinema_wall.jpg');"
+        class="absolute inset-0 bg-cover bg-center transition-transform duration-[25000ms] ease-out kenburns-bg opacity-75"
+        style="background-image: url('/hbo_max_mosaic_bg.jpg');"
       >
-        <!-- Viñeta Gradual Oscura: asegura que el texto sea 100% legible y cinematográfico -->
-        <div class="absolute inset-0 bg-gradient-to-b from-[#0B0E1F]/90 via-[#0B0E1F]/65 to-[#0B0E1F]" />
+        <!-- Viñeta Gradual Estilo HBO Max: oscura arriba para el header, respirable al centro y fundido a negro puro abajo -->
+        <div class="absolute inset-0 bg-gradient-to-b from-black/85 via-black/45 via-60% to-black pointer-events-none" />
         
-        <!-- Iluminación ambiental violeta y azul cyan -->
-        <div class="absolute top-1/4 left-1/2 -translate-x-1/2 size-[600px] rounded-full bg-brand-500/20 blur-[130px] pointer-events-none" />
-        <div class="absolute bottom-10 left-1/4 size-[400px] rounded-full bg-cyan-500/15 blur-[100px] pointer-events-none" />
-        
-        <!-- Sutil textura de pantalla / scanlines cinematográficas -->
-        <div class="absolute inset-0 opacity-15 bg-[radial-gradient(#06B6D4_1px,transparent_1px)] [background-size:24px_24px] pointer-events-none" />
+        <!-- Radial sutil para concentrar la atención en el centro -->
+        <div class="absolute inset-0 bg-[radial-gradient(circle_at_center,transparent_20%,rgba(0,0,0,0.8)_85%)] pointer-events-none" />
       </div>
 
-      <!-- CONTENIDO CENTRAL DEL HERO CINEMÁTICO -->
-      <div class="container-app relative z-10 text-center max-w-4xl mx-auto py-16 sm:py-24 space-y-6">
-        <!-- Logotipo Oficial Cinematográfico StreamStore (Rediseñado con resplandor ambiental) -->
-        <div class="relative flex items-center justify-center pb-2">
-          <!-- Halo de luz ambiental posterior -->
-          <div class="absolute -inset-3 rounded-full bg-gradient-to-r from-brand-500/35 via-cyan-400/30 to-brand-400/35 blur-2xl opacity-80 pointer-events-none" />
-          
-          <div class="relative size-24 sm:size-28 rounded-3xl p-1 bg-gradient-to-b from-white/20 via-white/5 to-transparent border border-white/20 shadow-[0_10px_40px_rgba(0,0,0,0.7),0_0_35px_rgba(128,87,255,0.45)] backdrop-blur-xl group hover:scale-105 transition-all duration-300">
+      <!-- CONTENIDO CENTRAL DEL HERO (IDÉNTICO A HBO MAX) -->
+      <div class="container-app relative z-10 text-center max-w-4xl mx-auto py-20 sm:py-28 flex flex-col items-center justify-center space-y-6">
+        <!-- Logotipo Central StreamStore en Relieve / 3D Blanco Puro -->
+        <div class="flex flex-col items-center justify-center space-y-2">
+          <div class="size-20 sm:size-24 rounded-3xl p-1 bg-gradient-to-b from-white/30 via-white/5 to-transparent border border-white/25 shadow-[0_10px_40px_rgba(0,0,0,0.8),0_0_40px_rgba(128,87,255,0.4)] backdrop-blur-xl group hover:scale-105 transition-all duration-300">
             <img
               src="/streamstore_logo_official.png"
               alt="StreamStore"
-              class="w-full h-full object-contain rounded-[20px] bg-[#0B0E1F]/80 p-2"
+              class="w-full h-full object-contain rounded-[20px] bg-black/80 p-2"
             />
           </div>
+
+          <h1 class="font-display text-5xl sm:text-7xl md:text-8xl font-black text-white uppercase tracking-tight drop-shadow-[0_12px_35px_rgba(0,0,0,0.95)]">
+            STREAM<span class="text-transparent bg-clip-text bg-gradient-to-r from-cyan-300 via-white to-purple-300">STORE</span>
+          </h1>
         </div>
 
-        <!-- Titular Principal Cinematográfico -->
-        <h1 class="font-display text-4xl sm:text-6xl lg:text-7xl font-black text-white tracking-tight leading-[1.08] drop-shadow-md">
-          Tus Plataformas de Streaming Favoritas al <span class="bg-gradient-to-r from-brand-400 via-cyan-300 to-brand-300 bg-clip-text text-transparent">Mejor Precio</span>
-        </h1>
-
-        <!-- Subtítulo -->
-        <p class="text-base sm:text-lg text-slate-300 max-w-2xl mx-auto leading-relaxed drop-shadow-sm font-sans">
-          Disfruta de Netflix, Disney+, Max, Prime Video, Spotify y Crunchyroll en 4K Ultra HD sin intermediarios. Cuentas completas y perfiles individuales con activación automática 24/7.
+        <!-- Frase de Precios Estilo HBO Max: "Los planes empiezan desde $..." -->
+        <p class="text-xl sm:text-2xl md:text-3xl text-white/95 font-medium tracking-tight drop-shadow-[0_4px_16px_rgba(0,0,0,0.9)]">
+          Los planes empiezan desde <strong class="text-white font-black drop-shadow-md">$8.000/mes</strong>
         </p>
 
-        <!-- Botones de Acción CTA Cinematográficos -->
-        <div class="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4">
+        <p class="text-sm sm:text-base text-slate-300/90 max-w-xl mx-auto font-sans leading-relaxed drop-shadow">
+          Acceso instantáneo a Netflix, Disney+, Max, Prime Video, Spotify y Crunchyroll en 4K Ultra HD con garantía ininterrumpida.
+        </p>
+
+        <!-- Botón Principal "Iniciar Sesión" (En vez de "Suscríbete" tal como pidió el usuario) -->
+        <div class="flex flex-col sm:flex-row items-center justify-center gap-4 pt-3 w-full sm:w-auto">
           <RouterLink
-            to="/catalogo"
-            class="btn-primary text-base py-4 px-8 font-bold shadow-[0_0_30px_rgba(128,87,255,0.45)] w-full sm:w-auto flex items-center justify-center gap-2 hover:scale-[1.02] transition-transform"
+            to="/login"
+            class="inline-flex items-center justify-center rounded-full bg-white hover:bg-slate-200 text-neutral-950 font-black text-base px-10 sm:px-14 py-3.5 sm:py-4 shadow-[0_0_35px_rgba(255,255,255,0.35)] hover:shadow-[0_0_50px_rgba(255,255,255,0.6)] transition-all duration-200 hover:scale-105 active:scale-95 w-full sm:w-auto uppercase tracking-wider"
           >
-            <span>Explorar Catálogo</span>
-            <ArrowRight class="size-4" />
+            Iniciar Sesión
           </RouterLink>
 
-          <!-- Botón para ver/repetir animación cinematográfica estilo Netflix -->
+          <RouterLink
+            to="/catalogo"
+            class="inline-flex items-center justify-center rounded-full border border-white/35 bg-black/60 hover:bg-white/10 text-white font-bold text-base px-8 sm:px-10 py-3.5 sm:py-4 backdrop-blur-md transition-all duration-200 hover:border-white w-full sm:w-auto"
+          >
+            <span>Explorar Catálogo</span>
+            <ArrowRight class="size-4 ml-2" />
+          </RouterLink>
+        </div>
+
+        <!-- Opción discreta de Intro Cinemática -->
+        <div class="pt-2">
           <button
             type="button"
-            class="btn-secondary text-base py-4 px-7 font-bold border-cyan-400/40 bg-slate-900/80 backdrop-blur-md text-cyan-200 hover:border-cyan-300 hover:text-white w-full sm:w-auto flex items-center justify-center gap-2 shadow-lg hover:scale-[1.02] transition-all cursor-pointer"
+            class="inline-flex items-center gap-2 text-xs font-mono text-cyan-300 hover:text-white transition-colors cursor-pointer py-1 px-3 rounded-full hover:bg-white/5"
             @click="startCinematicIntro"
           >
-            <Play class="size-4 fill-cyan-400 text-cyan-400" />
-            <span>Ver Intro Tipo Netflix</span>
+            <Play class="size-3.5 fill-cyan-400 text-cyan-400" />
+            <span>Ver Animación Cinemática Tipo Netflix</span>
           </button>
         </div>
 
-        <!-- Métricas de Confianza en 4 Columnas -->
-        <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 sm:gap-6 pt-10 border-t border-line/60 mt-8 backdrop-blur-sm">
-          <div class="rounded-xl border border-line/80 bg-surface/80 p-4 shadow-lg backdrop-blur-md">
-            <p class="font-display text-3xl font-black text-white tracking-tight">+15K</p>
-            <p class="text-xs text-slate-400 mt-0.5 font-medium">Clientes Satisfechos</p>
+        <!-- 4 Métricas de Confianza Integradas con Estilo Minimalista Oscuro -->
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-5 pt-8 w-full max-w-3xl border-t border-white/10 mt-6">
+          <div class="rounded-xl border border-white/10 bg-black/60 p-3.5 shadow-lg backdrop-blur-md">
+            <p class="font-display text-2xl sm:text-3xl font-black text-white tracking-tight">+15K</p>
+            <p class="text-[11px] sm:text-xs text-slate-400 mt-0.5">Clientes Satisfechos</p>
           </div>
-          <div class="rounded-xl border border-line/80 bg-surface/80 p-4 shadow-lg backdrop-blur-md">
-            <p class="font-display text-3xl font-black text-emerald-400 tracking-tight">100%</p>
-            <p class="text-xs text-slate-400 mt-0.5 font-medium">Garantía Activa</p>
+          <div class="rounded-xl border border-white/10 bg-black/60 p-3.5 shadow-lg backdrop-blur-md">
+            <p class="font-display text-2xl sm:text-3xl font-black text-emerald-400 tracking-tight">100%</p>
+            <p class="text-[11px] sm:text-xs text-slate-400 mt-0.5">Garantía Activa</p>
           </div>
-          <div class="rounded-xl border border-line/80 bg-surface/80 p-4 shadow-lg backdrop-blur-md">
-            <p class="font-display text-3xl font-black text-cyan-300 tracking-tight">24/7</p>
-            <p class="text-xs text-slate-400 mt-0.5 font-medium">Soporte Inmediato</p>
+          <div class="rounded-xl border border-white/10 bg-black/60 p-3.5 shadow-lg backdrop-blur-md">
+            <p class="font-display text-2xl sm:text-3xl font-black text-cyan-300 tracking-tight">24/7</p>
+            <p class="text-[11px] sm:text-xs text-slate-400 mt-0.5">Soporte Inmediato</p>
           </div>
-          <div class="rounded-xl border border-line/80 bg-surface/80 p-4 shadow-lg backdrop-blur-md">
-            <p class="font-display text-3xl font-black text-brand-300 tracking-tight">&lt; 10s</p>
-            <p class="text-xs text-slate-400 mt-0.5 font-medium">Entrega Automática</p>
+          <div class="rounded-xl border border-white/10 bg-black/60 p-3.5 shadow-lg backdrop-blur-md">
+            <p class="font-display text-2xl sm:text-3xl font-black text-purple-300 tracking-tight">&lt; 10s</p>
+            <p class="text-[11px] sm:text-xs text-slate-400 mt-0.5">Entrega Automática</p>
           </div>
         </div>
       </div>
@@ -428,10 +433,10 @@ const formatCOP = (val: number) => {
       <div class="flex flex-col sm:flex-row items-start sm:items-end justify-between gap-4 border-b border-line pb-6">
         <div>
           <span class="text-xs font-mono uppercase tracking-[0.25em] text-cyan-400 font-bold block mb-1">
-            Catálogo Destacado
+            Planes y Suscripciones
           </span>
           <h2 class="font-display text-2xl sm:text-4xl font-black text-fg tracking-tight">
-            Elige Tu Modalidad
+            ELIGE EL MEJOR PLAN PARA TI
           </h2>
         </div>
 
