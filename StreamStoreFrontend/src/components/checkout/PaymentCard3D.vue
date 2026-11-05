@@ -14,17 +14,14 @@ const props = withDefaults(
     isFlipped: boolean
   }>(),
   {
-    bankSkin: 'nu',
-    cardKind: 'credito',
+    bankSkin: 'bancolombia',
+    cardKind: 'debito',
   }
 )
 
 const emit = defineEmits<{
   toggleFlip: []
 }>()
-
-// Estilos dinámicos según el skin de banco seleccionado
-const isDarkText = computed(() => props.bankSkin === 'bancolombia')
 
 const ambientGlowClass = computed(() => {
   switch (props.bankSkin) {
@@ -47,7 +44,7 @@ const cardContainerClasses = computed(() => {
     case 'nu':
       return 'border-purple-400/20 text-white shadow-2xl'
     case 'bancolombia':
-      return 'border-black/10 text-neutral-900 shadow-2xl'
+      return 'border-black/15 text-neutral-900 shadow-2xl'
     case 'falabella':
       return 'border-emerald-400/20 text-white shadow-2xl'
     case 'bbva':
@@ -81,8 +78,127 @@ const cardContainerClasses = computed(() => {
         :class="cardContainerClasses"
       >
         <!-- FONDOS Y PATRONES VECTORIALES SEGÚN SKIN -->
-        <!-- Skin 1: Nu (Nubank) -->
-        <template v-if="bankSkin === 'nu'">
+        <!-- Skin 1: Bancolombia (Diseño Exacto al Plástico Físico Oficial) -->
+        <template v-if="bankSkin === 'bancolombia'">
+          <div class="absolute inset-0 bg-[#FFDD00]" />
+
+          <!-- Muesca de accesibilidad táctil para personas con discapacidad visual en el borde derecho -->
+          <div class="pointer-events-none absolute right-0 top-1/2 -translate-y-1/2 w-2.5 h-6 rounded-l-full bg-[#0a0c10] shadow-inner" />
+
+          <!-- Cintas multicolores curvadas oficiales de Bancolombia -->
+          <svg
+            class="pointer-events-none absolute inset-0 h-full w-full"
+            viewBox="0 0 380 230"
+            fill="none"
+            aria-hidden="true"
+          >
+            <!-- Cinta verde esmeralda y violeta vertical que pasa detrás del chip -->
+            <path
+              d="M135 0 V80 C135 130 170 170 205 185"
+              stroke="#00B594"
+              stroke-width="16"
+              stroke-linecap="round"
+            />
+            <path
+              d="M135 45 C135 110 160 155 200 180"
+              stroke="#7E3294"
+              stroke-width="17"
+              stroke-linecap="round"
+            />
+            <!-- Cinta rosa / lila que continúa la curva -->
+            <path
+              d="M152 135 C170 165 200 185 220 185"
+              stroke="#E289C3"
+              stroke-width="13"
+              stroke-linecap="round"
+            />
+            <!-- Cinta naranja y cian inferior izquierda -->
+            <path
+              d="M80 160 C90 190 75 220 40 230"
+              stroke="#FF8200"
+              stroke-width="14"
+              stroke-linecap="round"
+            />
+            <path
+              d="M100 195 C95 215 80 230 60 230"
+              stroke="#00A3E0"
+              stroke-width="10"
+              stroke-linecap="round"
+            />
+            <path
+              d="M75 140 C85 170 60 200 30 205"
+              stroke="#00B594"
+              stroke-width="12"
+              stroke-linecap="round"
+            />
+          </svg>
+
+          <!-- Estructura Frontal Bancolombia: TOTALMENTE LIMPIA, SIN NÚMEROS NI TITULAR (Todo va atrás) -->
+          <div class="relative z-10 flex h-full flex-col justify-between text-black">
+            <!-- Fila Superior: 'débito' o 'crédito' a la izquierda, logo '= Ba' a la derecha -->
+            <div class="flex justify-between items-start">
+              <span class="text-[12px] font-sans font-semibold lowercase text-black tracking-tight">
+                {{ cardKind === 'credito' ? 'crédito' : 'débito' }}
+              </span>
+
+              <!-- Logotipo Oficial Bancolombia: 3 barras horizontales + 'Ba' en negrita -->
+              <div class="flex items-center gap-2 pr-1">
+                <div class="flex flex-col gap-[3.5px] items-end" aria-hidden="true">
+                  <span class="block w-6 h-[4.5px] bg-black rounded-sm" />
+                  <span class="block w-8 h-[4.5px] bg-black rounded-sm" />
+                  <span class="block w-10 h-[4.5px] bg-black rounded-sm" />
+                </div>
+                <span
+                  class="text-[34px] font-black tracking-tighter text-black leading-none font-sans"
+                  style="font-family: 'Space Grotesk', Arial, sans-serif;"
+                >
+                  Ba
+                </span>
+              </div>
+            </div>
+
+            <!-- Fila Media: Chip EMV Plateado/Dorado + Contactless Ondas Negras -->
+            <div class="flex items-center gap-2.5 my-auto ml-3 relative z-10">
+              <!-- Chip EMV metálico exacto -->
+              <div
+                class="relative w-11 h-8 rounded-[4px] border border-black/40 shrink-0 overflow-hidden shadow-sm"
+                style="background: linear-gradient(145deg, #d8dbdf 0%, #c4c8ce 35%, #eef0f3 65%, #a6abb3 100%);"
+                aria-hidden="true"
+              >
+                <!-- Líneas orgánicas grabadas en el chip físico -->
+                <div class="absolute inset-0 flex items-center justify-center opacity-40">
+                  <div class="w-full h-[1px] bg-black" />
+                </div>
+                <div class="absolute inset-[3px] border border-black/30 rounded-[2px] opacity-40" />
+                <div class="absolute left-1/2 top-0 bottom-0 w-[1px] bg-black opacity-30" />
+                <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 size-2 rounded-full border border-black/40 opacity-40" />
+              </div>
+
+              <!-- Símbolo Contactless ))) en negro nítido -->
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <path d="M8 8.5c2.2 1.8 2.2 5.2 0 7" stroke="#000000" stroke-width="2.2" stroke-linecap="round" />
+                <path d="M11 5.5c3.5 2.8 3.5 10.2 0 13" stroke="#000000" stroke-width="2.2" stroke-linecap="round" />
+                <path d="M14 3c4.8 3.8 4.8 14.2 0 18" stroke="#000000" stroke-width="2.2" stroke-linecap="round" />
+              </svg>
+            </div>
+
+            <!-- Fila Inferior: Exclusivamente el Logo de Mastercard a la derecha -->
+            <div class="flex justify-between items-end mt-auto pt-2">
+              <span class="text-[9px] font-mono text-black/40 uppercase tracking-widest pl-1">
+                · Reverso con datos ·
+              </span>
+
+              <!-- Logo Oficial Mastercard (Rojo #EB001B y Naranja #F79E1B) -->
+              <div class="relative inline-block w-11 h-7 mr-2" aria-hidden="true">
+                <span class="absolute left-0 top-0 size-7 rounded-full bg-[#eb001b] shadow-sm" />
+                <span class="absolute right-0 top-0 size-7 rounded-full bg-[#f79e1b] mix-blend-screen shadow-sm" />
+              </div>
+            </div>
+          </div>
+        </template>
+
+        <!-- Skin 2: Nu (Nubank) -->
+        <template v-else-if="bankSkin === 'nu'">
           <div
             class="absolute inset-0"
             style="background: linear-gradient(160deg, #9B30D9 0%, #820AD1 40%, #6B09A8 100%);"
@@ -90,7 +206,6 @@ const cardContainerClasses = computed(() => {
           <div class="pointer-events-none absolute -right-10 top-8 size-40 rounded-full bg-white/5" />
           <div class="pointer-events-none absolute -left-8 -bottom-10 size-36 rounded-full bg-black/10" />
 
-          <!-- Estructura Nu -->
           <div class="relative z-10 flex h-full flex-col justify-between">
             <div class="flex justify-between items-start">
               <span
@@ -103,7 +218,6 @@ const cardContainerClasses = computed(() => {
                 <span class="text-[8px] uppercase tracking-[0.2em] text-white/60 font-mono font-semibold">
                   {{ cardKind === 'credito' ? 'Credito' : 'Debito' }}
                 </span>
-                <!-- Logo Mastercard -->
                 <div class="relative inline-block w-9 h-5.5" aria-hidden="true">
                   <span class="absolute left-0 top-0 w-[58%] h-full rounded-full bg-[#eb001b]" />
                   <span class="absolute right-0 top-0 w-[58%] h-full rounded-full bg-[#f79e1b] mix-blend-screen" />
@@ -111,16 +225,13 @@ const cardContainerClasses = computed(() => {
               </div>
             </div>
 
-            <!-- Contactless + Chip EMV en el lado derecho -->
             <div class="flex items-center justify-end gap-2 my-auto pr-1">
-              <!-- Contactless -->
               <svg width="15" height="15" viewBox="0 0 24 24" fill="none" aria-hidden="true">
                 <path d="M8 8.5c2.2 1.8 2.2 5.2 0 7" stroke="#ffffff" stroke-width="1.8" stroke-linecap="round" />
                 <path d="M11 5.5c3.5 2.8 3.5 10.2 0 13" stroke="#ffffff" stroke-width="1.8" stroke-linecap="round" />
                 <path d="M14 3c4.8 3.8 4.8 14.2 0 18" stroke="#ffffff" stroke-width="1.8" stroke-linecap="round" />
               </svg>
 
-              <!-- Chip EMV Dorado 6 contactos -->
               <div
                 class="relative w-9 h-7 rounded-[3px] border border-black/20 shrink-0 overflow-hidden shadow-sm"
                 style="background: linear-gradient(145deg, #e8d48b 0%, #c9a227 45%, #f0e0a0 70%, #a67c00 100%);"
@@ -132,7 +243,6 @@ const cardContainerClasses = computed(() => {
               </div>
             </div>
 
-            <!-- Número, Titular y Expiración -->
             <div class="mt-auto">
               <p class="text-[13px] sm:text-[14px] font-mono tracking-[0.16em] tabular-nums text-white">
                 {{ displayNumero }}
@@ -149,81 +259,6 @@ const cardContainerClasses = computed(() => {
           </div>
         </template>
 
-        <!-- Skin 2: Bancolombia -->
-        <template v-else-if="bankSkin === 'bancolombia'">
-          <div class="absolute inset-0 bg-[#FFDD00]" />
-          <!-- Curvas dinámicas de colores oficiales estilo Bancolombia -->
-          <svg
-            class="absolute left-0 top-0 h-full w-[55%] pointer-events-none"
-            viewBox="0 0 120 160"
-            preserveAspectRatio="none"
-            aria-hidden="true"
-          >
-            <path d="M-10 20 C40 10, 50 50, 20 90 C-5 120, 30 150, 70 160" fill="none" stroke="#00A651" stroke-width="14" stroke-linecap="round" />
-            <path d="M0 35 C45 25, 55 60, 25 95 C5 120, 40 145, 80 155" fill="none" stroke="#7B2D8E" stroke-width="11" stroke-linecap="round" />
-            <path d="M5 55 C40 50, 48 80, 28 110 C12 130, 45 148, 75 152" fill="none" stroke="#00A3E0" stroke-width="9" stroke-linecap="round" />
-            <path d="M15 75 C42 78, 50 100, 40 125 C32 140, 55 150, 70 148" fill="none" stroke="#E85D75" stroke-width="8" stroke-linecap="round" />
-          </svg>
-
-          <!-- Estructura Bancolombia -->
-          <div class="relative z-10 flex h-full flex-col justify-between text-black">
-            <div class="flex justify-between items-start">
-              <span class="text-[11px] font-medium lowercase font-sans">
-                {{ cardKind === 'credito' ? 'credito' : 'debito' }}
-              </span>
-
-              <!-- Isotipo Bancolombia -->
-              <span class="inline-flex items-center gap-1.5 text-xs font-bold tracking-tight">
-                <span class="flex flex-col gap-[2px]" aria-hidden="true">
-                  <span class="block w-2.5 h-[2px] bg-black rounded-sm" />
-                  <span class="block w-3.5 h-[2px] bg-black rounded-sm" />
-                  <span class="block w-4.5 h-[2px] bg-black rounded-sm" />
-                </span>
-                <span>Bancolombia</span>
-              </span>
-            </div>
-
-            <!-- Chip EMV + Contactless a la izquierda -->
-            <div class="flex items-center gap-2 my-auto ml-1 relative z-10">
-              <div
-                class="relative w-9 h-7 rounded-[3px] border border-black/30 shrink-0 overflow-hidden shadow-sm"
-                style="background: linear-gradient(145deg, #e8d48b 0%, #c9a227 45%, #f0e0a0 70%, #a67c00 100%);"
-                aria-hidden="true"
-              >
-                <div class="absolute inset-[3px] grid grid-cols-3 grid-rows-2 gap-px opacity-50">
-                  <span v-for="i in 6" :key="i" class="bg-black/30 rounded-[1px]" />
-                </div>
-              </div>
-
-              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-                <path d="M8 8.5c2.2 1.8 2.2 5.2 0 7" stroke="#111111" stroke-width="1.8" stroke-linecap="round" />
-                <path d="M11 5.5c3.5 2.8 3.5 10.2 0 13" stroke="#111111" stroke-width="1.8" stroke-linecap="round" />
-                <path d="M14 3c4.8 3.8 4.8 14.2 0 18" stroke="#111111" stroke-width="1.8" stroke-linecap="round" />
-              </svg>
-            </div>
-
-            <!-- Número, Titular y Expiración con Logo Mastercard -->
-            <div class="mt-auto relative z-10">
-              <p class="text-[12px] sm:text-[13px] font-mono tracking-[0.14em] tabular-nums text-black/90">
-                {{ displayNumero }}
-              </p>
-              <div class="flex justify-between items-end mt-1.5 gap-2">
-                <p class="text-[11px] font-bold tracking-wide truncate uppercase text-black">
-                  {{ displayNombre }}
-                </p>
-                <div class="flex items-center gap-2 shrink-0">
-                  <p class="text-[10px] font-mono text-black/85">{{ displayExpiracion }}</p>
-                  <!-- Logo Mastercard -->
-                  <div class="relative inline-block w-8 h-5" aria-hidden="true">
-                    <span class="absolute left-0 top-0 w-[58%] h-full rounded-full bg-[#eb001b]" />
-                    <span class="absolute right-0 top-0 w-[58%] h-full rounded-full bg-[#f79e1b] mix-blend-screen" />
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </template>
-
         <!-- Skin 3: Falabella CMR -->
         <template v-else-if="bankSkin === 'falabella'">
           <div
@@ -232,7 +267,6 @@ const cardContainerClasses = computed(() => {
           />
           <div class="absolute inset-0 opacity-20 bg-[radial-gradient(circle_at_20%_20%,rgba(255,255,255,0.35),transparent_45%)]" />
 
-          <!-- Estructura Falabella CMR -->
           <div class="relative z-10 flex h-full flex-col justify-between text-white">
             <div class="flex items-center justify-between">
               <div class="flex items-center gap-2">
@@ -285,16 +319,15 @@ const cardContainerClasses = computed(() => {
 
         <!-- Skin 4: BBVA Aqua -->
         <template v-else-if="bankSkin === 'bbva'">
-          <!-- Patrón Geométrico Poligonal BBVA -->
           <svg class="absolute inset-0 w-full h-full pointer-events-none" viewBox="0 0 340 200" preserveAspectRatio="xMidYMid slice">
             <defs>
-              <linearGradient id="bbvaBaseSvg2" x1="0" y1="0" x2="1" y2="1">
+              <linearGradient id="bbvaBaseSvg3" x1="0" y1="0" x2="1" y2="1">
                 <stop offset="0%" stop-color="#0A2F5C" />
                 <stop offset="55%" stop-color="#004481" />
                 <stop offset="100%" stop-color="#072A4A" />
               </linearGradient>
             </defs>
-            <rect width="340" height="200" fill="url(#bbvaBaseSvg2)" />
+            <rect width="340" height="200" fill="url(#bbvaBaseSvg3)" />
             <polygon points="0,0 90,0 40,70" fill="#1464A5" opacity="0.55" />
             <polygon points="90,0 170,0 120,55" fill="#0D3B6E" opacity="0.7" />
             <polygon points="170,0 260,0 210,80" fill="#1A6FB0" opacity="0.45" />
@@ -305,7 +338,6 @@ const cardContainerClasses = computed(() => {
             <polygon points="0,90 70,130 50,200 0,200" fill="#0A3A68" opacity="0.65" />
           </svg>
 
-          <!-- Estructura BBVA -->
           <div class="relative z-10 flex h-full flex-col justify-between text-white">
             <div class="flex justify-between items-start">
               <div>
@@ -320,7 +352,6 @@ const cardContainerClasses = computed(() => {
               </div>
             </div>
 
-            <!-- Chip + Holograma -->
             <div class="flex items-center justify-between my-auto">
               <div
                 class="relative w-9 h-7 rounded-[3px] border border-white/20 shrink-0 overflow-hidden"
@@ -331,7 +362,6 @@ const cardContainerClasses = computed(() => {
                 </div>
               </div>
 
-              <!-- Holograma de seguridad metálico -->
               <div
                 class="w-8 h-8 rounded-sm border border-white/30 shrink-0 overflow-hidden relative shadow-sm"
                 style="background: linear-gradient(135deg, #c0c8d4 0%, #e8eef5 25%, #9aa8b8 50%, #d5dde8 75%, #a8b4c4 100%);"
@@ -357,7 +387,7 @@ const cardContainerClasses = computed(() => {
           </div>
         </template>
 
-        <!-- Skin 5 (Default): StreamStore Cyber Dark -->
+        <!-- Skin 5: StreamStore Cyber Dark -->
         <template v-else>
           <div class="absolute inset-0 bg-gradient-to-br from-[#0c1322] via-[#11192e] to-[#070b14]" />
           <div class="pointer-events-none absolute -right-16 -top-16 size-44 rounded-full bg-cyan-500/15 blur-2xl" />
@@ -409,65 +439,167 @@ const cardContainerClasses = computed(() => {
 
       <!-- ================= CARA TRASERA ================= -->
       <div
-        class="card-face card-back absolute inset-0 flex flex-col justify-between overflow-hidden rounded-2xl border py-4 shadow-2xl"
+        class="card-face card-back absolute inset-0 flex flex-col justify-between overflow-hidden rounded-2xl border py-3 shadow-2xl"
         :class="cardContainerClasses"
       >
-        <!-- Fondos de la cara trasera correspondientes al skin -->
-        <div
-          v-if="bankSkin === 'nu'"
-          class="absolute inset-0"
-          style="background: linear-gradient(160deg, #9B30D9 0%, #820AD1 50%, #6B09A8 100%);"
-        />
-        <div v-else-if="bankSkin === 'bancolombia'" class="absolute inset-0 bg-[#FFDD00]" />
-        <div
-          v-else-if="bankSkin === 'falabella'"
-          class="absolute inset-0"
-          style="background: linear-gradient(180deg, #2E7D32 0%, #1B5E20 100%);"
-        />
-        <div
-          v-else-if="bankSkin === 'bbva'"
-          class="absolute inset-0"
-          style="background: linear-gradient(160deg, #0A2F5C 0%, #004481 50%, #072A4A 100%);"
-        />
-        <div v-else class="absolute inset-0 bg-gradient-to-br from-[#0c1322] via-[#11192e] to-[#070b14]" />
+        <!-- ================= REVERSO BANCOLOMBIA (IDÉNTICO A LA FOTO OFICIAL) ================= -->
+        <template v-if="bankSkin === 'bancolombia'">
+          <div class="absolute inset-0 bg-[#FFDD00]" />
 
-        <!-- CONTENIDO TRASERO -->
-        <div class="relative z-10 flex h-full flex-col justify-between">
-          <div class="px-4 text-[7px] truncate" :class="isDarkText ? 'text-black/60' : 'text-white/60'">
-            <span v-if="bankSkin === 'nu'">Necesitas ayuda? Abre el chat en la app · Valida en todo el mundo</span>
-            <span v-else-if="bankSkin === 'bancolombia'">Colombia 018000912345 · Simulacion StreamStore</span>
-            <span v-else-if="bankSkin === 'falabella'">CMR Banco Falabella · Simulacion StreamStore</span>
-            <span v-else>Atencion 24/7 · Simulacion StreamStore</span>
-          </div>
+          <!-- Muesca de accesibilidad táctil también reflejada en el reverso -->
+          <div class="pointer-events-none absolute left-0 top-1/2 -translate-y-1/2 w-2.5 h-6 rounded-r-full bg-[#0a0c10] shadow-inner" />
 
-          <!-- Banda Magnética Negra -->
-          <div class="my-1 h-9 bg-black w-full" />
+          <div class="relative z-10 flex h-full flex-col justify-between text-black">
+            <!-- Banda Magnética Negra Superior -->
+            <div>
+              <div class="h-8 bg-black w-full shadow-inner" />
+              <!-- Líneas de atención oficiales en microtexto amarillo/naranja -->
+              <p class="px-3 pt-1 text-[6.5px] font-mono text-neutral-800 tracking-tight truncate">
+                Líneas de atención en Colombia: 01 800 09-12345 · Resto del mundo 1-800-307-7309 · Simulación
+              </p>
+            </div>
 
-          <!-- Panel de Firma y CVV -->
-          <div class="px-4 my-auto">
-            <div class="flex items-center shadow-sm">
+            <!-- CUERPO CENTRAL: LOGOTIPO BANCOLOMBIA + TODOS LOS DATOS IMPRESOS ATRÁS -->
+            <div class="px-5 my-auto grid grid-cols-12 gap-3 items-center">
+              <!-- Lado Izquierdo: Marca Bancolombia, Reciclaje y Licencia -->
+              <div class="col-span-5 space-y-1">
+                <div class="flex items-center gap-1.5">
+                  <div class="flex flex-col gap-[1.5px]" aria-hidden="true">
+                    <span class="block w-2.5 h-[1.5px] bg-black" />
+                    <span class="block w-3.5 h-[1.5px] bg-black" />
+                    <span class="block w-4.5 h-[1.5px] bg-black" />
+                  </div>
+                  <span class="font-bold text-[11px] tracking-tight">Bancolombia</span>
+                </div>
+
+                <div class="flex items-center gap-1 text-[7px] text-neutral-800 font-sans leading-tight pt-1">
+                  <span>♻️</span>
+                  <span>Hecha de 100% plástico reciclado</span>
+                </div>
+
+                <p class="text-[5.5px] leading-tight text-neutral-700">
+                  This card is issued by Bancolombia S.A. pursuant to license by Mastercard.
+                </p>
+              </div>
+
+              <!-- Lado Derecho: NÚMERO DE TARJETA, VENCIMIENTO, CVV Y TITULAR (Impresión Térmica Negra) -->
+              <div class="col-span-7 space-y-1 text-right pr-2">
+                <!-- Número de tarjeta en bloque monospace destacado -->
+                <p class="font-mono text-[12px] sm:text-[13px] font-black tracking-[0.14em] tabular-nums text-black drop-shadow-sm">
+                  {{ displayNumero }}
+                </p>
+
+                <!-- VALID THRU y CVV / CVC -->
+                <div class="flex items-center justify-end gap-3 text-[9px] font-mono pt-0.5">
+                  <div class="flex items-center gap-1">
+                    <span class="text-[6.5px] leading-tight uppercase font-bold text-neutral-700">VALID<br>THRU</span>
+                    <span class="font-bold text-[11px] text-black">{{ displayExpiracion }}</span>
+                  </div>
+
+                  <div class="flex items-center gap-1">
+                    <span class="text-[6.5px] leading-tight uppercase font-bold text-neutral-700">CVC</span>
+                    <span class="font-mono text-[11px] font-black italic bg-white px-1.5 py-0.5 rounded border border-neutral-300 text-black">
+                      {{ displayCvv }}
+                    </span>
+                  </div>
+                </div>
+
+                <!-- Nombre del Titular -->
+                <p class="font-mono text-[10px] font-bold uppercase tracking-wider text-black pt-0.5">
+                  {{ displayNombre }}
+                </p>
+              </div>
+            </div>
+
+            <!-- PIE INFERIOR: HOLOGRAMA DE SEGURIDAD MASTERCARD Y FABRICACIÓN -->
+            <div class="px-5 pb-1 flex items-center justify-between">
+              <!-- Holograma de Seguridad Plateado de Mastercard -->
               <div
-                class="h-7 flex-1 rounded-l flex items-center px-2 overflow-hidden"
-                style="background: repeating-linear-gradient(-45deg, #f5f5f5, #f5f5f5 4px, #e2e8f0 4px, #e2e8f0 8px);"
+                class="w-8 h-5 rounded-full border border-neutral-400 overflow-hidden relative shadow-sm"
+                style="background: linear-gradient(135deg, #d8dbdf 0%, #ffffff 40%, #a6abb3 80%, #e2e8f0 100%);"
+                title="Holograma de seguridad"
               >
-                <span class="font-mono text-[9px] text-neutral-500 italic select-none">
-                  firma autorizada · simulacion
-                </span>
+                <div class="absolute inset-0 opacity-40 bg-[radial-gradient(#000000_1px,transparent_1px)] [background-size:3px_3px]" />
               </div>
-              <div class="h-7 w-16 bg-white rounded-r flex items-center justify-center font-mono text-xs font-bold text-[#1a1a1a] border-l border-neutral-300">
-                <span class="italic tracking-widest">{{ displayCvv }}</span>
-              </div>
-            </div>
-            <div class="mt-1 flex justify-between text-[8px] font-semibold" :class="isDarkText ? 'text-black/60' : 'text-white/60'">
-              <span class="pl-0.5">Seguridad EMV</span>
-              <span class="pr-0.5 uppercase">Codigo CVV</span>
-            </div>
-          </div>
 
-          <div class="px-4 pb-0.5 text-[7px] text-center" :class="isDarkText ? 'text-black/50' : 'text-white/50'">
-            Vista previa visual interactiva. No se almacenan ni procesan datos bancarios reales.
+              <span class="text-[6.5px] font-mono text-neutral-600">
+                THALES IZT · SIMULACIÓN SEGURA STREAMSTORE
+              </span>
+            </div>
           </div>
-        </div>
+        </template>
+
+        <!-- REVERSO NU -->
+        <template v-else-if="bankSkin === 'nu'">
+          <div
+            class="absolute inset-0"
+            style="background: linear-gradient(160deg, #9B30D9 0%, #820AD1 50%, #6B09A8 100%);"
+          />
+          <div class="relative z-10 flex h-full flex-col justify-between text-white">
+            <div class="px-4 text-[7px] text-white/70">
+              Necesitas ayuda? Abre el chat en la app · Valida en todo el mundo
+            </div>
+            <div class="my-1 h-8 bg-black w-full" />
+            <div class="px-4 my-auto">
+              <div class="flex items-center shadow-sm">
+                <div
+                  class="h-7 flex-1 rounded-l flex items-center px-2 overflow-hidden"
+                  style="background: repeating-linear-gradient(-45deg, #f5f5f5, #f5f5f5 4px, #e2e8f0 4px, #e2e8f0 8px);"
+                >
+                  <span class="font-mono text-[9px] text-neutral-500 italic select-none">
+                    firma autorizada · simulacion
+                  </span>
+                </div>
+                <div class="h-7 w-16 bg-white rounded-r flex items-center justify-center font-mono text-xs font-bold text-[#1a1a1a] border-l border-neutral-300">
+                  <span class="italic tracking-widest">{{ displayCvv }}</span>
+                </div>
+              </div>
+            </div>
+            <div class="px-4 pb-0.5 text-[7px] text-center text-white/60">
+              Vista previa visual interactiva. No se almacenan ni procesan datos bancarios reales.
+            </div>
+          </div>
+        </template>
+
+        <!-- REVERSO FALABELLA / BBVA / STREAMSTORE -->
+        <template v-else>
+          <div
+            v-if="bankSkin === 'falabella'"
+            class="absolute inset-0"
+            style="background: linear-gradient(180deg, #2E7D32 0%, #1B5E20 100%);"
+          />
+          <div
+            v-else-if="bankSkin === 'bbva'"
+            class="absolute inset-0"
+            style="background: linear-gradient(160deg, #0A2F5C 0%, #004481 50%, #072A4A 100%);"
+          />
+          <div v-else class="absolute inset-0 bg-gradient-to-br from-[#0c1322] via-[#11192e] to-[#070b14]" />
+
+          <div class="relative z-10 flex h-full flex-col justify-between text-white">
+            <div class="px-4 text-[7px] text-white/70">
+              Atencion 24/7 · Simulacion StreamStore
+            </div>
+            <div class="my-1 h-8 bg-black w-full" />
+            <div class="px-4 my-auto">
+              <div class="flex items-center shadow-sm">
+                <div
+                  class="h-7 flex-1 rounded-l flex items-center px-2 overflow-hidden"
+                  style="background: repeating-linear-gradient(-45deg, #f5f5f5, #f5f5f5 4px, #e2e8f0 4px, #e2e8f0 8px);"
+                >
+                  <span class="font-mono text-[9px] text-neutral-500 italic select-none">
+                    firma autorizada · simulacion
+                  </span>
+                </div>
+                <div class="h-7 w-16 bg-white rounded-r flex items-center justify-center font-mono text-xs font-bold text-[#1a1a1a] border-l border-neutral-300">
+                  <span class="italic tracking-widest">{{ displayCvv }}</span>
+                </div>
+              </div>
+            </div>
+            <div class="px-4 pb-0.5 text-[7px] text-center text-white/60">
+              Vista previa visual interactiva. No se almacenan ni procesan datos bancarios reales.
+            </div>
+          </div>
+        </template>
       </div>
     </div>
   </div>
