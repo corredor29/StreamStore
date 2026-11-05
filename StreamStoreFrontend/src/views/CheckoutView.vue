@@ -1,14 +1,13 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
 import { RouterLink } from 'vue-router'
-import { ArrowLeft, CheckCircle2, Lock, ShieldCheck, ShoppingBag, Sparkles, Tv } from '@lucide/vue'
+import { ArrowLeft, CheckCircle2, ShieldCheck, ShoppingBag, Sparkles, Tv } from '@lucide/vue'
 import { useCartStore } from '@/stores/cart'
 import { useAuthStore } from '@/stores/auth'
 import { formatPrice } from '@/composables/useFormat'
 import { usePaymentCard } from '@/composables/usePaymentCard'
 import { purchaseService } from '@/services/purchaseService'
 import type { Compra, MetodoPago, PagoPayload, PagoResultado } from '@/types'
-import PaymentMethodSelector from '@/components/checkout/PaymentMethodSelector.vue'
 import PaymentForm from '@/components/checkout/PaymentForm.vue'
 import AppAlert from '@/components/common/AppAlert.vue'
 
@@ -187,41 +186,18 @@ async function onProcessPayment(payload: { metodo: MetodoPago; marca?: any; ulti
 
       <!-- Cuadrícula Principal de Checkout -->
       <div v-else class="grid grid-cols-1 gap-8 lg:grid-cols-12 items-start">
-        <!-- Columna Izquierda: Método de Pago + Estudio de Tarjeta y Formulario (7 columnas) -->
-        <div class="lg:col-span-7 space-y-6">
-          <!-- 1. Selección de Método -->
-          <section aria-label="Método de pago" class="card p-5 sm:p-6 space-y-3">
-            <div class="flex items-center justify-between border-b border-line/60 pb-3">
-              <h2 class="font-display text-sm font-bold uppercase tracking-wider text-fg flex items-center gap-2">
-                <span class="size-5 rounded-full bg-brand-500 text-white text-[10px] grid place-items-center font-mono font-bold">1</span>
-                <span>Selecciona tu Pasarela</span>
-              </h2>
-              <span class="text-[10px] font-mono text-muted">Sin comisiones extra</span>
-            </div>
-            <PaymentMethodSelector v-model="metodoSeleccionado" />
-          </section>
-
-          <!-- 2. Formulario y Estudio de Tarjeta (Todo en un bloque unificado) -->
-          <section aria-label="Detalles de autorización" class="space-y-4">
-            <div class="flex items-center justify-between px-1">
-              <h2 class="font-display text-sm font-bold uppercase tracking-wider text-fg flex items-center gap-2">
-                <span class="size-5 rounded-full bg-cyan-500 text-neutral-900 text-[10px] grid place-items-center font-mono font-bold">2</span>
-                <span>{{ metodoSeleccionado === 'TARJETA' ? 'Estudio y Autorización de Tarjeta' : 'Confirmación Daviplata' }}</span>
-              </h2>
-              <div class="flex items-center gap-1 text-[10px] font-mono text-success">
-                <Lock class="size-3" />
-                <span>Simulación Segura</span>
-              </div>
-            </div>
-
+        <!-- Columna Izquierda: Terminal y Formulario Estilo Screenshots (7 columnas) -->
+        <div class="lg:col-span-7">
+          <div class="card p-5 sm:p-7 bg-[#10152A] border border-gray-800/80 shadow-2xl">
             <PaymentForm
               :metodo="metodoSeleccionado"
               :payment-card="paymentCard"
               :is-processing="isProcessing"
               :total-price="total"
+              @update:metodo="(m) => (metodoSeleccionado = m)"
               @submit-payment="onProcessPayment"
             />
-          </section>
+          </div>
         </div>
 
         <!-- Columna Derecha: Pre-Factura Digital Streaming (5 columnas) -->

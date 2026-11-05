@@ -1,5 +1,5 @@
 import { computed, reactive, ref } from 'vue'
-import type { CardBankSkin, MarcaTarjeta } from '@/types'
+import type { CardBankSkin, CardKind, MarcaTarjeta } from '@/types'
 
 export interface CardState {
   numero: string
@@ -11,7 +11,8 @@ export interface CardState {
 
 export function usePaymentCard() {
   const isFlipped = ref(false)
-  const bankSkin = ref<CardBankSkin>('streamstore')
+  const bankSkin = ref<CardBankSkin>('nu')
+  const cardKind = ref<CardKind>('credito')
 
   const card = reactive<CardState>({
     numero: '',
@@ -106,6 +107,10 @@ export function usePaymentCard() {
     bankSkin.value = skin
   }
 
+  function setCardKind(kind: CardKind) {
+    cardKind.value = kind
+  }
+
   // Preajustes de prueba oficiales para revisión rápida
   function setTestCard(type: 'visa' | 'mastercard' | 'amex' | 'rejected' | 'nu' | 'bancolombia' | 'falabella' | 'bbva') {
     flipToFront()
@@ -171,6 +176,7 @@ export function usePaymentCard() {
     card,
     brand,
     bankSkin,
+    cardKind,
     isFlipped,
     displayNumero,
     displayNombre,
@@ -187,5 +193,6 @@ export function usePaymentCard() {
     toggleFlip,
     setTestCard,
     setBankSkin,
+    setCardKind,
   }
 }

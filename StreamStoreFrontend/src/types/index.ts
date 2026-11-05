@@ -106,6 +106,10 @@ export type MetodoPago = 'TARJETA' | 'DAVIPLATA'
 
 export type MarcaTarjeta = 'visa' | 'mastercard' | 'amex' | 'generic'
 
+export type CardKind = 'credito' | 'debito'
+
+export type CardBank = 'nu' | 'bancolombia' | 'falabella' | 'bbva'
+
 export type CardBankSkin = 'streamstore' | 'nu' | 'bancolombia' | 'falabella' | 'bbva'
 
 export interface CardBankOption {
@@ -115,6 +119,18 @@ export interface CardBankOption {
   accent: string
   badgeBg: string
 }
+
+export const CARD_BANKS: {
+  id: CardBank
+  label: string
+  hint: string
+  accent: string
+}[] = [
+  { id: 'nu', label: 'NU', hint: 'Morada', accent: '#820AD1' },
+  { id: 'bancolombia', label: 'BANCOLOMBIA', hint: 'Amarilla', accent: '#FFDD00' },
+  { id: 'falabella', label: 'FALABELLA', hint: 'Verde CMR', accent: '#2E7D32' },
+  { id: 'bbva', label: 'BBVA', hint: 'Azul', accent: '#004481' },
+]
 
 export const CARD_BANK_SKINS: CardBankOption[] = [
   { id: 'streamstore', label: 'StreamStore', hint: 'Dark Cyber', accent: '#06b6d4', badgeBg: 'bg-cyan-500/20 text-cyan-300' },
