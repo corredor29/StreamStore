@@ -63,6 +63,29 @@ const expiracionInput = computed({
   },
 })
 
+// Control inteligente de enfoque según la disposición física de cada banco:
+// En Bancolombia la información reside en el reverso, por lo que enfocar cualquier campo muestra el reverso.
+// En bancos convencionales (Nu, Falabella, BBVA) la información reside en el frente y sólo el CVV en el reverso.
+function onFocusDataField() {
+  if (bankSkin.value === 'bancolombia') {
+    flipToBack()
+  } else {
+    flipToFront()
+  }
+}
+
+function onFocusCvv() {
+  flipToBack()
+}
+
+function onBlurCvv() {
+  if (bankSkin.value === 'bancolombia') {
+    flipToBack()
+  } else {
+    flipToFront()
+  }
+}
+
 function fillDaviplataDemo() {
   daviplata.celular = '3001234567'
   daviplata.codigoOtp = '1234'
@@ -276,15 +299,37 @@ function validateAndSubmit() {
           @toggle-flip="toggleFlip"
         />
 
-        <div class="mt-3 flex items-center justify-between w-full max-w-[370px] text-[10px] font-mono text-gray-500">
-          <span>Vista interactiva 3D</span>
+        <div class="mt-3 flex items-center justify-between w-full max-w-[370px] text-[10px] font-mono text-gray-400">
+          <span class="flex items-center gap-1.5">
+            <span class="w-1.5 h-1.5 rounded-full bg-[#00ece0] animate-pulse" />
+            <span>Vista interactiva 3D</span>
+          </span>
           <button
             type="button"
-            class="hover:text-[#00ece0] transition-colors underline"
+            class="hover:text-[#00ece0] transition-colors underline flex items-center gap-1 text-gray-300 cursor-pointer"
             @click="toggleFlip"
           >
-            {{ isFlipped ? 'Voltear al frente' : 'Girar para ver CVV' }}
+            <span>🔄</span>
+            <span v-if="bankSkin === 'bancolombia'">
+              {{ isFlipped ? 'Ver frontal (diseño = Ba)' : 'Ver reverso (datos impresos)' }}
+            </span>
+            <span v-else>
+              {{ isFlipped ? 'Voltear al frente' : 'Girar para ver CVV' }}
+            </span>
           </button>
+        </div>
+
+        <!-- Indicador contextual oficial para Bancolombia -->
+        <div
+          v-if="bankSkin === 'bancolombia'"
+          class="mt-2.5 w-full max-w-[370px] text-center text-[9px] font-mono px-3 py-1.5 rounded-sm bg-[#FFDD00]/10 border border-[#FFDD00]/30 text-[#FFDD00]"
+        >
+          <span v-if="isFlipped">
+            ✓ Mostrando reverso: en Bancolombia los datos (número, titular, fecha, CVC) van impresos atrás
+          </span>
+          <span v-else>
+            👁️ Mostrando frente oficial (= Ba). Haz clic en la tarjeta o escribe en los campos para volver al reverso
+          </span>
         </div>
       </div>
 
@@ -345,7 +390,7 @@ function validateAndSubmit() {
             class="w-full bg-[#0d1117] border border-gray-700 text-white text-sm font-mono px-3.5 py-2.5 outline-none focus:border-[#00ece0] transition-colors disabled:opacity-40 rounded-sm"
             :class="{ 'border-rose-500': !!errors.numero }"
             @input="(e) => setNumero((e.target as HTMLInputElement).value)"
-            @focus="flipToFront"
+            @focus="onFocusDataField"
           />
           <p v-if="errors.numero" class="text-xs text-rose-400 font-mono mt-1">
             {{ errors.numero }}
@@ -366,7 +411,7 @@ function validateAndSubmit() {
             class="w-full bg-[#0d1117] border border-gray-700 text-white text-sm font-mono uppercase px-3.5 py-2.5 outline-none focus:border-[#00ece0] transition-colors disabled:opacity-40 rounded-sm"
             :class="{ 'border-rose-500': !!errors.nombre }"
             @input="(e) => setNombre((e.target as HTMLInputElement).value)"
-            @focus="flipToFront"
+            @focus="onFocusDataField"
           />
           <p v-if="errors.nombre" class="text-xs text-rose-400 font-mono mt-1">
             {{ errors.nombre }}
@@ -388,7 +433,7 @@ function validateAndSubmit() {
               autocomplete="cc-exp"
               class="w-full bg-[#0d1117] border border-gray-700 text-white text-sm font-mono px-3.5 py-2.5 outline-none focus:border-[#00ece0] transition-colors disabled:opacity-40 rounded-sm text-center"
               :class="{ 'border-rose-500': !!errors.expiracion }"
-              @focus="flipToFront"
+              @focus="onFocusDataField"
             />
             <p v-if="errors.expiracion" class="text-xs text-rose-400 font-mono mt-1">
               {{ errors.expiracion }}
@@ -410,8 +455,8 @@ function validateAndSubmit() {
               class="w-full bg-[#0d1117] border border-gray-700 text-white text-sm font-mono px-3.5 py-2.5 outline-none focus:border-[#00ece0] transition-colors disabled:opacity-40 rounded-sm text-center"
               :class="{ 'border-rose-500': !!errors.cvv }"
               @input="(e) => setCvv((e.target as HTMLInputElement).value)"
-              @focus="flipToBack"
-              @blur="flipToFront"
+              @focus="onFocusCvv"
+              @blur="onBlurCvv"
             />
             <p v-if="errors.cvv" class="text-xs text-rose-400 font-mono mt-1">
               {{ errors.cvv }}

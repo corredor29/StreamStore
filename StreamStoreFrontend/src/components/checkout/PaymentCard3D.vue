@@ -182,10 +182,10 @@ const cardContainerClasses = computed(() => {
               </svg>
             </div>
 
-            <!-- Fila Inferior: Exclusivamente el Logo de Mastercard a la derecha -->
+            <!-- Fila Inferior: Exclusivamente el Logo de Mastercard a la derecha y aviso claro de giro -->
             <div class="flex justify-between items-end mt-auto pt-2">
-              <span class="text-[9px] font-mono text-black/40 uppercase tracking-widest pl-1">
-                · Reverso con datos ·
+              <span class="text-[9px] font-mono font-semibold text-black/70 uppercase tracking-wider pl-1 flex items-center gap-1">
+                <span>🔄</span> Reverso con datos
               </span>
 
               <!-- Logo Oficial Mastercard (Rojo #EB001B y Naranja #F79E1B) -->

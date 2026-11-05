@@ -10,9 +10,10 @@ export interface CardState {
 }
 
 export function usePaymentCard() {
-  const isFlipped = ref(false)
-  const bankSkin = ref<CardBankSkin>('nu')
-  const cardKind = ref<CardKind>('credito')
+  const bankSkin = ref<CardBankSkin>('bancolombia')
+  const cardKind = ref<CardKind>('debito')
+  // En Bancolombia los datos físicos están al reverso, por lo que inicia mostrando el reverso
+  const isFlipped = ref(bankSkin.value === 'bancolombia')
 
   const card = reactive<CardState>({
     numero: '',
@@ -105,6 +106,12 @@ export function usePaymentCard() {
 
   function setBankSkin(skin: CardBankSkin) {
     bankSkin.value = skin
+    // En Bancolombia la información reside en el reverso; en las demás reside en el frente
+    if (skin === 'bancolombia') {
+      isFlipped.value = true
+    } else {
+      isFlipped.value = false
+    }
   }
 
   function setCardKind(kind: CardKind) {
@@ -113,6 +120,17 @@ export function usePaymentCard() {
 
   // Preajustes de prueba oficiales para revisión rápida
   function setTestCard(type: 'visa' | 'mastercard' | 'amex' | 'rejected' | 'nu' | 'bancolombia' | 'falabella' | 'bbva') {
+    if (type === 'bancolombia') {
+      bankSkin.value = 'bancolombia'
+      setNumero('5300987654321098')
+      setNombre('VALENTINA BANCOLOMBIA')
+      card.mes = '04'
+      card.anio = '30'
+      setCvv('654')
+      flipToBack()
+      return
+    }
+
     flipToFront()
     if (type === 'visa') {
       bankSkin.value = 'streamstore'
@@ -148,13 +166,6 @@ export function usePaymentCard() {
       card.mes = '09'
       card.anio = '29'
       setCvv('321')
-    } else if (type === 'bancolombia') {
-      bankSkin.value = 'bancolombia'
-      setNumero('5300987654321098')
-      setNombre('VALENTINA BANCOLOMBIA')
-      card.mes = '04'
-      card.anio = '30'
-      setCvv('654')
     } else if (type === 'falabella') {
       bankSkin.value = 'falabella'
       setNumero('5487123498765432')
