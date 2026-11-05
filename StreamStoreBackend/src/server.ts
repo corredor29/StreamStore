@@ -9,6 +9,7 @@ import { sequelize } from "./config/database"
 import { router } from "./routes"
 import { NotFoundMiddleware } from "./middlewares/NotFoundMiddleware"
 import { ErrorMiddleware } from "./middlewares/ErrorMiddleware"
+import { uploadsDir } from "./middlewares/UploadMiddleware"
 import { startAlertasJob } from "./jobs/AlertasJob"
 import { logger } from "./utils/logger"
 
@@ -20,6 +21,10 @@ app.use(cors({ origin: config.corsOrigin, credentials: true }))
 app.use(express.json())
 app.use(cookieParser())
 app.use(morgan("dev"))
+app.use("/uploads", express.static(uploadsDir, {
+    index: false,
+    setHeaders: (res) => res.setHeader("X-Content-Type-Options", "nosniff")
+}))
 app.use("/api", router)
 app.use(NotFoundMiddleware)
 app.use(ErrorMiddleware)

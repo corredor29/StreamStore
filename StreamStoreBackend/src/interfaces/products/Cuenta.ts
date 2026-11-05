@@ -4,8 +4,8 @@ export type EstadoPantalla = "disponible" | "vendida"
 
 export type NuevaCuenta = {
     plataforma_id: number
-    email: string
-    password_cifrada: string
+    email: string | null
+    password_cifrada: string | null
     total_pantallas: number
 }
 
@@ -13,4 +13,9 @@ export type NuevaPantalla = {
     numero: number
     perfil: string
     pin: string
+}
+
+export type CambiosPantalla = {
+    perfil?: string
+    pin?: string
 }

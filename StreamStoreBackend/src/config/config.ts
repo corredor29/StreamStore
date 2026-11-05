@@ -28,6 +28,11 @@ export const config = {
         expiresIn: process.env.JWT_EXPIRES_IN ?? "1d"
     },
     aesSecret: secreto("AES_SECRET", "dev_aes_secret_cambiar"),
+    publicUrl: (process.env.PUBLIC_URL ?? `http://localhost:${process.env.PORT ?? 3000}`).replace(/\/$/, ""),
+    uploads: {
+        dir: process.env.UPLOAD_DIR ?? "uploads",
+        maxMb: Number(process.env.UPLOAD_MAX_MB ?? 2)
+    },
     corsOrigin: process.env.CORS_ORIGIN ?? "http://localhost:5173",
     clientUrl: (process.env.CLIENT_URL ?? process.env.CORS_ORIGIN ?? "http://localhost:5173").replace(/\/$/, ""),
     mail: {

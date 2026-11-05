@@ -11,8 +11,7 @@ const service = new CuentaService(new CuentaRepository(), new PlataformaReposito
 export class CuentaController {
     static async list(_req: Request, res: Response) {
         try {
-            const { plataforma_id } = res.locals.query as ListCuentasQuery
-            return ApiResponse.success(res, "Cuentas", await service.list(plataforma_id))
+            return ApiResponse.success(res, "Cuentas", await service.list(res.locals.query as ListCuentasQuery))
         } catch (error) {
             return ApiResponse.error(res, error)
         }
@@ -29,7 +28,9 @@ export class CuentaController {
 
     static async create(req: Request, res: Response) {
         try {
-            return ApiResponse.created(res, "Cuenta creada con sus pantallas", await service.create(req.body))
+            const creadas = await service.create(req.body)
+            const mensaje = Array.isArray(creadas) ? `${creadas.length} cuenta(s) creada(s) con sus pantallas` : "Cuenta creada con sus pantallas"
+            return ApiResponse.created(res, mensaje, creadas)
         } catch (error) {
             return ApiResponse.error(res, error)
         }

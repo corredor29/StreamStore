@@ -27,7 +27,7 @@ export const correoConfirmacionCompra = (compra: Compra) => {
     <tbody>${filas}</tbody>
     <tfoot><tr><td colspan="3" style="padding:8px;text-align:right"><b>Total</b></td><td style="padding:8px;text-align:right"><b>${formatCurrency(Number(compra.total))}</b></td></tr></tfoot>
   </table>
-  <p>Tus datos de acceso (correo, contraseña, perfil y PIN) están en <b>Mis servicios</b>.</p>
+  <p>Tus datos de acceso (correo, contraseña, perfil y PIN) están en <b>Mis servicios</b>. Si algún servicio aparece como pendiente de asignación, te enviaremos sus datos por correo apenas el equipo los asigne.</p>
   <p><a href="${config.clientUrl}/mi-cuenta" style="display:inline-block;background:#6d28d9;color:#fff;padding:12px 20px;border-radius:8px;text-decoration:none">Ver mis servicios</a></p>
   <p style="color:#6b7280;font-size:12px">StreamStore</p>
 </div>`
