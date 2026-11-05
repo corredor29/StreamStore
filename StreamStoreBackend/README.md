@@ -50,6 +50,29 @@ npm run dev                 # http://localhost:3000/api/health
 
 `npm run db:reset` **borra y recrea** las tablas.
 
+Para conservar los datos usa `npm run migrate`. Crea la base si no existe; si está vacía crea el esquema completo sin datos demo, y si ya tiene tablas aplica en orden las migraciones de `database/migrations/`, que se pueden repetir sin daño.
+
+| URL | Qué es |
+|---|---|
+| http://localhost:3000/swagger (o `/api-docs`) | Swagger UI con todos los endpoints. Haz login, copia `data.token` y pégalo en **Authorize** |
+| http://localhost:3000/api/docs.json | Spec OpenAPI 3 |
+
+Swagger UI se carga desde el CDN de cdnjs, así que esa página necesita internet. La API no.
+
+`HOST` en `.env` va vacío por defecto: Node escucha en todas las interfaces IPv4 e IPv6, y `localhost` funciona por `127.0.0.1` y por `::1`. Con `127.0.0.1` la API solo acepta conexiones de esta máquina. Con `0.0.0.0` solo escucha IPv4 y queda visible en la red local.
+
+### Backend y frontend juntos
+
+Desde la raíz del repo (`StreamStore/`):
+
+```bash
+npm run install:all   # instala dependencias de backend y frontend
+npm run migrate       # o npm run db:reset para datos demo
+npm run dev           # backend :3000 + frontend :5173; Ctrl+C detiene ambos
+```
+
+Si uno de los dos se cae, el lanzador (`run_all.js`) detiene también el otro.
+
 ## Usuarios demo
 
 | Rol | Email | Password |
@@ -195,7 +218,7 @@ mysql -u root streamStoreDb < database/migrations/20261105_usuarios_telefono_y_r
 mysql -u root streamStoreDb < database/migrations/20261105_portadas_y_entrega_credenciales.sql
 ```
 
-Son idempotentes (revisan `information_schema`), se pueden correr más de una vez. `npm run db:reset` recrea todo desde cero.
+O todas de una vez: `npm run migrate`. Son idempotentes (revisan `information_schema`), se pueden correr más de una vez. `npm run db:reset` recrea todo desde cero.
 
 ## Recuperar contraseña (RF-13)
 

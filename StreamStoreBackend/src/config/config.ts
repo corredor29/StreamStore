@@ -14,6 +14,7 @@ const secreto = (nombre: string, valorDesarrollo: string) => {
 export const config = {
     env,
     port: Number(process.env.PORT ?? 3000),
+    host: process.env.HOST || undefined,
     appTimezone: process.env.APP_TIMEZONE ?? "America/Bogota",
     db: {
         host: process.env.DB_HOST ?? "localhost",
