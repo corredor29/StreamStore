@@ -33,12 +33,14 @@ const main = async () => {
     await runSchema()
     console.log("✔ Esquema creado")
 
-    const [admin, c1, c2] = await Usuario.bulkCreate([
+    const [admin, adminLegacy, c1, cLegacy, c2] = await Usuario.bulkCreate([
         { nombre: "Admin StreamStore", email: "admin@streamstore.test", password: await bcrypt.hash("Admin123*", 10), telefono: "+57 300 000 0000", rol: "admin" },
+        { nombre: "Admin StreamStore", email: "admin@streamstore.com", password: await bcrypt.hash("adminpassword", 10), telefono: "+57 300 000 0000", rol: "admin" },
         { nombre: "Laura Cliente", email: "cliente1@streamstore.test", password: await bcrypt.hash("Cliente123*", 10), telefono: "+57 300 000 0001", rol: "cliente" },
-        { nombre: "Andrés Cliente", email: "cliente2@streamstore.test", password: await bcrypt.hash("Cliente123*", 10), telefono: "+57 300 000 0002", rol: "cliente" }
+        { nombre: "Carlos Cliente", email: "cliente@streamstore.com", password: await bcrypt.hash("password123", 10), telefono: "+57 300 000 0001", rol: "cliente" },
+        { nombre: "Andres Cliente", email: "cliente2@streamstore.test", password: await bcrypt.hash("Cliente123*", 10), telefono: "+57 300 000 0002", rol: "cliente" }
     ])
-    await Carrito.bulkCreate([{ usuario_id: c1.id }, { usuario_id: c2.id }, { usuario_id: admin.id }])
+    await Carrito.bulkCreate([{ usuario_id: c1.id }, { usuario_id: cLegacy.id }, { usuario_id: c2.id }, { usuario_id: admin.id }, { usuario_id: adminLegacy.id }])
 
     const defs = [
         { nombre: "Netflix", slug: "NF", pantallas: 4, completa: 45000, pantalla: 15000 },

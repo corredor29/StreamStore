@@ -114,7 +114,7 @@ async function onSubmit() {
             @click="fillDemoAccount('cliente')"
           >
             <UserCheck class="size-3 text-success" aria-hidden="true" />
-            <span>Cliente Demo</span>
+            <span>Cliente Demo (Laura)</span>
           </button>
           <button
             type="button"
@@ -122,7 +122,7 @@ async function onSubmit() {
             @click="fillDemoAccount('admin')"
           >
             <ShieldAlert class="size-3 text-warning" aria-hidden="true" />
-            <span>Admin Demo</span>
+            <span>Admin Demo (Panel)</span>
           </button>
         </div>
       </div>
