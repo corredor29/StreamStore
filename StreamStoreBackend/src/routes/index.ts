@@ -1,7 +1,13 @@
 import { Router } from "express"
 import { sequelize } from "../config/database"
-import { success } from "../utils/apiResponse"
-import { authRoutes } from "./AuthRoutes"
+import { ApiResponse } from "../utils/apiResponse"
+import { AuthRoutes } from "./AuthRoutes"
+import { AdminRoutes } from "./AdminRoutes"
+import { CarritoRoutes } from "./cart/CarritoRoutes"
+import { CompraRoutes } from "./orders/CompraRoutes"
+import { PlataformaRoutes } from "./products/PlataformaRoutes"
+import { ProductoRoutes } from "./products/ProductoRoutes"
+import { ServicioRoutes } from "./orders/ServicioRoutes"
 
 export const router = Router()
 
@@ -12,7 +18,13 @@ router.get("/health", async (_req, res) => {
     } catch {
         database = "desconectada"
     }
-    return success(res, "StreamStore API operativa", { status: "ok", database, timestamp: new Date().toISOString() })
+    return ApiResponse.success(res, "StreamStore API operativa", { status: "ok", database, timestamp: new Date().toISOString() })
 })
 
-router.use("/auth", authRoutes)
+router.use("/auth", AuthRoutes)
+router.use("/plataformas", PlataformaRoutes)
+router.use("/productos", ProductoRoutes)
+router.use("/carrito", CarritoRoutes)
+router.use("/compras", CompraRoutes)
+router.use("/servicios", ServicioRoutes)
+router.use("/admin", AdminRoutes)

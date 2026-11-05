@@ -9,6 +9,7 @@ import { sequelize } from "./config/database"
 import { router } from "./routes"
 import { NotFoundMiddleware } from "./middlewares/NotFoundMiddleware"
 import { ErrorMiddleware } from "./middlewares/ErrorMiddleware"
+import { startAlertasJob } from "./jobs/AlertasJob"
 import { logger } from "./utils/logger"
 
 process.env.TZ = config.appTimezone
@@ -27,6 +28,7 @@ const start = async () => {
     try {
         await sequelize.authenticate()
         logger.info(`Conectado a MySQL: ${config.db.name}`)
+        startAlertasJob()
     } catch (error) {
         logger.error(`No se pudo conectar a MySQL (${config.db.name}): ${error instanceof Error ? error.message : error}`)
     }
