@@ -1,0 +1,14 @@
+{
+  "name": "streamstore-monorepo",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "node run_all.js",
+    "dev:backend": "npm run dev --prefix StreamStoreBackend",
+    "dev:frontend": "npm run dev --prefix StreamStoreFrontend",
+    "install:all": "npm install --prefix StreamStoreBackend && npm install --prefix StreamStoreFrontend",
+    "build": "npm run build --prefix StreamStoreBackend && npm run build --prefix StreamStoreFrontend",
+    "migrate": "npm run migrate --prefix StreamStoreBackend",
+    "db:reset": "npm run db:reset --prefix StreamStoreBackend"
+  }
+}
