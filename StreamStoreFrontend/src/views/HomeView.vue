@@ -1,23 +1,120 @@
 <script setup lang="ts">
 import { ref } from 'vue'
-import { RouterLink } from 'vue-router'
+import { RouterLink, useRouter } from 'vue-router'
 import { 
   ArrowRight, 
   ChevronDown, 
-  CreditCard, 
   Headphones, 
   Play, 
   ShieldCheck, 
   Sparkles, 
-  Zap 
+  Volume2, 
+  VolumeX, 
+  Zap,
+  CheckCircle2,
+  X
 } from '@lucide/vue'
 import type { TipoProducto } from '@/types'
+import { useCartStore } from '@/stores/cart'
+
+const router = useRouter()
+const cart = useCartStore()
 
 const modalidadSeleccionada = ref<TipoProducto>('CUENTA_COMPLETA')
+
+// Estado de la Animación Cinemática Tipo Netflix
+const showNetflixIntro = ref(false)
+const introStage = ref<'black' | 'logo' | 'mosaic' | 'finished'>('finished')
+const isMuted = ref(false)
+
+function playCinematicSound() {
+  if (isMuted.value) return
+  try {
+    const AudioCtx = window.AudioContext || (window as any).webkitAudioContext
+    if (!AudioCtx) return
+    const ctx = new AudioCtx()
+    if (ctx.state === 'suspended') {
+      ctx.resume()
+    }
+    const now = ctx.currentTime
+
+    // 1. Sub-bajo cinematográfico profundo (55Hz a 110Hz)
+    const subOsc = ctx.createOscillator()
+    const subGain = ctx.createGain()
+    subOsc.type = 'sine'
+    subOsc.frequency.setValueAtTime(55, now)
+    subOsc.frequency.exponentialRampToValueAtTime(110, now + 1.2)
+    subGain.gain.setValueAtTime(0.01, now)
+    subGain.gain.linearRampToValueAtTime(0.45, now + 0.3)
+    subGain.gain.exponentialRampToValueAtTime(0.001, now + 2.6)
+    subOsc.connect(subGain)
+    subGain.connect(ctx.destination)
+    subOsc.start(now)
+    subOsc.stop(now + 2.7)
+
+    // 2. Acorde sinfónico de sintetizador Ta-Dum (frecuencias armónicas)
+    const chordFreqs = [110, 164.81, 220, 329.63]
+    chordFreqs.forEach((freq, idx) => {
+      const osc = ctx.createOscillator()
+      const gain = ctx.createGain()
+      const filter = ctx.createBiquadFilter()
+
+      osc.type = idx % 2 === 0 ? 'sawtooth' : 'triangle'
+      osc.frequency.setValueAtTime(freq, now)
+
+      filter.type = 'lowpass'
+      filter.frequency.setValueAtTime(350, now)
+      filter.frequency.exponentialRampToValueAtTime(2200, now + 0.8)
+      filter.frequency.exponentialRampToValueAtTime(250, now + 2.5)
+
+      gain.gain.setValueAtTime(0.001, now)
+      gain.gain.linearRampToValueAtTime(0.12, now + 0.35)
+      gain.gain.exponentialRampToValueAtTime(0.0001, now + 2.5)
+
+      osc.connect(filter)
+      filter.connect(gain)
+      gain.connect(ctx.destination)
+
+      osc.start(now + 0.05)
+      osc.stop(now + 2.6)
+    })
+  } catch (e) {
+    // Ignorar si el navegador bloquea audio por políticas de interacción
+  }
+}
+
+function startCinematicIntro() {
+  showNetflixIntro.value = true
+  introStage.value = 'black'
+  playCinematicSound()
+
+  setTimeout(() => {
+    introStage.value = 'logo'
+  }, 400)
+
+  setTimeout(() => {
+    introStage.value = 'mosaic'
+  }, 1900)
+
+  setTimeout(() => {
+    closeCinematicIntro()
+  }, 4200)
+}
+
+function closeCinematicIntro() {
+  introStage.value = 'finished'
+  showNetflixIntro.value = false
+}
+
+function toggleMute() {
+  isMuted.value = !isMuted.value
+}
 
 const plataformas = [
   {
     id: 1,
+    productoIdCompleta: 1,
+    productoIdPantalla: 2,
     nombre: 'Netflix Premium 4K',
     slug: 'netflix',
     desc: 'Acceso completo en 4K Ultra HD. Compatible con Smart TVs, consolas y dispositivos móviles.',
@@ -28,6 +125,8 @@ const plataformas = [
   },
   {
     id: 2,
+    productoIdCompleta: 3,
+    productoIdPantalla: 4,
     nombre: 'Disney+ Total Family',
     slug: 'disney',
     desc: 'Todo el universo Disney, Pixar, Marvel, Star Wars y Star+ sin interrupciones con audio envolvente.',
@@ -38,6 +137,8 @@ const plataformas = [
   },
   {
     id: 3,
+    productoIdCompleta: 5,
+    productoIdPantalla: 6,
     nombre: 'Max (HBO) 4K Ultra',
     slug: 'max',
     desc: 'Series icónicas de HBO, Warner Bros, Max Originals y transmisiones de alta calidad.',
@@ -48,6 +149,8 @@ const plataformas = [
   },
   {
     id: 4,
+    productoIdCompleta: 7,
+    productoIdPantalla: 8,
     nombre: 'Amazon Prime Video',
     slug: 'prime',
     desc: 'Producciones originales galardonadas, canales en vivo y transmisiones deportivas en HD.',
@@ -58,6 +161,8 @@ const plataformas = [
   },
   {
     id: 5,
+    productoIdCompleta: 9,
+    productoIdPantalla: 10,
     nombre: 'Spotify Individual Premium',
     slug: 'spotify',
     desc: 'Música ilimitada sin anuncios, audio de máxima calidad y descargas offline para tus viajes.',
@@ -68,6 +173,8 @@ const plataformas = [
   },
   {
     id: 6,
+    productoIdCompleta: 11,
+    productoIdPantalla: 12,
     nombre: 'Crunchyroll Mega Fan',
     slug: 'crunchyroll',
     desc: 'El catálogo de anime más extenso del mundo en simulcast con subtítulos y doblaje en español.',
@@ -78,10 +185,38 @@ const plataformas = [
   },
 ]
 
+function comprarPlataforma(p: typeof plataformas[0]) {
+  const prodId = modalidadSeleccionada.value === 'CUENTA_COMPLETA' 
+    ? p.productoIdCompleta 
+    : p.productoIdPantalla
+  const precio = modalidadSeleccionada.value === 'CUENTA_COMPLETA'
+    ? p.precioCompleta
+    : p.precioPantalla
+
+  cart.addItem({
+    id: prodId,
+    nombre: `${p.nombre} (${modalidadSeleccionada.value === 'CUENTA_COMPLETA' ? 'Cuenta Completa' : '1 Pantalla'})`,
+    tipo: modalidadSeleccionada.value,
+    duracionDias: 30,
+    precio: precio,
+    stock: 5,
+    activo: true,
+    plataformaId: p.id,
+    plataforma: {
+      id: p.id,
+      nombre: p.nombre,
+      slug: p.slug,
+      color: p.color,
+    },
+  })
+
+  router.push('/checkout')
+}
+
 const faqs = ref([
   {
     q: '¿Cómo se realiza la entrega de la cuenta o pantalla?',
-    a: 'La entrega es automatizada e inmediata. En cuanto tu pago simulado es verificado en el sistema, tus credenciales (correo, contraseña y PIN de perfil individual si corresponde) se activan y muestran de inmediato en tu panel "Mi Cuenta > Mis Servicios".',
+    a: 'La entrega es automatizada e inmediata. En cuanto tu pago es verificado en el sistema, tus credenciales (correo, contraseña y PIN de perfil individual si corresponde) se activan y muestran de inmediato en tu panel "Mi Cuenta > Mis Servicios".',
     open: true,
   },
   {
@@ -115,73 +250,184 @@ const formatCOP = (val: number) => {
 </script>
 
 <template>
-  <div class="space-y-20 pb-20">
-    <!-- ================= 1. CINEMATIC HERO (Stitch Board 2) ================= -->
-    <section class="relative overflow-hidden pt-12 sm:pt-20 lg:pt-24 pb-16 border-b border-line">
-      <!-- Iluminación ambiental controlada (Glow esférico) -->
-      <div class="pointer-events-none absolute left-1/2 top-0 -translate-x-1/2 size-[650px] rounded-full bg-brand-500/15 blur-[120px] -z-10" />
-      <div class="pointer-events-none absolute right-1/4 top-1/3 size-[400px] rounded-full bg-cyan-500/10 blur-[100px] -z-10" />
+  <div class="space-y-20 pb-20 selection:bg-brand-500/30 selection:text-white">
+    <!-- ================= MODAL / OVERLAY INTRO CINEMÁTICA TIPO NETFLIX ================= -->
+    <Teleport to="body">
+      <Transition
+        enter-active-class="transition duration-500 ease-out"
+        enter-from-class="opacity-0"
+        enter-to-class="opacity-100"
+        leave-active-class="transition duration-700 ease-in"
+        leave-from-class="opacity-100"
+        leave-to-class="opacity-0"
+      >
+        <div
+          v-if="showNetflixIntro"
+          class="fixed inset-0 z-50 bg-black flex items-center justify-center overflow-hidden select-none"
+        >
+          <!-- Controles de la Intro (Saltar y Silencio) -->
+          <div class="absolute top-6 right-6 z-50 flex items-center gap-3">
+            <button
+              type="button"
+              class="size-10 rounded-full border border-white/20 bg-black/60 text-white flex items-center justify-center hover:bg-white/10 transition-colors"
+              title="Activar/Silenciar sonido"
+              @click="toggleMute"
+            >
+              <VolumeX v-if="isMuted" class="size-4" />
+              <Volume2 v-else class="size-4 text-cyan-400" />
+            </button>
 
-      <div class="container-app text-center max-w-4xl mx-auto space-y-6">
-        <!-- Pill de Categoría -->
-        <div class="inline-flex items-center gap-2 rounded-full border border-cyan-400/30 bg-cyan-950/40 px-4 py-1.5 text-xs font-mono font-semibold uppercase tracking-widest text-cyan-300 shadow-sm">
-          <Sparkles class="size-3.5 text-cyan-400" />
-          <span>StreamStore / Entertainment 100% Digital</span>
+            <button
+              type="button"
+              class="px-4 py-2 rounded-full border border-white/20 bg-black/60 text-white text-xs font-mono font-semibold hover:bg-white/20 transition-all flex items-center gap-1.5"
+              @click="closeCinematicIntro"
+            >
+              <span>Saltar Intro</span>
+              <X class="size-3.5" />
+            </button>
+          </div>
+
+          <!-- Mosaico de fondo animado que se enciende en ondas -->
+          <div
+            class="absolute inset-0 bg-cover bg-center transition-all duration-1000 transform"
+            :class="[
+              introStage === 'black' ? 'opacity-0 scale-95' : '',
+              introStage === 'logo' ? 'opacity-30 scale-100 blur-sm' : '',
+              introStage === 'mosaic' ? 'opacity-90 scale-105' : '',
+            ]"
+            style="background-image: url('/hero_cinema_wall.jpg');"
+          >
+            <!-- Capa de brillo y viñeta cinematográfica -->
+            <div class="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-black/80" />
+          </div>
+
+          <!-- Revelación Anamórfica del Logotipo StreamStore (Estilo Netflix Ta-Dum) -->
+          <div
+            class="relative z-20 flex flex-col items-center justify-center text-center transition-all duration-700"
+            :class="[
+              introStage === 'black' ? 'opacity-0 scale-75' : '',
+              introStage === 'logo' ? 'opacity-100 scale-110' : '',
+              introStage === 'mosaic' ? 'opacity-90 scale-100 translate-y-2' : '',
+            ]"
+          >
+            <!-- Haz de luz horizontal anamórfico tipo cine -->
+            <div
+              class="absolute h-1 w-[200vw] bg-gradient-to-r from-transparent via-cyan-400 to-transparent blur-sm animate-pulse"
+              style="box-shadow: 0 0 40px #8057FF, 0 0 80px #06B6D4;"
+            />
+
+            <!-- Imagen del Logotipo Oficial StreamStore con Halo Neón -->
+            <div class="relative size-32 sm:size-44 rounded-3xl p-1 bg-gradient-to-tr from-[#8057FF] via-[#06B6D4] to-[#8057FF] shadow-[0_0_80px_rgba(128,87,255,0.7)] animate-bounce duration-1000">
+              <img
+                src="/streamstore_logo_official.png"
+                alt="StreamStore Logo Oficial"
+                class="w-full h-full object-cover rounded-[22px] bg-[#0B0E1F]"
+              />
+            </div>
+
+            <!-- Título de Marca Animado -->
+            <h2 class="mt-6 font-display text-4xl sm:text-6xl font-black uppercase tracking-tight text-white drop-shadow-[0_0_30px_rgba(6,182,212,0.8)]">
+              Stream<span class="text-cyan-400">Store</span>
+            </h2>
+            <p class="mt-2 text-xs sm:text-sm font-mono tracking-[0.35em] text-cyan-300/90 uppercase">
+              Digital Entertainment Universe
+            </p>
+          </div>
+        </div>
+      </Transition>
+    </Teleport>
+
+    <!-- ================= 1. CINEMATIC WEBSITE HERO (MOSAICO STREAMING ESTILO NETFLIX) ================= -->
+    <section class="relative min-h-[90vh] flex items-center justify-center overflow-hidden border-b border-line">
+      <!-- FONDO: MOSAICO DE PANTALLAS DE ENTRETENIMIENTO (WALL OF SCREENS) CON ANIMACIÓN KEN BURNS -->
+      <div
+        class="absolute inset-0 bg-cover bg-center transition-transform duration-[25000ms] ease-out kenburns-bg"
+        style="background-image: url('/hero_cinema_wall.jpg');"
+      >
+        <!-- Viñeta Gradual Oscura: asegura que el texto sea 100% legible y cinematográfico -->
+        <div class="absolute inset-0 bg-gradient-to-b from-[#0B0E1F]/90 via-[#0B0E1F]/65 to-[#0B0E1F]" />
+        
+        <!-- Iluminación ambiental violeta y azul cyan -->
+        <div class="absolute top-1/4 left-1/2 -translate-x-1/2 size-[600px] rounded-full bg-brand-500/20 blur-[130px] pointer-events-none" />
+        <div class="absolute bottom-10 left-1/4 size-[400px] rounded-full bg-cyan-500/15 blur-[100px] pointer-events-none" />
+        
+        <!-- Sutil textura de pantalla / scanlines cinematográficas -->
+        <div class="absolute inset-0 opacity-15 bg-[radial-gradient(#06B6D4_1px,transparent_1px)] [background-size:24px_24px] pointer-events-none" />
+      </div>
+
+      <!-- CONTENIDO CENTRAL DEL HERO CINEMÁTICO -->
+      <div class="container-app relative z-10 text-center max-w-4xl mx-auto py-16 sm:py-24 space-y-6">
+        <!-- Logotipo Oficial y Badge de Marca -->
+        <div class="flex flex-col items-center justify-center gap-4">
+          <div class="relative size-20 sm:size-24 rounded-2xl p-0.5 bg-gradient-to-tr from-brand-500 via-cyan-400 to-brand-400 shadow-[0_0_40px_rgba(6,182,212,0.4)] group hover:scale-105 transition-transform duration-300">
+            <img
+              src="/streamstore_logo_official.png"
+              alt="StreamStore"
+              class="w-full h-full object-cover rounded-[14px] bg-[#151B32]"
+            />
+          </div>
+
+          <div class="inline-flex items-center gap-2 rounded-full border border-cyan-400/40 bg-cyan-950/70 px-4 py-1.5 text-xs font-mono font-bold uppercase tracking-widest text-cyan-300 shadow-[0_0_20px_rgba(6,182,212,0.25)] backdrop-blur-md">
+            <Sparkles class="size-3.5 text-cyan-400 animate-pulse" />
+            <span>STREAMSTORE · CINEMATIC ENTERTAINMENT HUB</span>
+          </div>
         </div>
 
-        <!-- Titular Principal -->
-        <h1 class="font-display text-4xl sm:text-6xl lg:text-7xl font-black text-fg tracking-tight leading-[1.08]">
+        <!-- Titular Principal Cinematográfico -->
+        <h1 class="font-display text-4xl sm:text-6xl lg:text-7xl font-black text-white tracking-tight leading-[1.08] drop-shadow-md">
           Tus Plataformas de Streaming Favoritas al <span class="bg-gradient-to-r from-brand-400 via-cyan-300 to-brand-300 bg-clip-text text-transparent">Mejor Precio</span>
         </h1>
 
         <!-- Subtítulo -->
-        <p class="text-base sm:text-lg text-muted max-w-2xl mx-auto leading-relaxed">
-          Disfruta del mejor entretenimiento en 4K UHD sin sobrecostos. Cuentas completas y perfiles individuales con entrega automática en segundos.
+        <p class="text-base sm:text-lg text-slate-300 max-w-2xl mx-auto leading-relaxed drop-shadow-sm font-sans">
+          Disfruta de Netflix, Disney+, Max, Prime Video, Spotify y Crunchyroll en 4K Ultra HD sin intermediarios. Cuentas completas y perfiles individuales con activación automática 24/7.
         </p>
 
-        <!-- Botones de Acción CTA -->
+        <!-- Botones de Acción CTA Cinematográficos -->
         <div class="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4">
           <RouterLink
             to="/catalogo"
-            class="btn-primary text-base py-3.5 px-8 font-bold shadow-lg shadow-brand-500/30 w-full sm:w-auto"
+            class="btn-primary text-base py-4 px-8 font-bold shadow-[0_0_30px_rgba(128,87,255,0.45)] w-full sm:w-auto flex items-center justify-center gap-2 hover:scale-[1.02] transition-transform"
           >
             <span>Explorar Catálogo</span>
             <ArrowRight class="size-4" />
           </RouterLink>
 
-          <RouterLink
-            to="/bienvenida"
-            class="btn-secondary text-base py-3.5 px-7 font-bold border-cyan-500/30 text-cyan-200 hover:border-cyan-400 hover:text-white w-full sm:w-auto flex items-center gap-2"
+          <!-- Botón para ver/repetir animación cinematográfica estilo Netflix -->
+          <button
+            type="button"
+            class="btn-secondary text-base py-4 px-7 font-bold border-cyan-400/40 bg-slate-900/80 backdrop-blur-md text-cyan-200 hover:border-cyan-300 hover:text-white w-full sm:w-auto flex items-center justify-center gap-2 shadow-lg hover:scale-[1.02] transition-all cursor-pointer"
+            @click="startCinematicIntro"
           >
-            <Play class="size-4 fill-cyan-400 text-cyan-400" />
-            <span>Conoce Cómo Funciona</span>
-          </RouterLink>
+            <Play class="size-4 fill-cyan-400 text-cyan-400 animate-pulse" />
+            <span>Ver Intro Tipo Netflix 🍿</span>
+          </button>
         </div>
 
-        <!-- Métricas de Confianza (4 Columnas) -->
-        <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 sm:gap-6 pt-12 border-t border-line/60 mt-12">
-          <div class="rounded-xl border border-line/60 bg-surface/50 p-4">
-            <p class="font-display text-3xl font-black text-fg tracking-tight">+15K</p>
-            <p class="text-xs text-muted mt-0.5">Clientes Satisfechos</p>
+        <!-- Métricas de Confianza en 4 Columnas -->
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 sm:gap-6 pt-10 border-t border-line/60 mt-8 backdrop-blur-sm">
+          <div class="rounded-xl border border-line/80 bg-surface/80 p-4 shadow-lg backdrop-blur-md">
+            <p class="font-display text-3xl font-black text-white tracking-tight">+15K</p>
+            <p class="text-xs text-slate-400 mt-0.5 font-medium">Clientes Satisfechos</p>
           </div>
-          <div class="rounded-xl border border-line/60 bg-surface/50 p-4">
-            <p class="font-display text-3xl font-black text-success tracking-tight">100%</p>
-            <p class="text-xs text-muted mt-0.5">Garantía Activa</p>
+          <div class="rounded-xl border border-line/80 bg-surface/80 p-4 shadow-lg backdrop-blur-md">
+            <p class="font-display text-3xl font-black text-emerald-400 tracking-tight">100%</p>
+            <p class="text-xs text-slate-400 mt-0.5 font-medium">Garantía Activa</p>
           </div>
-          <div class="rounded-xl border border-line/60 bg-surface/50 p-4">
+          <div class="rounded-xl border border-line/80 bg-surface/80 p-4 shadow-lg backdrop-blur-md">
             <p class="font-display text-3xl font-black text-cyan-300 tracking-tight">24/7</p>
-            <p class="text-xs text-muted mt-0.5">Soporte Inmediato</p>
+            <p class="text-xs text-slate-400 mt-0.5 font-medium">Soporte Inmediato</p>
           </div>
-          <div class="rounded-xl border border-line/60 bg-surface/50 p-4">
+          <div class="rounded-xl border border-line/80 bg-surface/80 p-4 shadow-lg backdrop-blur-md">
             <p class="font-display text-3xl font-black text-brand-300 tracking-tight">&lt; 10s</p>
-            <p class="text-xs text-muted mt-0.5">Entrega Automática</p>
+            <p class="text-xs text-slate-400 mt-0.5 font-medium">Entrega Automática</p>
           </div>
         </div>
       </div>
     </section>
 
     <!-- ================= 2. ELIGE TU MODALIDAD Y CATÁLOGO RÁPIDO ================= -->
-    <section class="container-app space-y-8">
+    <section id="plataformas" class="container-app space-y-8 scroll-mt-24">
       <div class="flex flex-col sm:flex-row items-start sm:items-end justify-between gap-4 border-b border-line pb-6">
         <div>
           <span class="text-xs font-mono uppercase tracking-[0.25em] text-cyan-400 font-bold block mb-1">
@@ -196,7 +442,7 @@ const formatCOP = (val: number) => {
         <div class="flex p-1 rounded-xl border border-line bg-surface-2 self-stretch sm:self-auto">
           <button
             type="button"
-            class="flex-1 sm:flex-none px-4 py-2 rounded-lg text-xs font-bold transition-all duration-200"
+            class="flex-1 sm:flex-none px-4 py-2 rounded-lg text-xs font-bold transition-all duration-200 cursor-pointer"
             :class="
               modalidadSeleccionada === 'CUENTA_COMPLETA'
                 ? 'bg-brand-500 text-white shadow-sm'
@@ -208,7 +454,7 @@ const formatCOP = (val: number) => {
           </button>
           <button
             type="button"
-            class="flex-1 sm:flex-none px-4 py-2 rounded-lg text-xs font-bold transition-all duration-200"
+            class="flex-1 sm:flex-none px-4 py-2 rounded-lg text-xs font-bold transition-all duration-200 cursor-pointer"
             :class="
               modalidadSeleccionada === 'PANTALLA'
                 ? 'bg-cyan-500 text-neutral-900 shadow-sm'
@@ -221,7 +467,7 @@ const formatCOP = (val: number) => {
         </div>
       </div>
 
-      <!-- Cuadrícula de 6 Plataformas Principales -->
+      <!-- Cuadrícula de las 6 Plataformas Principales -->
       <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         <div
           v-for="p in plataformas"
@@ -239,138 +485,130 @@ const formatCOP = (val: number) => {
               <span class="text-xs font-mono uppercase tracking-wider px-2 py-0.5 rounded border border-line bg-surface-2 text-muted">
                 {{ p.badge }}
               </span>
-              <span class="size-2.5 rounded-full" :style="{ backgroundColor: p.color }" />
+              <span class="text-xs font-semibold text-emerald-400 flex items-center gap-1">
+                <span class="size-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                Disponible
+              </span>
             </div>
 
             <div>
               <h3 class="font-display text-xl font-bold text-fg group-hover:text-cyan-300 transition-colors">
                 {{ p.nombre }}
               </h3>
-              <p class="text-xs text-muted leading-relaxed mt-1 line-clamp-2">
+              <p class="text-xs text-muted mt-1 leading-relaxed line-clamp-2">
                 {{ p.desc }}
               </p>
             </div>
-
-            <!-- Precio en COP según modalidad seleccionada -->
-            <div class="pt-3 border-t border-line/60">
-              <span class="text-[10px] font-mono text-muted uppercase tracking-wider block">
-                Precio mensual desde
-              </span>
-              <p class="font-display text-2xl font-black text-fg mt-0.5">
-                {{ formatCOP(modalidadSeleccionada === 'CUENTA_COMPLETA' ? p.precioCompleta : p.precioPantalla) }}
-                <span class="text-xs text-muted font-normal font-sans">/ mes</span>
-              </p>
-            </div>
           </div>
 
-          <div class="p-2 pt-4">
-            <RouterLink
-              to="/catalogo"
-              class="btn w-full py-2.5 text-xs font-bold uppercase tracking-wider transition-all duration-200"
-              :class="
-                modalidadSeleccionada === 'CUENTA_COMPLETA'
-                  ? 'btn-primary'
-                  : 'bg-cyan-500 hover:bg-cyan-400 text-neutral-900 shadow-md shadow-cyan-500/20'
-              "
+          <div class="p-2 pt-4 border-t border-line/60 mt-auto flex items-center justify-between">
+            <div>
+              <span class="text-[10px] font-mono uppercase text-muted block">Precio mensual</span>
+              <span class="font-display text-lg font-black text-cyan-300">
+                {{ formatCOP(modalidadSeleccionada === 'CUENTA_COMPLETA' ? p.precioCompleta : p.precioPantalla) }}
+              </span>
+            </div>
+
+            <button
+              type="button"
+              class="btn-primary text-xs py-2 px-3.5 font-bold shadow-md shadow-brand-500/20 flex items-center gap-1.5 cursor-pointer"
+              @click="comprarPlataforma(p)"
             >
               <span>{{ modalidadSeleccionada === 'CUENTA_COMPLETA' ? 'Comprar Cuenta' : 'Comprar Pantalla' }}</span>
               <ArrowRight class="size-3.5" />
-            </RouterLink>
+            </button>
           </div>
         </div>
       </div>
     </section>
 
-    <!-- ================= 3. EXPERIENCIA SIN COMPLICACIONES (Stitch Board 2) ================= -->
-    <section class="container-app space-y-10">
-      <div class="text-center max-w-xl mx-auto space-y-2">
-        <span class="text-xs font-mono uppercase tracking-[0.25em] text-cyan-400 font-bold block">
-          Por Qué Elegirnos
-        </span>
-        <h2 class="font-display text-3xl sm:text-4xl font-black text-fg tracking-tight">
-          Experiencia Sin Complicaciones
-        </h2>
-        <p class="text-xs sm:text-sm text-muted">
-          Diseñado para ofrecerte máxima velocidad, seguridad y tranquilidad en cada compra digital.
-        </p>
-      </div>
+    <!-- ================= 3. GARANTÍAS Y BENEFICIOS ================= -->
+    <section class="container-app">
+      <div class="rounded-2xl border border-line bg-surface/60 p-8 sm:p-12 relative overflow-hidden backdrop-blur-md">
+        <div class="absolute -right-20 -bottom-20 size-64 rounded-full bg-brand-500/10 blur-3xl pointer-events-none" />
 
-      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-        <!-- Beneficio 1: Entrega Inmediata -->
-        <div class="card p-6 space-y-3 border-line/80 hover:border-cyan-400/50 transition-colors">
-          <div class="grid size-12 place-items-center rounded-2xl bg-cyan-500/15 text-cyan-300 border border-cyan-500/30">
-            <Zap class="size-6" />
-          </div>
-          <h3 class="font-display text-base font-bold text-fg">Entrega Inmediata</h3>
-          <p class="text-xs text-muted leading-relaxed">
-            Recibe tus datos de acceso en segundos de forma automatizada tras confirmar tu pago.
+        <div class="text-center max-w-2xl mx-auto space-y-3 mb-10">
+          <span class="text-xs font-mono uppercase tracking-[0.25em] text-brand-300 font-bold">Por Qué Elegirnos</span>
+          <h2 class="font-display text-2xl sm:text-4xl font-black text-fg tracking-tight">
+            Experiencia Sin Complicaciones
+          </h2>
+          <p class="text-sm text-muted">
+            Diseñado para ofrecerte máxima velocidad, seguridad y tranquilidad en cada compra digital.
           </p>
         </div>
 
-        <!-- Beneficio 2: Garantía Total -->
-        <div class="card p-6 space-y-3 border-line/80 hover:border-emerald-400/50 transition-colors">
-          <div class="grid size-12 place-items-center rounded-2xl bg-emerald-500/15 text-emerald-300 border border-emerald-500/30">
-            <ShieldCheck class="size-6" />
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+          <div class="space-y-2.5">
+            <div class="size-10 rounded-xl bg-brand-500/20 text-brand-300 flex items-center justify-center border border-brand-500/30">
+              <Zap class="size-5" />
+            </div>
+            <h3 class="font-bold text-fg text-sm">Entrega Inmediata</h3>
+            <p class="text-xs text-muted leading-relaxed">
+              Recibe tus datos de acceso en segundos de forma automatizada tras verificar tu pago.
+            </p>
           </div>
-          <h3 class="font-display text-base font-bold text-fg">Garantía Total</h3>
-          <p class="text-xs text-muted leading-relaxed">
-            Reemplazo inmediato garantizado durante todo el periodo si tu suscripción presenta fallas.
-          </p>
-        </div>
 
-        <!-- Beneficio 3: Soporte 24/7 -->
-        <div class="card p-6 space-y-3 border-line/80 hover:border-brand-400/50 transition-colors">
-          <div class="grid size-12 place-items-center rounded-2xl bg-brand-500/15 text-brand-300 border border-brand-500/30">
-            <Headphones class="size-6" />
+          <div class="space-y-2.5">
+            <div class="size-10 rounded-xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center border border-emerald-500/30">
+              <ShieldCheck class="size-5" />
+            </div>
+            <h3 class="font-bold text-fg text-sm">Garantía Total</h3>
+            <p class="text-xs text-muted leading-relaxed">
+              Reemplazo inmediato garantizado durante todo el periodo de tu suscripción contratada.
+            </p>
           </div>
-          <h3 class="font-display text-base font-bold text-fg">Soporte 24/7</h3>
-          <p class="text-xs text-muted leading-relaxed">
-            Equipo técnico disponible vía WhatsApp y chat interno para resolver cualquier duda al instante.
-          </p>
-        </div>
 
-        <!-- Beneficio 4: Pagos en COP -->
-        <div class="card p-6 space-y-3 border-line/80 hover:border-yellow-400/50 transition-colors">
-          <div class="grid size-12 place-items-center rounded-2xl bg-yellow-500/15 text-yellow-300 border border-yellow-500/30">
-            <CreditCard class="size-6" />
+          <div class="space-y-2.5">
+            <div class="size-10 rounded-xl bg-cyan-500/20 text-cyan-300 flex items-center justify-center border border-cyan-500/30">
+              <Headphones class="size-5" />
+            </div>
+            <h3 class="font-bold text-fg text-sm">Soporte 24/7</h3>
+            <p class="text-xs text-muted leading-relaxed">
+              Equipo técnico disponible vía WhatsApp y ticket para resolver cualquier duda al instante.
+            </p>
           </div>
-          <h3 class="font-display text-base font-bold text-fg">Pagos en COP</h3>
-          <p class="text-xs text-muted leading-relaxed">
-            Paga fácilmente en pesos colombianos con múltiples métodos de pago locales seguros.
-          </p>
+
+          <div class="space-y-2.5">
+            <div class="size-10 rounded-xl bg-purple-500/20 text-purple-300 flex items-center justify-center border border-purple-500/30">
+              <CheckCircle2 class="size-5" />
+            </div>
+            <h3 class="font-bold text-fg text-sm">Pagos en COP</h3>
+            <p class="text-xs text-muted leading-relaxed">
+              Paga fácilmente en pesos colombianos con múltiples métodos de pago locales seguros.
+            </p>
+          </div>
         </div>
       </div>
     </section>
 
-    <!-- ================= 4. PREGUNTAS FRECUENTES (Stitch Board 2) ================= -->
-    <section class="container-app max-w-3xl space-y-8">
+    <!-- ================= 4. PREGUNTAS FRECUENTES ================= -->
+    <section class="container-app max-w-3xl space-y-6">
       <div class="text-center space-y-2">
-        <span class="text-xs font-mono uppercase tracking-[0.25em] text-cyan-400 font-bold block">
-          Resolvemos tus Dudas
-        </span>
-        <h2 class="font-display text-3xl font-black text-fg tracking-tight">
+        <span class="text-xs font-mono uppercase tracking-[0.25em] text-cyan-400 font-bold">Dudas Habituales</span>
+        <h2 class="font-display text-2xl sm:text-4xl font-black text-fg tracking-tight">
           Preguntas Frecuentes
         </h2>
       </div>
 
       <div class="space-y-3">
         <div
-          v-for="(faq, idx) in faqs"
-          :key="idx"
-          class="rounded-xl border border-line bg-surface overflow-hidden transition-colors"
+          v-for="(faq, i) in faqs"
+          :key="i"
+          class="rounded-xl border border-line bg-surface/50 overflow-hidden transition-all duration-200"
         >
           <button
             type="button"
-            class="flex w-full items-center justify-between p-5 text-left font-display text-sm font-bold text-fg hover:text-cyan-300 transition-colors"
-            @click="toggleFaq(idx)"
+            class="w-full p-4 sm:p-5 text-left font-bold text-sm text-fg flex items-center justify-between gap-4 hover:text-cyan-300 transition-colors cursor-pointer"
+            @click="toggleFaq(i)"
           >
             <span>{{ faq.q }}</span>
             <ChevronDown
-              class="size-4 shrink-0 transition-transform duration-300 text-muted"
+              class="size-4 shrink-0 transition-transform duration-300"
               :class="{ 'rotate-180 text-cyan-300': faq.open }"
             />
           </button>
-          <div v-show="faq.open" class="px-5 pb-5 text-xs text-muted leading-relaxed border-t border-line/40 pt-3">
+
+          <div v-show="faq.open" class="px-4 pb-4 sm:px-5 sm:pb-5 text-xs text-muted leading-relaxed border-t border-line/40 pt-3">
             {{ faq.a }}
           </div>
         </div>
@@ -378,3 +616,21 @@ const formatCOP = (val: number) => {
     </section>
   </div>
 </template>
+
+<style scoped>
+@keyframes kenburns {
+  0% {
+    transform: scale(1.02) translate(0, 0);
+  }
+  50% {
+    transform: scale(1.08) translate(-1%, -1%);
+  }
+  100% {
+    transform: scale(1.02) translate(0, 0);
+  }
+}
+
+.kenburns-bg {
+  animation: kenburns 30s ease-in-out infinite alternate;
+}
+</style>

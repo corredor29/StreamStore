@@ -95,7 +95,7 @@ export const purchaseService = {
       return mockDelay(nuevaCompra, 400)
     }
 
-    const { data } = await api.post<Compra>('/compras')
+    const { data } = await api.post<Compra>('/compras', { items })
     return data
   },
 
