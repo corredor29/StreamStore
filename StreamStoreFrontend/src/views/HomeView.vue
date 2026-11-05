@@ -7,7 +7,6 @@ import {
   Headphones, 
   Play, 
   ShieldCheck, 
-  Sparkles, 
   Volume2, 
   VolumeX, 
   Zap,
@@ -357,19 +356,17 @@ const formatCOP = (val: number) => {
 
       <!-- CONTENIDO CENTRAL DEL HERO CINEMÁTICO -->
       <div class="container-app relative z-10 text-center max-w-4xl mx-auto py-16 sm:py-24 space-y-6">
-        <!-- Logotipo Oficial y Badge de Marca -->
-        <div class="flex flex-col items-center justify-center gap-4">
-          <div class="relative size-20 sm:size-24 rounded-2xl p-0.5 bg-gradient-to-tr from-brand-500 via-cyan-400 to-brand-400 shadow-[0_0_40px_rgba(6,182,212,0.4)] group hover:scale-105 transition-transform duration-300">
+        <!-- Logotipo Oficial Cinematográfico StreamStore (Rediseñado con resplandor ambiental) -->
+        <div class="relative flex items-center justify-center pb-2">
+          <!-- Halo de luz ambiental posterior -->
+          <div class="absolute -inset-3 rounded-full bg-gradient-to-r from-brand-500/35 via-cyan-400/30 to-brand-400/35 blur-2xl opacity-80 pointer-events-none" />
+          
+          <div class="relative size-24 sm:size-28 rounded-3xl p-1 bg-gradient-to-b from-white/20 via-white/5 to-transparent border border-white/20 shadow-[0_10px_40px_rgba(0,0,0,0.7),0_0_35px_rgba(128,87,255,0.45)] backdrop-blur-xl group hover:scale-105 transition-all duration-300">
             <img
               src="/streamstore_logo_official.png"
               alt="StreamStore"
-              class="w-full h-full object-cover rounded-[14px] bg-[#151B32]"
+              class="w-full h-full object-contain rounded-[20px] bg-[#0B0E1F]/80 p-2"
             />
-          </div>
-
-          <div class="inline-flex items-center gap-2 rounded-full border border-cyan-400/40 bg-cyan-950/70 px-4 py-1.5 text-xs font-mono font-bold uppercase tracking-widest text-cyan-300 shadow-[0_0_20px_rgba(6,182,212,0.25)] backdrop-blur-md">
-            <Sparkles class="size-3.5 text-cyan-400 animate-pulse" />
-            <span>STREAMSTORE · CINEMATIC ENTERTAINMENT HUB</span>
           </div>
         </div>
 
@@ -399,8 +396,8 @@ const formatCOP = (val: number) => {
             class="btn-secondary text-base py-4 px-7 font-bold border-cyan-400/40 bg-slate-900/80 backdrop-blur-md text-cyan-200 hover:border-cyan-300 hover:text-white w-full sm:w-auto flex items-center justify-center gap-2 shadow-lg hover:scale-[1.02] transition-all cursor-pointer"
             @click="startCinematicIntro"
           >
-            <Play class="size-4 fill-cyan-400 text-cyan-400 animate-pulse" />
-            <span>Ver Intro Tipo Netflix 🍿</span>
+            <Play class="size-4 fill-cyan-400 text-cyan-400" />
+            <span>Ver Intro Tipo Netflix</span>
           </button>
         </div>
 
