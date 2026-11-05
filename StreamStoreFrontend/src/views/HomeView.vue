@@ -1,10 +1,11 @@
-﻿<script setup lang="ts">
+<script setup lang="ts">
 import { ref } from 'vue'
 import { RouterLink } from 'vue-router'
 import { 
   ArrowRight, 
   ChevronDown, 
   CreditCard, 
+  Film, 
   HelpCircle, 
   KeyRound, 
   ShieldCheck, 
@@ -14,31 +15,31 @@ import {
 import heroImg from '@/assets/hero.png'
 
 const plataformasDestacadas = [
-  { nombre: 'Netflix', slug: 'netflix', desc: 'PelÃ­culas, series y producciones originales sin lÃ­mite.', color: '#E50914', cuentas: 'Completa o Pantalla' },
-  { nombre: 'Disney+', slug: 'disney', desc: 'Marvel, Star Wars, Pixar y clÃ¡sicos familiares.', color: '#113CCF', cuentas: 'Completa o Pantalla' },
+  { nombre: 'Netflix', slug: 'netflix', desc: 'Películas, series y producciones originales sin límite.', color: '#E50914', cuentas: 'Completa o Pantalla' },
+  { nombre: 'Disney+', slug: 'disney', desc: 'Marvel, Star Wars, Pixar y clásicos familiares.', color: '#113CCF', cuentas: 'Completa o Pantalla' },
   { nombre: 'Prime Video', slug: 'prime', desc: 'Series exclusivas de Amazon y estrenos mundiales.', color: '#00A8E1', cuentas: 'Completa o Pantalla' },
   { nombre: 'Max', slug: 'max', desc: 'HBO, Warner Bros, DC y producciones de alta gama.', color: '#7B2FF7', cuentas: 'Completa o Pantalla' },
 ]
 
 const faqs = ref([
   {
-    q: 'Â¿CuÃ¡l es la diferencia entre Cuenta Completa y Pantalla Individual?',
+    q: '¿Cuál es la diferencia entre Cuenta Completa y Pantalla Individual?',
     a: 'En la Cuenta Completa adquieres la cuenta en su totalidad con todas sus pantallas disponibles para ti y tu familia. En Pantalla Individual adquieres un perfil exclusivo con PIN de acceso dentro de una cuenta compartida.',
     open: true,
   },
   {
-    q: 'Â¿CuÃ¡ndo y cÃ³mo recibo mis credenciales de acceso?',
-    a: 'Las credenciales (correo, contraseÃ±a y PIN de perfil si aplica) se revelan inmediatamente en la secciÃ³n "Mi Cuenta > Mis Servicios" una vez que el pago es procesado y confirmado.',
+    q: '¿Cuándo y cómo recibo mis credenciales de acceso?',
+    a: 'Las credenciales (correo, contraseña y PIN de perfil si aplica) se revelan inmediatamente en la sección "Mi Cuenta > Mis Servicios" una vez que el pago es procesado y confirmado.',
     open: false,
   },
   {
-    q: 'Â¿El carrito de compras reserva el inventario?',
+    q: '¿El carrito de compras reserva el inventario?',
     a: 'No. El carrito te permite agrupar productos, pero el stock definitivo se valida en tiempo real al momento de ejecutar el pago para garantizar inventario activo.',
     open: false,
   },
   {
-    q: 'Â¿QuÃ© garantÃ­a tienen los servicios contratados?',
-    a: 'Cuentas con garantÃ­a y reemplazo inmediato durante los 30 dÃ­as de vigencia de tu plan con atenciÃ³n a travÃ©s de nuestro soporte tÃ©cnico.',
+    q: '¿Qué garantía tienen los servicios contratados?',
+    a: 'Cuentas con garantía y reemplazo inmediato durante los 30 días de vigencia de tu plan con atención a través de nuestro soporte técnico.',
     open: false,
   },
 ])
@@ -72,17 +73,22 @@ function toggleFaq(index: number) {
             </h1>
 
             <p class="mt-5 text-base leading-relaxed text-muted sm:text-lg max-w-xl">
-              Cuentas completas y pantallas individuales garantizadas para Netflix, Disney+, Prime Video y Max. Entrega inmediata tras la confirmaciÃ³n de tu compra.
+              Cuentas completas y pantallas individuales garantizadas para Netflix, Disney+, Prime Video y Max. Entrega inmediata tras la confirmación de tu compra.
             </p>
 
             <div class="mt-8 flex flex-wrap items-center gap-4">
               <RouterLink to="/catalogo" class="btn-primary text-base py-3 px-6 shadow-lg shadow-brand-500/25">
-                <span>Explorar CatÃ¡logo</span>
+                <span>Explorar Catálogo</span>
                 <ArrowRight class="size-4" aria-hidden="true" />
               </RouterLink>
 
-                            <a href="#como-funciona" class="btn-secondary text-base py-3 px-6">
-                Â¿CÃ³mo funciona?
+              <RouterLink to="/bienvenida" class="btn-secondary text-base py-3 px-5 border-brand-400/50 hover:bg-brand-500/10">
+                <Film class="size-4 text-brand-300" aria-hidden="true" />
+                <span>Video de Bienvenida</span>
+              </RouterLink>
+
+              <a href="#como-funciona" class="btn-secondary text-base py-3 px-6">
+                ¿Cómo funciona?
               </a>
             </div>
 
@@ -90,11 +96,11 @@ function toggleFaq(index: number) {
             <div class="mt-10 grid grid-cols-3 gap-4 border-t border-line/60 pt-6">
               <div>
                 <p class="font-display text-2xl font-bold text-fg">100%</p>
-                <p class="text-xs text-muted">GarantÃ­a activa</p>
+                <p class="text-xs text-muted">Garantía activa</p>
               </div>
               <div>
                 <p class="font-display text-2xl font-bold text-fg">&lt; 1 min</p>
-                <p class="text-xs text-muted">Entrega automÃ¡tica</p>
+                <p class="text-xs text-muted">Entrega automática</p>
               </div>
               <div>
                 <p class="font-display text-2xl font-bold text-fg">24/7</p>
@@ -134,7 +140,7 @@ function toggleFaq(index: number) {
             <p class="text-sm text-muted">Selecciona tu plataforma para ver disponibilidad y precios.</p>
           </div>
           <RouterLink to="/catalogo" class="text-sm font-semibold text-brand-300 hover:text-brand-200 inline-flex items-center gap-1">
-            <span>Ver todo el catÃ¡logo</span>
+            <span>Ver todo el catálogo</span>
             <ArrowRight class="size-4" aria-hidden="true" />
           </RouterLink>
         </div>
@@ -168,19 +174,19 @@ function toggleFaq(index: number) {
             </div>
             <div class="mt-6 flex items-center justify-between border-t border-line/50 pt-3 text-xs">
               <span class="text-muted">{{ plat.cuentas }}</span>
-              <span class="font-semibold text-brand-300 group-hover:translate-x-0.5 transition-transform">Ver planes â†’</span>
+              <span class="font-semibold text-brand-300 group-hover:translate-x-0.5 transition-transform">Ver planes →</span>
             </div>
           </RouterLink>
         </div>
       </div>
     </section>
 
-    <!-- CÃ“MO FUNCIONA -->
+    <!-- CÓMO FUNCIONA -->
     <section id="como-funciona" class="py-16 sm:py-24 border-b border-line">
       <div class="container-app">
         <div class="text-center max-w-2xl mx-auto">
           <span class="text-xs font-semibold uppercase tracking-wider text-brand-300">Paso a paso</span>
-          <h2 class="mt-1 font-display text-3xl font-bold text-fg sm:text-4xl">Â¿CÃ³mo funciona StreamStore?</h2>
+          <h2 class="mt-1 font-display text-3xl font-bold text-fg sm:text-4xl">¿Cómo funciona StreamStore?</h2>
           <p class="mt-2 text-sm text-muted sm:text-base">
             Proceso de compra simple, transparente y automatizado en tres sencillos pasos.
           </p>
@@ -225,7 +231,7 @@ function toggleFaq(index: number) {
             </div>
             <h3 class="mt-4 font-display text-lg font-bold text-fg">3. Recibe tus credenciales</h3>
             <p class="mt-2 text-sm text-muted">
-              Accede a tu panel en <strong>Mi Cuenta</strong> y consulta correo, contraseÃ±a y PIN asignado listos para copiar con un solo clic.
+              Accede a tu panel en <strong>Mi Cuenta</strong> y consulta correo, contraseña y PIN asignado listos para copiar con un solo clic.
             </p>
           </div>
         </div>

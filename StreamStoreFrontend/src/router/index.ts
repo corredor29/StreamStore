@@ -1,4 +1,4 @@
-﻿import { createRouter, createWebHistory, type RouteRecordRaw } from 'vue-router'
+import { createRouter, createWebHistory, type RouteRecordRaw } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 
 declare module 'vue-router' {
@@ -12,13 +12,19 @@ declare module 'vue-router' {
 
 const routes: RouteRecordRaw[] = [
   {
+    path: '/bienvenida',
+    name: 'welcome-story',
+    component: () => import('@/views/WelcomeStoryView.vue'),
+    meta: { title: 'Bienvenido a StreamStore · Experiencia Scrollytelling' },
+  },
+  {
     path: '/',
     component: () => import('@/layouts/PublicLayout.vue'),
     children: [
       { path: '', name: 'home', component: () => import('@/views/HomeView.vue'), meta: { title: 'Inicio' } },
-      { path: 'catalogo', name: 'catalog', component: () => import('@/views/CatalogView.vue'), meta: { title: 'CatÃ¡logo' } },
+      { path: 'catalogo', name: 'catalog', component: () => import('@/views/CatalogView.vue'), meta: { title: 'Catálogo' } },
       { path: 'productos/:id(\\d+)', name: 'product', component: () => import('@/views/ProductDetailView.vue'), props: (r) => ({ id: Number(r.params.id) }), meta: { title: 'Producto' } },
-      { path: 'login', name: 'login', component: () => import('@/views/LoginView.vue'), meta: { title: 'Iniciar sesiÃ³n', guestOnly: true } },
+      { path: 'login', name: 'login', component: () => import('@/views/LoginView.vue'), meta: { title: 'Iniciar sesión', guestOnly: true } },
       { path: 'registro', name: 'register', component: () => import('@/views/RegisterView.vue'), meta: { title: 'Crear cuenta', guestOnly: true } },
       { path: 'carrito', name: 'cart', component: () => import('@/views/CartView.vue'), meta: { title: 'Carrito' } },
       { path: 'checkout', name: 'checkout', component: () => import('@/views/CheckoutView.vue'), meta: { title: 'Pago', requiresAuth: true } },
@@ -37,13 +43,13 @@ const routes: RouteRecordRaw[] = [
     component: () => import('@/layouts/AdminLayout.vue'),
     meta: { requiresAuth: true, role: 'admin' },
     children: [
-      { path: '', name: 'admin', component: () => import('@/views/AdminView.vue'), meta: { title: 'AdministraciÃ³n' } },
+      { path: '', name: 'admin', component: () => import('@/views/AdminView.vue'), meta: { title: 'Administración' } },
     ],
   },
   {
     path: '/:pathMatch(.*)*',
     component: () => import('@/layouts/PublicLayout.vue'),
-    children: [{ path: '', name: 'not-found', component: () => import('@/views/NotFoundView.vue'), meta: { title: 'PÃ¡gina no encontrada' } }],
+    children: [{ path: '', name: 'not-found', component: () => import('@/views/NotFoundView.vue'), meta: { title: 'Página no encontrada' } }],
   },
 ]
 
@@ -57,11 +63,11 @@ const router = createRouter({
   },
 })
 
-// Guardias de navegaciÃ³n para protecciÃ³n de rutas y separaciÃ³n de permisos
+// Guardias de navegación para protección de rutas y separación de permisos
 router.beforeEach((to) => {
   const auth = useAuthStore()
 
-  // 1. Proteger rutas que requieren autenticaciÃ³n
+  // 1. Proteger rutas que requieren autenticación
   if (to.meta.requiresAuth && !auth.isAuthenticated) {
     return {
       name: 'login',
@@ -81,7 +87,7 @@ router.beforeEach((to) => {
 })
 
 router.afterEach((to) => {
-  document.title = to.meta.title ? `${to.meta.title} Â· StreamStore` : 'StreamStore'
+  document.title = to.meta.title ? `${to.meta.title} · StreamStore` : 'StreamStore'
 })
 
 export default router
