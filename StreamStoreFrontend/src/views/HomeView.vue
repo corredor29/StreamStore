@@ -312,7 +312,7 @@ const formatCOP = (val: number) => {
 </script>
 
 <template>
-  <div class="space-y-20 pb-20 selection:bg-brand-500/30 selection:text-white">
+  <div class="bg-black text-white selection:bg-brand-500/30 selection:text-white pb-24 overflow-x-hidden">
     <!-- ================= MODAL / OVERLAY INTRO CINEMÁTICA TIPO NETFLIX ================= -->
     <Teleport to="body">
       <Transition
@@ -474,10 +474,13 @@ const formatCOP = (val: number) => {
       </div>
     </section>
 
-    <!-- ================= 2. EXPERIENCIA SCROLLYTELLING ESTILO HBO MAX ================= -->
-    <section id="plataformas" class="relative bg-black scroll-mt-20 overflow-hidden">
-      <!-- Transición suave a negro puro desde el hero -->
-      <div class="h-28 bg-gradient-to-b from-transparent to-black pointer-events-none -mt-28 relative z-20" />
+    <!-- FASE DE TRANSICIÓN A OSCURIDAD TOTAL (LA PANTALLA SE OSCURECE TOTALMENTE) -->
+    <div class="relative z-20 h-[50vh] sm:h-[65vh] bg-gradient-to-b from-black via-black to-black flex flex-col items-center justify-center text-center pointer-events-none">
+      <div class="size-1 rounded-full bg-white/20 animate-pulse" />
+    </div>
+
+    <!-- ================= 2. EXPERIENCIA SCROLLYTELLING (REVELACIÓN LENTA DESDE LA OSCURIDAD) ================= -->
+    <section id="plataformas" class="relative bg-black scroll-mt-10 overflow-hidden">
 
       <!-- CONTENEDOR DE FONDOS FIJOS CON CROSSFADE INTERACTIVO (FOTOS DE PERSONAS VIENDO CADA PLATAFORMA) -->
       <div class="sticky top-0 h-screen w-full overflow-hidden pointer-events-none z-0">
@@ -507,12 +510,7 @@ const formatCOP = (val: number) => {
           <!-- COLUMNA IZQUIERDA: TEXTO QUE ASCIENDE Y QUEDA FIJO / STICKY CON EL SELECTOR -->
           <div class="lg:col-span-5 lg:sticky lg:top-24 lg:h-[calc(100vh-120px)] flex flex-col justify-between py-6 space-y-8">
             <div class="space-y-4">
-              <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-white/15 bg-white/5 backdrop-blur-md">
-                <span class="size-2 rounded-full animate-ping" :style="{ backgroundColor: scrollyPlatforms[activeStoryIndex]?.color || '#8057FF' }" />
-                <span class="text-[11px] font-mono uppercase tracking-[0.2em] text-white/80 font-bold">
-                  {{ scrollyPlatforms[activeStoryIndex]?.tag || 'PLANES OFICIALES' }}
-                </span>
-              </div>
+              
 
               <!-- Título que asciende con fuerza y elegancia -->
               <h2 class="font-display text-3xl sm:text-5xl lg:text-6xl font-black text-white uppercase tracking-tight leading-[1.05] drop-shadow-2xl">
@@ -587,11 +585,11 @@ const formatCOP = (val: number) => {
               :key="sp.id"
               :ref="(el) => { if (el) storyCardRefs[idx] = el as HTMLElement }"
               :data-story-index="idx"
-              class="min-h-[75vh] flex items-center justify-center transition-all duration-700 transform"
+              class="min-h-[85vh] flex items-center justify-center transition-all duration-1000 ease-out transform"
               :class="
                 activeStoryIndex === idx
                   ? 'opacity-100 translate-y-0 scale-100'
-                  : 'opacity-40 translate-y-12 scale-[0.97]'
+                  : 'opacity-0 translate-y-28 scale-95 pointer-events-none'
               "
             >
               <!-- Tarjeta Cinemática de la Plataforma -->
@@ -676,7 +674,7 @@ const formatCOP = (val: number) => {
 
     <!-- ================= 3. GARANTÍAS Y BENEFICIOS ================= -->
     <section class="container-app">
-      <div class="rounded-2xl border border-line bg-surface/60 p-8 sm:p-12 relative overflow-hidden backdrop-blur-md">
+      <div class="rounded-3xl border border-white/10 bg-white/5 p-8 sm:p-12 relative overflow-hidden backdrop-blur-md">
         <div class="absolute -right-20 -bottom-20 size-64 rounded-full bg-brand-500/10 blur-3xl pointer-events-none" />
 
         <div class="text-center max-w-2xl mx-auto space-y-3 mb-10">
@@ -746,7 +744,7 @@ const formatCOP = (val: number) => {
         <div
           v-for="(faq, i) in faqs"
           :key="i"
-          class="rounded-xl border border-line bg-surface/50 overflow-hidden transition-all duration-200"
+          class="rounded-xl border border-white/10 bg-white/5 overflow-hidden transition-all duration-200"
         >
           <button
             type="button"
@@ -760,7 +758,7 @@ const formatCOP = (val: number) => {
             />
           </button>
 
-          <div v-show="faq.open" class="px-4 pb-4 sm:px-5 sm:pb-5 text-xs text-muted leading-relaxed border-t border-line/40 pt-3">
+          <div v-show="faq.open" class="px-4 pb-4 sm:px-5 sm:pb-5 text-xs text-muted leading-relaxed border-t border-white/10 pt-3">
             {{ faq.a }}
           </div>
         </div>
