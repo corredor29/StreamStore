@@ -64,10 +64,28 @@ const expiracionInput = computed({
 })
 
 // Control inteligente de enfoque según la disposición física de cada banco:
-// En Bancolombia la información reside en el reverso, por lo que enfocar cualquier campo muestra el reverso.
-// En bancos convencionales (Nu, Falabella, BBVA) la información reside en el frente y sólo el CVV en el reverso.
-function onFocusDataField() {
+// - Bancolombia: Número, Titular, Vence y CVC van todos impresos al reverso.
+// - Nu: Número, Válida hasta y CVC van al reverso; el Titular va en el frente.
+// - Falabella y BBVA: Número, Titular y Vence van en el frente; sólo el CVV va al reverso.
+function onFocusNumero() {
+  if (bankSkin.value === 'bancolombia' || bankSkin.value === 'nu') {
+    flipToBack()
+  } else {
+    flipToFront()
+  }
+}
+
+function onFocusTitular() {
   if (bankSkin.value === 'bancolombia') {
+    flipToBack()
+  } else {
+    // En Nu, Falabella y BBVA el nombre del titular se ubica en el frente
+    flipToFront()
+  }
+}
+
+function onFocusExpiracion() {
+  if (bankSkin.value === 'bancolombia' || bankSkin.value === 'nu') {
     flipToBack()
   } else {
     flipToFront()
@@ -79,7 +97,7 @@ function onFocusCvv() {
 }
 
 function onBlurCvv() {
-  if (bankSkin.value === 'bancolombia') {
+  if (bankSkin.value === 'bancolombia' || bankSkin.value === 'nu') {
     flipToBack()
   } else {
     flipToFront()
@@ -313,23 +331,37 @@ function validateAndSubmit() {
             <span v-if="bankSkin === 'bancolombia'">
               {{ isFlipped ? 'Ver frontal (diseño = Ba)' : 'Ver reverso (datos impresos)' }}
             </span>
+            <span v-else-if="bankSkin === 'nu'">
+              {{ isFlipped ? 'Ver frontal (nombre y logo nu)' : 'Ver reverso (número y CVC)' }}
+            </span>
             <span v-else>
               {{ isFlipped ? 'Voltear al frente' : 'Girar para ver CVV' }}
             </span>
           </button>
         </div>
 
-        <!-- Indicador contextual oficial para Bancolombia -->
+        <!-- Indicador contextual oficial para Bancolombia y Nu -->
         <div
-          v-if="bankSkin === 'bancolombia'"
-          class="mt-2.5 w-full max-w-[370px] text-center text-[9px] font-mono px-3 py-1.5 rounded-sm bg-[#FFDD00]/10 border border-[#FFDD00]/30 text-[#FFDD00]"
+          v-if="bankSkin === 'bancolombia' || bankSkin === 'nu'"
+          class="mt-2.5 w-full max-w-[370px] text-center text-[9px] font-mono px-3 py-1.5 rounded-sm"
+          :class="bankSkin === 'bancolombia' ? 'bg-[#FFDD00]/10 border border-[#FFDD00]/30 text-[#FFDD00]' : 'bg-[#820AD1]/15 border border-[#820AD1]/40 text-[#d8b4fe]'"
         >
-          <span v-if="isFlipped">
-            ✓ Mostrando reverso: en Bancolombia los datos (número, titular, fecha, CVC) van impresos atrás
-          </span>
-          <span v-else>
-            👁️ Mostrando frente oficial (= Ba). Haz clic en la tarjeta o escribe en los campos para volver al reverso
-          </span>
+          <template v-if="bankSkin === 'nu'">
+            <span v-if="isFlipped">
+              ✓ Mostrando reverso Nu: número de 16 dígitos, Válida hasta y CVC
+            </span>
+            <span v-else>
+              👁️ Mostrando frente Nu: nombre del titular, logo oficial y chip
+            </span>
+          </template>
+          <template v-else>
+            <span v-if="isFlipped">
+              ✓ Mostrando reverso Bancolombia: datos completos impresos atrás
+            </span>
+            <span v-else>
+              👁️ Mostrando frente Bancolombia (= Ba). Clic o escribe para ver reverso
+            </span>
+          </template>
         </div>
       </div>
 
@@ -390,7 +422,7 @@ function validateAndSubmit() {
             class="w-full bg-[#0d1117] border border-gray-700 text-white text-sm font-mono px-3.5 py-2.5 outline-none focus:border-[#00ece0] transition-colors disabled:opacity-40 rounded-sm"
             :class="{ 'border-rose-500': !!errors.numero }"
             @input="(e) => setNumero((e.target as HTMLInputElement).value)"
-            @focus="onFocusDataField"
+            @focus="onFocusNumero"
           />
           <p v-if="errors.numero" class="text-xs text-rose-400 font-mono mt-1">
             {{ errors.numero }}
@@ -411,7 +443,7 @@ function validateAndSubmit() {
             class="w-full bg-[#0d1117] border border-gray-700 text-white text-sm font-mono uppercase px-3.5 py-2.5 outline-none focus:border-[#00ece0] transition-colors disabled:opacity-40 rounded-sm"
             :class="{ 'border-rose-500': !!errors.nombre }"
             @input="(e) => setNombre((e.target as HTMLInputElement).value)"
-            @focus="onFocusDataField"
+            @focus="onFocusTitular"
           />
           <p v-if="errors.nombre" class="text-xs text-rose-400 font-mono mt-1">
             {{ errors.nombre }}
@@ -433,7 +465,7 @@ function validateAndSubmit() {
               autocomplete="cc-exp"
               class="w-full bg-[#0d1117] border border-gray-700 text-white text-sm font-mono px-3.5 py-2.5 outline-none focus:border-[#00ece0] transition-colors disabled:opacity-40 rounded-sm text-center"
               :class="{ 'border-rose-500': !!errors.expiracion }"
-              @focus="onFocusDataField"
+              @focus="onFocusExpiracion"
             />
             <p v-if="errors.expiracion" class="text-xs text-rose-400 font-mono mt-1">
               {{ errors.expiracion }}

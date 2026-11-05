@@ -197,64 +197,74 @@ const cardContainerClasses = computed(() => {
           </div>
         </template>
 
-        <!-- Skin 2: Nu (Nubank) -->
+        <!-- Skin 2: Nu (Nubank Colombia - Réplica Fiel del Plástico Físico Oficial) -->
         <template v-else-if="bankSkin === 'nu'">
+          <!-- Fondo púrpura mate oficial Nubank (#820AD1) -->
           <div
             class="absolute inset-0"
-            style="background: linear-gradient(160deg, #9B30D9 0%, #820AD1 40%, #6B09A8 100%);"
+            style="background: linear-gradient(145deg, #8A05BE 0%, #820AD1 50%, #6D079D 100%);"
           />
-          <div class="pointer-events-none absolute -right-10 top-8 size-40 rounded-full bg-white/5" />
-          <div class="pointer-events-none absolute -left-8 -bottom-10 size-36 rounded-full bg-black/10" />
 
-          <div class="relative z-10 flex h-full flex-col justify-between">
-            <div class="flex justify-between items-start">
+          <!-- Cara Frontal Nu: Nombre del Titular arriba a la izquierda, Logo 'nu' arriba a la derecha,
+               crédito/débito + contactless + chip plateado + Mastercard abajo. SIN NÚMEROS (van al reverso) -->
+          <div class="relative z-10 flex h-full flex-col justify-between text-white p-1">
+            <!-- Fila Superior: Nombre del Titular a la izquierda y Logotipo Oficial 'nu' a la derecha -->
+            <div class="flex justify-between items-start pt-1 px-1">
+              <p class="text-[12px] sm:text-[13px] font-sans font-medium text-white tracking-wide truncate max-w-[210px] drop-shadow-sm">
+                {{ displayNombre }}
+              </p>
+
+              <!-- Logotipo Nu oficial en blanco -->
               <span
-                class="text-[28px] font-black lowercase leading-none tracking-tighter text-white"
-                style="font-family: Arial Black, Arial, sans-serif;"
+                class="text-[32px] font-black lowercase text-white tracking-tighter leading-none select-none font-sans pr-1"
+                style="font-family: system-ui, -apple-system, sans-serif; letter-spacing: -0.06em;"
               >
                 nu
               </span>
-              <div class="flex flex-col items-end gap-1.5">
-                <span class="text-[8px] uppercase tracking-[0.2em] text-white/60 font-mono font-semibold">
-                  {{ cardKind === 'credito' ? 'Credito' : 'Debito' }}
-                </span>
-                <div class="relative inline-block w-9 h-5.5" aria-hidden="true">
-                  <span class="absolute left-0 top-0 w-[58%] h-full rounded-full bg-[#eb001b]" />
-                  <span class="absolute right-0 top-0 w-[58%] h-full rounded-full bg-[#f79e1b] mix-blend-screen" />
-                </div>
-              </div>
             </div>
 
-            <div class="flex items-center justify-end gap-2 my-auto pr-1">
-              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-                <path d="M8 8.5c2.2 1.8 2.2 5.2 0 7" stroke="#ffffff" stroke-width="1.8" stroke-linecap="round" />
-                <path d="M11 5.5c3.5 2.8 3.5 10.2 0 13" stroke="#ffffff" stroke-width="1.8" stroke-linecap="round" />
-                <path d="M14 3c4.8 3.8 4.8 14.2 0 18" stroke="#ffffff" stroke-width="1.8" stroke-linecap="round" />
-              </svg>
+            <!-- Fila Inferior: 'crédito' + contactless a la izquierda, chip metálico al centro, Mastercard a la derecha -->
+            <div class="flex items-end justify-between pb-1 px-1 mt-auto">
+              <!-- crédito / débito y contactless ))) -->
+              <div class="flex flex-col gap-1 items-start">
+                <span class="text-[11px] font-sans lowercase text-white font-medium tracking-tight">
+                  {{ cardKind === 'debito' ? 'débito' : 'crédito' }}
+                </span>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" class="text-white" aria-hidden="true">
+                  <path d="M8 8.5c2.2 1.8 2.2 5.2 0 7" stroke="#ffffff" stroke-width="2.2" stroke-linecap="round" />
+                  <path d="M11 5.5c3.5 2.8 3.5 10.2 0 13" stroke="#ffffff" stroke-width="2.2" stroke-linecap="round" />
+                  <path d="M14 3c4.8 3.8 4.8 14.2 0 18" stroke="#ffffff" stroke-width="2.2" stroke-linecap="round" />
+                </svg>
+              </div>
 
+              <!-- Chip EMV plateado oficial -->
               <div
                 class="relative w-9 h-7 rounded-[3px] border border-black/20 shrink-0 overflow-hidden shadow-sm"
-                style="background: linear-gradient(145deg, #e8d48b 0%, #c9a227 45%, #f0e0a0 70%, #a67c00 100%);"
+                style="background: linear-gradient(135deg, #e8ecef 0%, #c4cbd1 35%, #f1f4f7 65%, #a8b1b8 100%);"
                 aria-hidden="true"
               >
-                <div class="absolute inset-[3px] grid grid-cols-3 grid-rows-2 gap-px opacity-40">
-                  <span v-for="i in 6" :key="i" class="bg-black/30 rounded-[1px]" />
+                <div class="absolute inset-[2.5px] border border-slate-500/40 rounded-[2px]" />
+                <div class="absolute inset-0 flex items-center justify-center">
+                  <div class="w-full h-px bg-slate-500/40" />
                 </div>
+                <div class="absolute inset-0 flex items-center justify-center">
+                  <div class="h-full w-px bg-slate-500/40" />
+                </div>
+                <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-3.5 h-3.5 rounded-full border border-slate-500/50" />
+              </div>
+
+              <!-- Logo Oficial Mastercard (Rojo #EB001B y Naranja #F79E1B) -->
+              <div class="relative inline-block w-11 h-7" aria-hidden="true">
+                <span class="absolute left-0 top-0 size-7 rounded-full bg-[#eb001b] shadow-sm" />
+                <span class="absolute right-0 top-0 size-7 rounded-full bg-[#f79e1b] mix-blend-screen shadow-sm" />
               </div>
             </div>
 
-            <div class="mt-auto">
-              <p class="text-[13px] sm:text-[14px] font-mono tracking-[0.16em] tabular-nums text-white">
-                {{ displayNumero }}
-              </p>
-              <div class="flex justify-between items-end mt-2 gap-2">
-                <p class="text-[11px] font-semibold tracking-[0.08em] truncate uppercase text-white">
-                  {{ displayNombre }}
-                </p>
-                <p class="text-[10px] font-mono text-white/85 shrink-0">
-                  {{ displayExpiracion }}
-                </p>
-              </div>
+            <!-- Aviso interactivo en el borde inferior -->
+            <div class="flex justify-between items-center px-1 pt-0.5">
+              <span class="text-[8px] font-mono font-medium text-white/70 uppercase tracking-wider flex items-center gap-1">
+                <span>🔄</span> Datos impresos al reverso
+              </span>
             </div>
           </div>
         </template>
@@ -529,34 +539,78 @@ const cardContainerClasses = computed(() => {
           </div>
         </template>
 
-        <!-- REVERSO NU -->
+        <!-- ================= REVERSO NU (IDÉNTICO A LA FOTO FÍSICA OFICIAL) ================= -->
         <template v-else-if="bankSkin === 'nu'">
+          <!-- Fondo púrpura Nubank mate -->
           <div
             class="absolute inset-0"
-            style="background: linear-gradient(160deg, #9B30D9 0%, #820AD1 50%, #6B09A8 100%);"
+            style="background: linear-gradient(145deg, #8A05BE 0%, #820AD1 50%, #6D079D 100%);"
           />
+
           <div class="relative z-10 flex h-full flex-col justify-between text-white">
-            <div class="px-4 text-[7px] text-white/70">
-              Necesitas ayuda? Abre el chat en la app · Valida en todo el mundo
+            <!-- Banda Magnética Negra Superior -->
+            <div>
+              <div class="h-8 bg-black w-full shadow-inner" />
+              <!-- Microtexto oficial de Nu -->
+              <p class="px-3 pt-1 text-[6.5px] font-mono text-purple-200/90 tracking-tight truncate">
+                ¿Necesitas ayuda? Abre el chat en la app · Colombia 01 800 917 2000 · Bogotá +57 60(1) 357 1102 · ayuda@nu.com.co
+              </p>
             </div>
-            <div class="my-1 h-8 bg-black w-full" />
-            <div class="px-4 my-auto">
-              <div class="flex items-center shadow-sm">
-                <div
-                  class="h-7 flex-1 rounded-l flex items-center px-2 overflow-hidden"
-                  style="background: repeating-linear-gradient(-45deg, #f5f5f5, #f5f5f5 4px, #e2e8f0 4px, #e2e8f0 8px);"
-                >
-                  <span class="font-mono text-[9px] text-neutral-500 italic select-none">
-                    firma autorizada · simulacion
-                  </span>
-                </div>
-                <div class="h-7 w-16 bg-white rounded-r flex items-center justify-center font-mono text-xs font-bold text-[#1a1a1a] border-l border-neutral-300">
-                  <span class="italic tracking-widest">{{ displayCvv }}</span>
+
+            <!-- CUERPO CENTRAL: TEXTOS LEGALES A LA IZQUIERDA + DATOS IMPRESOS A LA DERECHA -->
+            <div class="px-5 my-auto grid grid-cols-12 gap-3 items-center">
+              <!-- Lado Izquierdo: Leyenda legal de Nu Colombia -->
+              <div class="col-span-5 space-y-1 text-[6.5px] text-white/80 leading-tight">
+                <p>Al usar la tarjeta, aceptas los términos de tu contrato.</p>
+                <p>Válida en todo el mundo e intransferible.</p>
+                <p class="text-[5.5px] text-purple-200/70">
+                  Emitida con cariño por Nu Colombia Compañía de Financiamiento S.A.
+                </p>
+              </div>
+
+              <!-- Lado Derecho: NÚMERO DE 16 DÍGITOS, VÁLIDA HASTA Y CVC -->
+              <div class="col-span-7 space-y-1 text-right pr-2">
+                <!-- Número de tarjeta en bloque monospace blanco destacado -->
+                <p class="font-mono text-[13px] sm:text-[14px] font-black tracking-[0.14em] tabular-nums text-white drop-shadow-sm">
+                  {{ displayNumero }}
+                </p>
+
+                <!-- Válida hasta y CVC -->
+                <div class="flex items-center justify-end gap-3 text-[9px] font-mono pt-0.5">
+                  <div class="flex items-center gap-1">
+                    <span class="text-[6.5px] leading-tight uppercase font-bold text-white/70">Válida<br>hasta</span>
+                    <span class="font-bold text-[11px] text-white">{{ displayExpiracion }}</span>
+                  </div>
+
+                  <div class="flex items-center gap-1">
+                    <span class="text-[6.5px] leading-tight uppercase font-bold text-white/70">CVC</span>
+                    <span class="font-mono text-[11px] font-black italic bg-white/15 px-1.5 py-0.5 rounded border border-white/25 text-white">
+                      {{ displayCvv }}
+                    </span>
+                  </div>
                 </div>
               </div>
             </div>
-            <div class="px-4 pb-0.5 text-[7px] text-center text-white/60">
-              Vista previa visual interactiva. No se almacenan ni procesan datos bancarios reales.
+
+            <!-- PIE INFERIOR: HOLOGRAMA DE SEGURIDAD MASTERCARD + CATEGORÍA GOLD Y FABRICANTE -->
+            <div class="px-5 pb-1 flex items-center justify-between">
+              <!-- Holograma de Seguridad Plateado de Mastercard y etiqueta 'gold' -->
+              <div class="flex items-center gap-2">
+                <div
+                  class="w-8 h-5 rounded-full border border-white/30 overflow-hidden relative shadow-sm"
+                  style="background: linear-gradient(135deg, #d8dbdf 0%, #ffffff 40%, #a6abb3 80%, #e2e8f0 100%);"
+                  title="Holograma de seguridad"
+                >
+                  <div class="absolute inset-0 opacity-40 bg-[radial-gradient(#000000_1px,transparent_1px)] [background-size:3px_3px]" />
+                </div>
+                <span class="text-[12px] font-sans font-medium text-white/95 lowercase tracking-wide">
+                  gold
+                </span>
+              </div>
+
+              <span class="text-[6.5px] font-mono text-purple-200/60">
+                THALES IZT U1188174F2 0626 · STREAMSTORE
+              </span>
             </div>
           </div>
         </template>

@@ -106,8 +106,8 @@ export function usePaymentCard() {
 
   function setBankSkin(skin: CardBankSkin) {
     bankSkin.value = skin
-    // En Bancolombia la información reside en el reverso; en las demás reside en el frente
-    if (skin === 'bancolombia') {
+    // En Bancolombia y Nu los números de tarjeta van impresos al reverso
+    if (skin === 'bancolombia' || skin === 'nu') {
       isFlipped.value = true
     } else {
       isFlipped.value = false
@@ -127,6 +127,17 @@ export function usePaymentCard() {
       card.mes = '04'
       card.anio = '30'
       setCvv('654')
+      flipToBack()
+      return
+    }
+
+    if (type === 'nu') {
+      bankSkin.value = 'nu'
+      setNumero('5529912345678901')
+      setNombre('ANDRES FELIPE NAVAS')
+      card.mes = '03'
+      card.anio = '29'
+      setCvv('321')
       flipToBack()
       return
     }
@@ -159,13 +170,6 @@ export function usePaymentCard() {
       card.mes = '05'
       card.anio = '28'
       setCvv('999')
-    } else if (type === 'nu') {
-      bankSkin.value = 'nu'
-      setNumero('5162451234567890')
-      setNombre('DAVID NU BANK')
-      card.mes = '09'
-      card.anio = '29'
-      setCvv('321')
     } else if (type === 'falabella') {
       bankSkin.value = 'falabella'
       setNumero('5487123498765432')
