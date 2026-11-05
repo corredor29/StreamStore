@@ -28,6 +28,13 @@ const items = computed(() => cart.items)
 const total = computed(() => cart.total)
 const count = computed(() => cart.count)
 
+const refFactura = ref('STRM-' + Date.now().toString().slice(-6))
+const fechaFactura = new Date().toLocaleDateString('es-CO', {
+  day: '2-digit',
+  month: 'short',
+  year: 'numeric',
+})
+
 async function onProcessPayment(payload: { metodo: MetodoPago; marca?: any; ultimos4?: string }) {
   if (items.value.length === 0) return
 
@@ -185,6 +192,7 @@ async function onProcessPayment(payload: { metodo: MetodoPago; marca?: any; ulti
             </h2>
             <PaymentCard3D
               :brand="paymentCard.brand.value"
+              :bank-skin="paymentCard.bankSkin.value"
               :display-numero="paymentCard.displayNumero.value"
               :display-nombre="paymentCard.displayNombre.value"
               :display-expiracion="paymentCard.displayExpiracion.value"
@@ -207,51 +215,87 @@ async function onProcessPayment(payload: { metodo: MetodoPago; marca?: any; ulti
           </section>
         </div>
 
-        <!-- Columna Derecha: Resumen de Pedido -->
+        <!-- Columna Derecha: Pre-Factura y Resumen de Pedido -->
         <div class="lg:col-span-5">
-          <aside aria-label="Detalle del pedido" class="card sticky top-24 p-6">
-            <h2 class="font-display text-lg font-bold text-fg border-b border-line pb-3">
-              Resumen del pedido
-            </h2>
+          <aside aria-label="Detalle de facturación" class="card sticky top-24 overflow-hidden border border-line">
+            <!-- Barra superior de acento degradado (estilo SmartInventory) -->
+            <div class="h-1.5 w-full bg-gradient-to-r from-brand-500 via-cyan-400 to-emerald-400" />
 
-            <div class="divide-y divide-line/60 my-4 max-h-72 overflow-y-auto pr-1">
-              <div
-                v-for="item in items"
-                :key="item.id"
-                class="py-3 flex items-center justify-between text-xs"
-              >
+            <div class="p-6">
+              <!-- Encabezado de Pre-factura -->
+              <div class="flex items-start justify-between border-b border-line pb-4">
                 <div>
-                  <p class="font-bold text-fg">{{ item.producto.nombre }}</p>
-                  <p class="text-muted">
-                    {{ item.cantidad }}x {{ formatPrice(item.producto.precio) }} · {{ item.producto.duracionDias }} días
-                  </p>
+                  <span class="text-[10px] font-mono uppercase tracking-[0.25em] text-cyan-400 font-bold">
+                    Pre-Factura Digital
+                  </span>
+                  <h2 class="font-display text-lg font-black text-fg tracking-tight">
+                    Resumen de Compra
+                  </h2>
                 </div>
-                <span class="font-mono font-bold text-fg">
-                  {{ formatPrice(item.subtotal) }}
+                <div class="text-right">
+                  <span class="text-[9px] font-mono uppercase text-muted block">Referencia</span>
+                  <span class="font-mono text-xs font-bold text-fg">{{ refFactura }}</span>
+                  <span class="text-[10px] font-mono text-muted block mt-0.5">{{ fechaFactura }}</span>
+                </div>
+              </div>
+
+              <!-- Lista de Ítems -->
+              <div class="divide-y divide-line/60 my-4 max-h-72 overflow-y-auto pr-1">
+                <div
+                  v-for="item in items"
+                  :key="item.id"
+                  class="py-3 flex items-center justify-between text-xs"
+                >
+                  <div class="min-w-0 pr-2">
+                    <p class="font-bold text-fg truncate">{{ item.producto.nombre }}</p>
+                    <p class="text-[11px] text-muted">
+                      {{ item.cantidad }}x {{ formatPrice(item.producto.precio) }} · {{ item.producto.duracionDias }} días
+                    </p>
+                  </div>
+                  <span class="font-mono font-bold text-cyan-300 shrink-0">
+                    {{ formatPrice(item.subtotal) }}
+                  </span>
+                </div>
+              </div>
+
+              <!-- Desglose de Costos -->
+              <div class="space-y-2 border-t border-line pt-4 text-xs">
+                <div class="flex justify-between text-muted">
+                  <span>Subtotal ({{ count }} ítems):</span>
+                  <span class="font-mono text-fg font-bold">{{ formatPrice(total) }}</span>
+                </div>
+                <div class="flex justify-between text-muted">
+                  <span>Impuestos (IVA 0% - Servicios Digitales):</span>
+                  <span class="font-mono text-fg font-semibold">$0 COP</span>
+                </div>
+                <div class="flex justify-between text-muted">
+                  <span>Entrega de credenciales:</span>
+                  <span class="text-success font-semibold flex items-center gap-1">
+                    <span class="size-1.5 rounded-full bg-success animate-ping" />
+                    Inmediata
+                  </span>
+                </div>
+              </div>
+
+              <!-- Total General -->
+              <div class="my-5 flex items-baseline justify-between border-t border-line pt-4">
+                <span class="font-display text-base font-bold text-fg">Total a pagar</span>
+                <span class="font-display text-2xl sm:text-3xl font-black text-fg tracking-tight">
+                  {{ formatPrice(total) }}
                 </span>
               </div>
-            </div>
 
-            <div class="space-y-2 border-t border-line pt-4 text-xs">
-              <div class="flex justify-between text-muted">
-                <span>Total ítems:</span>
-                <span class="font-mono text-fg font-bold">{{ count }}</span>
+              <!-- Garantía y Simulación -->
+              <div class="space-y-2">
+                <div class="rounded-xl border border-emerald-500/20 bg-emerald-950/20 p-2.5 text-[11px] text-emerald-200/90 flex items-center gap-2">
+                  <ShieldCheck class="size-4 shrink-0 text-emerald-400" aria-hidden="true" />
+                  <span>Garantía de activación instantánea al confirmar el pago.</span>
+                </div>
+
+                <div class="rounded-xl bg-surface-2 p-3 text-[11px] text-muted">
+                  <p>🔒 <strong>Entorno Seguro de Pruebas:</strong> Las transacciones bancarias son simuladas. No se efectúan débitos a cuentas bancarias reales.</p>
+                </div>
               </div>
-              <div class="flex justify-between text-muted">
-                <span>Entrega:</span>
-                <span class="text-success font-semibold">Inmediata</span>
-              </div>
-            </div>
-
-            <div class="my-6 flex items-baseline justify-between border-t border-line pt-4">
-              <span class="font-display text-base font-bold text-fg">Total</span>
-              <span class="font-display text-3xl font-extrabold text-fg">
-                {{ formatPrice(total) }}
-              </span>
-            </div>
-
-            <div class="rounded-xl bg-surface-2 p-3 text-[11px] text-muted space-y-1">
-              <p>🔒 <strong>Entorno Seguro de Pruebas:</strong> Las transacciones bancarias son simuladas. No se efectúan cobros a cuentas reales.</p>
             </div>
           </aside>
         </div>

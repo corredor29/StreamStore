@@ -106,6 +106,24 @@ export type MetodoPago = 'TARJETA' | 'DAVIPLATA'
 
 export type MarcaTarjeta = 'visa' | 'mastercard' | 'amex' | 'generic'
 
+export type CardBankSkin = 'streamstore' | 'nu' | 'bancolombia' | 'falabella' | 'bbva'
+
+export interface CardBankOption {
+  id: CardBankSkin
+  label: string
+  hint: string
+  accent: string
+  badgeBg: string
+}
+
+export const CARD_BANK_SKINS: CardBankOption[] = [
+  { id: 'streamstore', label: 'StreamStore', hint: 'Dark Cyber', accent: '#06b6d4', badgeBg: 'bg-cyan-500/20 text-cyan-300' },
+  { id: 'nu', label: 'Nu', hint: 'Morada Gold', accent: '#820AD1', badgeBg: 'bg-purple-600/20 text-purple-300' },
+  { id: 'bancolombia', label: 'Bancolombia', hint: 'Amarilla', accent: '#FFDD00', badgeBg: 'bg-yellow-500/20 text-yellow-300' },
+  { id: 'falabella', label: 'Falabella CMR', hint: 'Verde', accent: '#2E7D32', badgeBg: 'bg-emerald-600/20 text-emerald-300' },
+  { id: 'bbva', label: 'BBVA', hint: 'Azul Aqua', accent: '#004481', badgeBg: 'bg-blue-600/20 text-blue-300' },
+]
+
 /**
  * Payload enviado al backend al pagar. Nunca incluye número completo, CVV
  * ni fecha de vencimiento: solo metadatos no sensibles de la simulación.

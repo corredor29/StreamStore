@@ -1,5 +1,5 @@
 import { computed, reactive, ref } from 'vue'
-import type { MarcaTarjeta } from '@/types'
+import type { CardBankSkin, MarcaTarjeta } from '@/types'
 
 export interface CardState {
   numero: string
@@ -11,6 +11,7 @@ export interface CardState {
 
 export function usePaymentCard() {
   const isFlipped = ref(false)
+  const bankSkin = ref<CardBankSkin>('streamstore')
 
   const card = reactive<CardState>({
     numero: '',
@@ -97,22 +98,29 @@ export function usePaymentCard() {
     isFlipped.value = false
   }
 
+  function setBankSkin(skin: CardBankSkin) {
+    bankSkin.value = skin
+  }
+
   // Preajustes de prueba oficiales para revisión rápida
-  function setTestCard(type: 'visa' | 'mastercard' | 'amex' | 'rejected') {
+  function setTestCard(type: 'visa' | 'mastercard' | 'amex' | 'rejected' | 'nu' | 'bancolombia' | 'falabella' | 'bbva') {
     flipToFront()
     if (type === 'visa') {
+      bankSkin.value = 'streamstore'
       setNumero('4532015012345678')
       setNombre('CARLOS VISA DEMO')
       card.mes = '12'
       card.anio = '28'
       setCvv('789')
     } else if (type === 'mastercard') {
+      bankSkin.value = 'streamstore'
       setNumero('5412751234123456')
       setNombre('MARIA MASTERCARD')
       card.mes = '08'
       card.anio = '29'
       setCvv('456')
     } else if (type === 'amex') {
+      bankSkin.value = 'streamstore'
       setNumero('378282246310005')
       setNombre('ALEX AMEX DEMO')
       card.mes = '11'
@@ -124,12 +132,41 @@ export function usePaymentCard() {
       card.mes = '05'
       card.anio = '28'
       setCvv('999')
+    } else if (type === 'nu') {
+      bankSkin.value = 'nu'
+      setNumero('5162451234567890')
+      setNombre('DAVID NU BANK')
+      card.mes = '09'
+      card.anio = '29'
+      setCvv('321')
+    } else if (type === 'bancolombia') {
+      bankSkin.value = 'bancolombia'
+      setNumero('5300987654321098')
+      setNombre('VALENTINA BANCOLOMBIA')
+      card.mes = '04'
+      card.anio = '30'
+      setCvv('654')
+    } else if (type === 'falabella') {
+      bankSkin.value = 'falabella'
+      setNumero('5487123498765432')
+      setNombre('SANTIAGO FALABELLA CMR')
+      card.mes = '10'
+      card.anio = '28'
+      setCvv('890')
+    } else if (type === 'bbva') {
+      bankSkin.value = 'bbva'
+      setNumero('4557987612345678')
+      setNombre('CAMILA BBVA AQUA')
+      card.mes = '07'
+      card.anio = '29'
+      setCvv('147')
     }
   }
 
   return {
     card,
     brand,
+    bankSkin,
     isFlipped,
     displayNumero,
     displayNombre,
@@ -144,5 +181,6 @@ export function usePaymentCard() {
     flipToBack,
     flipToFront,
     setTestCard,
+    setBankSkin,
   }
 }
