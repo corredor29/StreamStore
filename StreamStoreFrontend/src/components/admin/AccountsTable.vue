@@ -49,7 +49,7 @@ const cuentasFiltradas = computed(() => {
     const q = searchQuery.value.toLowerCase().trim()
     const matchesSearch =
       !q ||
-      c.correo.toLowerCase().includes(q) ||
+      (c.correo && c.correo.toLowerCase().includes(q)) ||
       (c.plataforma?.nombre && c.plataforma.nombre.toLowerCase().includes(q))
 
     return matchesPlat && matchesEstado && matchesSearch
@@ -124,18 +124,41 @@ const cuentasFiltradas = computed(() => {
           @click="toggleExpand(cuenta.id)"
         >
           <div class="flex items-center gap-3 min-w-0">
+            <!-- Portada / Badge de Plataforma -->
+            <div
+              v-if="cuenta.coverUrl || cuenta.plataforma?.coverUrl"
+              class="size-11 rounded-lg overflow-hidden shrink-0 border border-line bg-surface-2"
+            >
+              <img
+                :src="cuenta.coverUrl || cuenta.plataforma?.coverUrl!"
+                :alt="cuenta.plataforma?.nombre || 'Portada'"
+                class="w-full h-full object-cover"
+              />
+            </div>
             <span
+              v-else
               class="rounded-lg px-2.5 py-1 text-xs font-bold uppercase tracking-wider text-white shrink-0"
               :style="{ backgroundColor: cuenta.plataforma?.slug === 'netflix' ? '#E50914' : cuenta.plataforma?.slug === 'disney' ? '#113CCF' : cuenta.plataforma?.slug === 'prime' ? '#00A8E1' : '#7B2FF7' }"
             >
               {{ cuenta.plataforma?.nombre || 'Plataforma' }}
             </span>
             <div class="min-w-0">
-              <p class="font-mono text-sm font-bold text-fg truncate">
+              <div class="flex items-center gap-2">
+                <span v-if="cuenta.coverUrl || cuenta.plataforma?.coverUrl" class="font-bold text-fg text-sm truncate">
+                  {{ cuenta.plataforma?.nombre || 'Plataforma' }}
+                </span>
+                <span v-if="!cuenta.correo || cuenta.correo.includes('pendiente')" class="rounded bg-cyan-950/60 border border-cyan-400/30 text-cyan-300 text-[10px] font-mono px-2 py-0.5">
+                  Entrega post-compra
+                </span>
+              </div>
+              <p v-if="cuenta.correo && !cuenta.correo.includes('pendiente')" class="font-mono text-xs sm:text-sm font-semibold text-fg truncate">
                 {{ cuenta.correo }}
               </p>
-              <p class="text-xs text-muted">
-                ID Cuenta: #{{ cuenta.id }}
+              <p v-else class="text-xs text-muted">
+                Credenciales pendientes de asignación
+              </p>
+              <p class="text-[11px] text-muted">
+                ID Inventario: #{{ cuenta.id }}
               </p>
             </div>
           </div>

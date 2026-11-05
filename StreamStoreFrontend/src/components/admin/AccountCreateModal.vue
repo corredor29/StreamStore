@@ -1,12 +1,13 @@
 <script setup lang="ts">
-import { reactive, ref } from 'vue'
+import { computed, reactive, ref, watch } from 'vue'
 import { 
-  KeyRound, 
-  Lock, 
-  Mail, 
-  Plus, 
+  Check, 
+  Image as ImageIcon, 
+  Info, 
+  Sparkles, 
   Trash2, 
   Tv, 
+  Upload, 
   X 
 } from '@lucide/vue'
 import type { CrearCuentaPayload, Plataforma } from '@/types'
@@ -23,101 +24,162 @@ const emit = defineEmits<{
   created: []
 }>()
 
-const form = reactive({
-  plataformaId: 1,
-  correo: '',
-  password: '',
-  pantallas: [
-    { perfil: 'Perfil 1', pin: '' },
-    { perfil: 'Perfil 2', pin: '' },
-    { perfil: 'Perfil 3', pin: '' },
-    { perfil: 'Perfil 4', pin: '' },
-    { perfil: 'Perfil 5', pin: '' },
-  ],
-})
+// Campos del formulario
+const nombrePlataforma = ref('')
+const plataformaId = ref<number | null>(null)
+const coverPreview = ref<string | null>(null)
+const coverInputMode = ref<'upload' | 'url'>('upload')
+const coverUrlInput = ref('')
+const totalPantallas = ref<number>(5)
+
+// Estado de UI de autocompletado
+const showSuggestions = ref(false)
+const isDragging = ref(false)
+const fileInputRef = ref<HTMLInputElement | null>(null)
 
 const errors = reactive<Record<string, string>>({
-  correo: '',
-  password: '',
-  pantallas: '',
+  nombre: '',
+  cover: '',
 })
 
 const isSubmitting = ref(false)
 const serverError = ref<string | null>(null)
 
-function addPantalla() {
-  if (form.pantallas.length >= 6) return
-  form.pantallas.push({
-    perfil: `Perfil ${form.pantallas.length + 1}`,
-    pin: '',
-  })
-}
+// Sugerencias de autocompletado basadas en lo que escribe el admin
+const plataformasSugeridas = computed(() => {
+  const query = nombrePlataforma.value.trim().toLowerCase()
+  if (!query) {
+    return props.plataformas.slice(0, 6)
+  }
+  return props.plataformas.filter((p) =>
+    p.nombre.toLowerCase().includes(query)
+  )
+})
 
-function removePantalla(index: number) {
-  if (form.pantallas.length <= 1) return
-  form.pantallas.splice(index, 1)
-}
+// Detección de coincidencia exacta con plataforma registrada
+const plataformaExistente = computed(() => {
+  const query = nombrePlataforma.value.trim().toLowerCase()
+  if (!query) return null
+  return props.plataformas.find((p) => p.nombre.toLowerCase() === query) || null
+})
 
-function adjustPantallasPorPlataforma() {
-  // Ajuste inteligente sugerido según plataforma típica
-  const p = props.plataformas.find((x) => x.id === form.plataformaId)
-  if (p?.slug === 'max') {
-    form.pantallas = [
-      { perfil: 'Perfil 1', pin: '' },
-      { perfil: 'Perfil 2', pin: '' },
-      { perfil: 'Perfil 3', pin: '' },
-    ]
-  } else if (p?.slug === 'disney') {
-    form.pantallas = [
-      { perfil: 'Perfil 1', pin: '' },
-      { perfil: 'Perfil 2', pin: '' },
-      { perfil: 'Perfil 3', pin: '' },
-      { perfil: 'Perfil 4', pin: '' },
-    ]
-  } else if (p?.slug === 'prime') {
-    form.pantallas = [
-      { perfil: 'Perfil 1', pin: '' },
-      { perfil: 'Perfil 2', pin: '' },
-      { perfil: 'Perfil 3', pin: '' },
-    ]
+// Al escribir en el input de plataforma
+function onNombreInput() {
+  errors.nombre = ''
+  showSuggestions.value = true
+  const match = props.plataformas.find(
+    (p) => p.nombre.toLowerCase() === nombrePlataforma.value.trim().toLowerCase()
+  )
+  if (match) {
+    plataformaId.value = match.id
+    if (!coverPreview.value && match.coverUrl) {
+      coverPreview.value = match.coverUrl
+    }
   } else {
-    form.pantallas = [
-      { perfil: 'Perfil 1', pin: '' },
-      { perfil: 'Perfil 2', pin: '' },
-      { perfil: 'Perfil 3', pin: '' },
-      { perfil: 'Perfil 4', pin: '' },
-      { perfil: 'Perfil 5', pin: '' },
-    ]
+    plataformaId.value = null
   }
 }
+
+// Seleccionar una sugerencia del autocompletado
+function selectSugerencia(plat: Plataforma) {
+  nombrePlataforma.value = plat.nombre
+  plataformaId.value = plat.id
+  showSuggestions.value = false
+  if (plat.coverUrl && !coverPreview.value) {
+    coverPreview.value = plat.coverUrl
+  }
+}
+
+// Manejo de subida de archivo para foto de portada
+function handleFileChange(event: Event) {
+  const target = event.target as HTMLInputElement
+  const file = target.files?.[0]
+  processFile(file)
+}
+
+function processFile(file?: File) {
+  if (!file) return
+  if (!file.type.startsWith('image/')) {
+    errors.cover = 'Por favor selecciona un archivo de imagen válido (.png, .jpg, .webp).'
+    return
+  }
+  errors.cover = ''
+  const reader = new FileReader()
+  reader.onload = (e) => {
+    coverPreview.value = (e.target?.result as string) || null
+  }
+  reader.readAsDataURL(file)
+}
+
+function onDragOver(e: DragEvent) {
+  e.preventDefault()
+  isDragging.value = true
+}
+
+function onDragLeave(e: DragEvent) {
+  e.preventDefault()
+  isDragging.value = false
+}
+
+function onDrop(e: DragEvent) {
+  e.preventDefault()
+  isDragging.value = false
+  const file = e.dataTransfer?.files?.[0]
+  processFile(file)
+}
+
+function applyCoverUrl() {
+  if (!coverUrlInput.value.trim()) return
+  coverPreview.value = coverUrlInput.value.trim()
+  errors.cover = ''
+}
+
+function removeCover() {
+  coverPreview.value = null
+  coverUrlInput.value = ''
+  if (fileInputRef.value) {
+    fileInputRef.value.value = ''
+  }
+}
+
+// Reset al abrir o cerrar modal
+watch(
+  () => props.isOpen,
+  (open) => {
+    if (open) {
+      nombrePlataforma.value = ''
+      plataformaId.value = null
+      coverPreview.value = null
+      coverUrlInput.value = ''
+      totalPantallas.value = 5
+      errors.nombre = ''
+      errors.cover = ''
+      serverError.value = null
+      showSuggestions.value = false
+    }
+  }
+)
 
 async function onSubmit() {
-  errors.correo = ''
-  errors.password = ''
-  errors.pantallas = ''
+  errors.nombre = ''
+  errors.cover = ''
   serverError.value = null
 
-  if (!form.correo || !form.correo.includes('@')) {
-    errors.correo = 'Ingresa un correo electrónico de cuenta válido.'
+  const nombreLimpio = nombrePlataforma.value.trim()
+  if (!nombreLimpio) {
+    errors.nombre = 'Ingresa el nombre de la plataforma (ej. Netflix, Disney+, Max...).'
+    return
   }
-  if (!form.password || form.password.length < 6) {
-    errors.password = 'La contraseña debe tener al menos 6 caracteres.'
-  }
-  if (form.pantallas.length === 0) {
-    errors.pantallas = 'Debes configurar al menos una pantalla.'
-  }
-
-  if (errors.correo || errors.password || errors.pantallas) return
 
   isSubmitting.value = true
   try {
     const payload: CrearCuentaPayload = {
-      plataformaId: form.plataformaId,
-      correo: form.correo.trim(),
-      password: form.password,
-      pantallas: form.pantallas.map((p) => ({
-        perfil: p.perfil.trim(),
-        pin: p.pin?.trim() || undefined,
+      plataformaId: plataformaId.value || undefined,
+      nombrePlataforma: nombreLimpio,
+      coverUrl: coverPreview.value || undefined,
+      totalPantallas: totalPantallas.value,
+      pantallas: Array.from({ length: totalPantallas.value }, (_, i) => ({
+        perfil: `Perfil ${i + 1}`,
       })),
     }
 
@@ -125,7 +187,7 @@ async function onSubmit() {
     emit('created')
     emit('close')
   } catch (err: any) {
-    serverError.value = err?.message || 'Error al cargar la cuenta en inventario.'
+    serverError.value = err?.message || 'Error al registrar la cuenta en el inventario.'
   } finally {
     isSubmitting.value = false
   }
@@ -135,26 +197,27 @@ async function onSubmit() {
 <template>
   <div
     v-if="isOpen"
-    class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm"
+    class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm select-none"
     role="dialog"
     aria-modal="true"
     aria-labelledby="modal-title"
+    @click.self="showSuggestions = false"
   >
-    <div class="card w-full max-w-xl max-h-[90vh] overflow-y-auto p-6 sm:p-8 border-brand-500/40 shadow-2xl">
+    <div class="card w-full max-w-xl max-h-[92vh] overflow-y-auto p-6 sm:p-8 border-brand-500/40 shadow-2xl bg-[#10152A]">
       <!-- Encabezado Modal -->
-      <div class="flex items-center justify-between border-b border-line pb-4">
+      <div class="flex items-start justify-between border-b border-line pb-4">
         <div>
-          <h2 id="modal-title" class="font-display text-lg font-bold text-fg flex items-center gap-2">
+          <h2 id="modal-title" class="font-display text-lg sm:text-xl font-bold text-fg flex items-center gap-2">
             <Tv class="size-5 text-brand-300" />
-            Cargar Cuenta al Inventario
+            <span>Cargar Cuenta al Inventario</span>
           </h2>
-          <p class="text-xs text-muted">
-            Configura las credenciales maestras y la distribución de pantallas.
+          <p class="text-xs text-muted mt-1">
+            Registra la plataforma y portada para habilitar la disponibilidad en catálogo.
           </p>
         </div>
         <button
           type="button"
-          class="text-muted hover:text-fg p-1.5 rounded-lg hover:bg-surface-2"
+          class="text-muted hover:text-fg p-1.5 rounded-lg hover:bg-surface-2 transition-colors"
           aria-label="Cerrar modal"
           @click="emit('close')"
         >
@@ -167,115 +230,217 @@ async function onSubmit() {
         <p>{{ serverError }}</p>
       </AppAlert>
 
-      <!-- Formulario -->
-      <form class="mt-6 space-y-4" @submit.prevent="onSubmit">
-        <!-- Plataforma -->
-        <div>
-          <label for="admin-platform" class="field-label">Plataforma</label>
-          <select
-            id="admin-platform"
-            v-model.number="form.plataformaId"
-            class="field-input"
-            @change="adjustPantallasPorPlataforma"
-          >
-            <option v-for="plat in plataformas" :key="plat.id" :value="plat.id">
-              {{ plat.nombre }}
-            </option>
-          </select>
-        </div>
-
-        <!-- Correo de la Cuenta -->
-        <div>
-          <label for="admin-acc-email" class="field-label">Correo electrónico de acceso</label>
-          <div class="relative">
-            <input
-              id="admin-acc-email"
-              v-model="form.correo"
-              type="email"
-              placeholder="cuenta@plataforma.com"
-              required
-              class="field-input pl-10"
-              :aria-invalid="!!errors.correo"
-            />
-            <Mail class="absolute left-3 top-3 size-4 text-muted" aria-hidden="true" />
-          </div>
-          <p v-if="errors.correo" class="field-error">{{ errors.correo }}</p>
-        </div>
-
-        <!-- Contraseña Maestra -->
-        <div>
-          <label for="admin-acc-pwd" class="field-label">Contraseña maestra</label>
-          <div class="relative">
-            <input
-              id="admin-acc-pwd"
-              v-model="form.password"
-              type="text"
-              placeholder="Contraseña segura de la cuenta"
-              required
-              class="field-input pl-10 font-mono"
-              :aria-invalid="!!errors.password"
-            />
-            <Lock class="absolute left-3 top-3 size-4 text-muted" aria-hidden="true" />
-          </div>
-          <p v-if="errors.password" class="field-error">{{ errors.password }}</p>
-        </div>
-
-        <!-- Configuración de Pantallas -->
-        <div class="border-t border-line pt-4 space-y-3">
-          <div class="flex items-center justify-between">
-            <span class="text-xs font-bold uppercase tracking-wider text-fg">
-              Configuración de Pantallas ({{ form.pantallas.length }})
+      <!-- Formulario Adaptado al Nuevo Flujo -->
+      <form class="mt-6 space-y-6" @submit.prevent="onSubmit">
+        
+        <!-- ================= 1. NOMBRE DE PLATAFORMA CON AUTOCOMPLETADO ================= -->
+        <div class="relative space-y-1.5">
+          <label for="admin-platform-input" class="field-label flex items-center justify-between">
+            <span>Nombre de la Plataforma *</span>
+            <span v-if="plataformaExistente" class="text-[11px] font-mono text-cyan-400 font-normal flex items-center gap-1">
+              <Check class="size-3 text-cyan-400" />
+              <span>Plataforma existente</span>
             </span>
+            <span v-else-if="nombrePlataforma.trim()" class="text-[11px] font-mono text-brand-300 font-normal flex items-center gap-1">
+              <Sparkles class="size-3 text-brand-300" />
+              <span>Nueva plataforma a registrar</span>
+            </span>
+          </label>
+
+          <div class="relative">
+            <input
+              id="admin-platform-input"
+              v-model="nombrePlataforma"
+              type="text"
+              autocomplete="off"
+              placeholder="Escribe o busca (ej. Netflix, Disney+, Max, Apple TV+...)"
+              class="field-input pl-10 pr-10"
+              :class="{ 'border-danger': !!errors.nombre }"
+              @input="onNombreInput"
+              @focus="showSuggestions = true"
+            />
+            <Tv class="absolute left-3 top-3 size-4 text-muted" aria-hidden="true" />
+
             <button
+              v-if="nombrePlataforma"
               type="button"
-              class="btn-secondary text-xs py-1 px-2.5 gap-1"
-              :disabled="form.pantallas.length >= 6"
-              @click="addPantalla"
+              class="absolute right-3 top-3 text-muted hover:text-white"
+              title="Limpiar campo"
+              @click="nombrePlataforma = ''; plataformaId = null; showSuggestions = true"
             >
-              <Plus class="size-3.5" />
-              <span>Añadir pantalla</span>
+              <X class="size-4" />
             </button>
           </div>
+          <p v-if="errors.nombre" class="field-error">{{ errors.nombre }}</p>
 
-          <div class="space-y-2 max-h-52 overflow-y-auto pr-1">
-            <div
-              v-for="(pantalla, idx) in form.pantallas"
-              :key="idx"
-              class="flex items-center gap-2 rounded-lg border border-line bg-surface-2 p-2.5"
+          <!-- Menú Flotante de Sugerencias de Autocompletado -->
+          <div
+            v-if="showSuggestions && plataformasSugeridas.length > 0"
+            class="absolute top-full left-0 right-0 z-30 mt-1 max-h-52 overflow-y-auto rounded-xl border border-line/80 bg-[#151B32] shadow-2xl backdrop-blur-lg divide-y divide-line/40"
+          >
+            <div class="px-3 py-1.5 text-[10px] font-mono font-bold uppercase tracking-wider text-muted bg-[#10152A]">
+              Sugerencias rápidas (puedes elegir o seguir escribiendo):
+            </div>
+            <button
+              v-for="plat in plataformasSugeridas"
+              :key="plat.id"
+              type="button"
+              class="w-full flex items-center justify-between px-3 py-2.5 text-left text-xs hover:bg-surface-2 transition-colors group"
+              @click="selectSugerencia(plat)"
             >
-              <span class="font-mono text-xs font-bold text-muted w-6 text-center">
-                #{{ idx + 1 }}
-              </span>
-
-              <input
-                v-model="pantalla.perfil"
-                type="text"
-                placeholder="Nombre de perfil"
-                class="field-input text-xs py-1.5 flex-1"
-                required
-              />
-
-              <div class="relative w-28">
-                <input
-                  v-model="pantalla.pin"
-                  type="text"
-                  placeholder="PIN opcional"
-                  maxlength="6"
-                  class="field-input text-xs py-1.5 pl-7 text-center font-mono"
+              <div class="flex items-center gap-2.5">
+                <span
+                  class="size-2.5 rounded-full"
+                  :style="{ backgroundColor: plat.color || '#8057FF' }"
                 />
-                <KeyRound class="absolute left-2 top-2 size-3.5 text-muted" />
+                <span class="font-semibold text-fg group-hover:text-cyan-300 transition-colors">
+                  {{ plat.nombre }}
+                </span>
               </div>
+              <span class="text-[10px] font-mono text-muted group-hover:text-fg">
+                Autocompletar ↵
+              </span>
+            </button>
+          </div>
+        </div>
 
+        <!-- ================= 2. FOTO DE LA PORTADA DE LA PLATAFORMA ================= -->
+        <div class="space-y-2">
+          <div class="flex items-center justify-between">
+            <label class="field-label mb-0">Foto de Portada de la Plataforma</label>
+            <div class="flex items-center gap-2 text-xs">
               <button
                 type="button"
-                class="text-muted hover:text-danger p-1 disabled:opacity-30"
-                :disabled="form.pantallas.length <= 1"
-                aria-label="Eliminar pantalla"
-                @click="removePantalla(idx)"
+                class="px-2 py-0.5 rounded text-[11px] font-mono font-semibold transition-colors"
+                :class="coverInputMode === 'upload' ? 'bg-brand-500/20 text-brand-300 border border-brand-500/40' : 'text-muted hover:text-fg'"
+                @click="coverInputMode = 'upload'"
               >
-                <Trash2 class="size-4" />
+                Subir Archivo
+              </button>
+              <button
+                type="button"
+                class="px-2 py-0.5 rounded text-[11px] font-mono font-semibold transition-colors"
+                :class="coverInputMode === 'url' ? 'bg-brand-500/20 text-brand-300 border border-brand-500/40' : 'text-muted hover:text-fg'"
+                @click="coverInputMode = 'url'"
+              >
+                Pegar URL
               </button>
             </div>
+          </div>
+
+          <!-- Previsualización si ya hay imagen cargada -->
+          <div v-if="coverPreview" class="relative group rounded-xl overflow-hidden border border-line bg-black/40">
+            <div class="aspect-video w-full overflow-hidden flex items-center justify-center bg-black/60">
+              <img
+                :src="coverPreview"
+                alt="Vista previa de portada"
+                class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+              />
+            </div>
+            <!-- Overlay con botón para eliminar portada -->
+            <div class="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-3">
+              <button
+                type="button"
+                class="px-3 py-1.5 rounded-lg bg-danger/80 hover:bg-danger text-white text-xs font-bold flex items-center gap-1.5 shadow-lg"
+                @click="removeCover"
+              >
+                <Trash2 class="size-3.5" />
+                <span>Quitar portada</span>
+              </button>
+            </div>
+            <div class="absolute bottom-2 left-2 px-2 py-0.5 rounded bg-black/70 backdrop-blur-md text-[10px] font-mono text-cyan-300">
+              Portada lista para mostrarse en catálogo
+            </div>
+          </div>
+
+          <!-- Modo 1: Zona Drag & Drop de Subida -->
+          <div
+            v-else-if="coverInputMode === 'upload'"
+            class="relative border-2 border-dashed rounded-xl p-6 text-center transition-all cursor-pointer group"
+            :class="[
+              isDragging ? 'border-cyan-400 bg-cyan-950/20' : 'border-line/80 hover:border-brand-500/60 bg-surface/40',
+            ]"
+            @dragover="onDragOver"
+            @dragleave="onDragLeave"
+            @drop="onDrop"
+            @click="fileInputRef?.click()"
+          >
+            <input
+              ref="fileInputRef"
+              type="file"
+              accept="image/png, image/jpeg, image/webp"
+              class="hidden"
+              @change="handleFileChange"
+            />
+            <div class="flex flex-col items-center justify-center gap-2">
+              <div class="size-11 rounded-xl bg-surface-2 border border-line/60 flex items-center justify-center group-hover:scale-110 transition-transform">
+                <Upload class="size-5 text-cyan-400" />
+              </div>
+              <div>
+                <p class="text-xs font-semibold text-fg">
+                  Haz clic para seleccionar o arrastra la foto de portada
+                </p>
+                <p class="text-[11px] text-muted mt-0.5">
+                  Formatos recomendados: PNG, JPG o WEBP (Relación 16:9)
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Modo 2: Ingresar URL Directa -->
+          <div v-else class="flex gap-2">
+            <div class="relative flex-1">
+              <input
+                v-model="coverUrlInput"
+                type="url"
+                placeholder="https://ejemplo.com/portada-streaming.jpg"
+                class="field-input pl-9 text-xs"
+              />
+              <ImageIcon class="absolute left-3 top-2.5 size-4 text-muted" />
+            </div>
+            <button
+              type="button"
+              class="btn-secondary text-xs px-3"
+              @click="applyCoverUrl"
+            >
+              Cargar
+            </button>
+          </div>
+          <p v-if="errors.cover" class="field-error">{{ errors.cover }}</p>
+        </div>
+
+        <!-- ================= 3. DISTRIBUCIÓN DE CUPOS / PANTALLAS ================= -->
+        <div class="space-y-2 border-t border-line pt-4">
+          <label class="field-label flex items-center justify-between">
+            <span>Capacidad / Cupos de Pantallas</span>
+            <span class="font-mono text-xs text-brand-300 font-bold">
+              {{ totalPantallas }} {{ totalPantallas === 1 ? 'Pantalla' : 'Pantallas' }}
+            </span>
+          </label>
+          <div class="grid grid-cols-5 gap-2">
+            <button
+              v-for="num in [1, 2, 3, 4, 5]"
+              :key="num"
+              type="button"
+              class="py-2 rounded-lg text-xs font-mono font-bold border transition-all"
+              :class="[
+                totalPantallas === num
+                  ? 'border-cyan-400 bg-cyan-950/60 text-cyan-300 shadow-[0_0_15px_rgba(6,182,212,0.3)]'
+                  : 'border-line bg-surface hover:bg-surface-2 text-muted hover:text-fg'
+              ]"
+              @click="totalPantallas = num"
+            >
+              {{ num }} {{ num === 1 ? 'cupo' : 'cupos' }}
+            </button>
+          </div>
+        </div>
+
+        <!-- ================= NOTA INFORMATIVA DEL FLUJO DE ENTREGA ================= -->
+        <div class="rounded-xl border border-cyan-400/30 bg-cyan-950/30 p-3.5 flex items-start gap-3">
+          <Info class="size-4 text-cyan-400 shrink-0 mt-0.5" />
+          <div class="text-xs text-cyan-200/90 leading-relaxed">
+            <strong class="text-white block font-semibold mb-0.5">Entrega bajo demanda:</strong>
+            No es necesario ingresar correo ni contraseña ahora. Cuando un cliente realice la compra, tú como administrador le asignarás directamente las credenciales de acceso y el PIN desde el panel de órdenes.
           </div>
         </div>
 
@@ -290,10 +455,10 @@ async function onSubmit() {
           </button>
           <button
             type="submit"
-            class="btn-primary text-xs py-2 px-5 font-bold"
+            class="btn-primary text-xs py-2 px-5 font-bold shadow-lg shadow-brand-500/25"
             :disabled="isSubmitting"
           >
-            <span v-if="isSubmitting">Guardando cuenta...</span>
+            <span v-if="isSubmitting">Guardando en inventario...</span>
             <span v-else>Guardar e Ingresar a Inventario</span>
           </button>
         </div>

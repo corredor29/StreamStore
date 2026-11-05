@@ -33,6 +33,7 @@ export interface Plataforma {
   nombre: string
   slug: string
   logoUrl?: string | null
+  coverUrl?: string | null
   color?: string | null
   activa: boolean
 }
@@ -191,8 +192,10 @@ export interface Pantalla {
 export interface CuentaAdmin {
   id: number
   plataformaId: number
-  plataforma?: Pick<Plataforma, 'id' | 'nombre' | 'slug'>
-  correo: string
+  plataforma?: Pick<Plataforma, 'id' | 'nombre' | 'slug' | 'coverUrl' | 'color'>
+  correo?: string | null
+  coverUrl?: string | null
+  credencialesPendientes?: boolean
   estado: EstadoCuenta
   totalPantallas: number
   pantallasDisponibles: number
@@ -200,10 +203,13 @@ export interface CuentaAdmin {
 }
 
 export interface CrearCuentaPayload {
-  plataformaId: number
-  correo: string
-  password: string
-  pantallas: Array<{ perfil: string; pin?: string }>
+  plataformaId?: number
+  nombrePlataforma?: string
+  coverUrl?: string | null
+  correo?: string
+  password?: string
+  totalPantallas?: number
+  pantallas?: Array<{ perfil: string; pin?: string }>
 }
 
 export interface ResumenAdmin {

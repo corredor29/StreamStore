@@ -109,17 +109,38 @@ export const adminService = {
 
   async crearCuenta(payload: CrearCuentaPayload): Promise<CuentaAdmin> {
     if (USE_MOCKS) {
-      const plat = mockPlataformas.find((p) => p.id === payload.plataformaId)
-      const totalPantallas = payload.pantallas.length
+      let plat = payload.plataformaId ? mockPlataformas.find((p) => p.id === payload.plataformaId) : undefined
+      if (!plat && payload.nombrePlataforma) {
+        const slug = payload.nombrePlataforma.toLowerCase().replace(/[^a-z0-9]/g, '-')
+        plat = {
+          id: Math.floor(10 + Math.random() * 90),
+          nombre: payload.nombrePlataforma,
+          slug,
+          color: '#8057FF',
+          coverUrl: payload.coverUrl || null,
+          activa: true,
+        }
+        mockPlataformas.push(plat)
+      } else if (plat && payload.coverUrl) {
+        plat.coverUrl = payload.coverUrl
+      }
+
+      const totalPantallas = payload.totalPantallas || payload.pantallas?.length || 5
+      const pantallasArr = payload.pantallas && payload.pantallas.length > 0 
+        ? payload.pantallas 
+        : Array.from({ length: totalPantallas }, (_, i) => ({ perfil: `Perfil ${i + 1}`, pin: '' }))
+
       const nuevaCuenta: CuentaAdmin = {
         id: Math.floor(100 + Math.random() * 900),
-        plataformaId: payload.plataformaId,
-        plataforma: plat ? { id: plat.id, nombre: plat.nombre, slug: plat.slug } : undefined,
-        correo: payload.correo,
+        plataformaId: plat?.id || 1,
+        plataforma: plat ? { id: plat.id, nombre: plat.nombre, slug: plat.slug, color: plat.color, coverUrl: plat.coverUrl } : undefined,
+        correo: payload.correo || null,
+        coverUrl: payload.coverUrl || plat?.coverUrl || null,
+        credencialesPendientes: !payload.correo,
         estado: 'DISPONIBLE',
         totalPantallas,
         pantallasDisponibles: totalPantallas,
-        pantallas: payload.pantallas.map((p, idx) => ({
+        pantallas: pantallasArr.map((p, idx) => ({
           id: Math.floor(1000 + Math.random() * 9000),
           numero: idx + 1,
           perfil: p.perfil || `Perfil ${idx + 1}`,
@@ -131,7 +152,19 @@ export const adminService = {
       return mockDelay(nuevaCuenta, 400)
     }
 
-    const { data } = await api.post<CuentaAdmin>(`/admin/cuentas`, payload)
+    // Compatibilidad tanto si el backend ya admite el nuevo formato como si aún requiere email/pass temporales
+    const safePayload = {
+      plataformaId: payload.plataformaId || 1,
+      correo: payload.correo || `${(payload.nombrePlataforma || 'servicio').toLowerCase().replace(/[^a-z0-9]/g, '')}.pendiente@streamstore.net`,
+      password: payload.password || 'TEMP_POST_VENTA_2026',
+      coverUrl: payload.coverUrl || undefined,
+      nombrePlataforma: payload.nombrePlataforma || undefined,
+      pantallas: (payload.pantallas && payload.pantallas.length > 0)
+        ? payload.pantallas
+        : Array.from({ length: payload.totalPantallas || 5 }, (_, i) => ({ perfil: `Perfil ${i + 1}` })),
+    }
+
+    const { data } = await api.post<CuentaAdmin>(`/admin/cuentas`, safePayload)
     return data
   },
 
