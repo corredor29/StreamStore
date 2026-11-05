@@ -1,11 +1,10 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { onMounted, ref } from 'vue'
 import { RouterLink, useRouter } from 'vue-router'
 import { 
   ArrowRight, 
   ChevronDown, 
   Headphones, 
-  Play, 
   ShieldCheck, 
   Volume2, 
   VolumeX, 
@@ -104,6 +103,11 @@ function closeCinematicIntro() {
   introStage.value = 'finished'
   showNetflixIntro.value = false
 }
+
+// Reproducir animación automáticamente al entrar / abrir la página
+onMounted(() => {
+  startCinematicIntro()
+})
 
 function toggleMute() {
   isMuted.value = !isMuted.value
@@ -352,18 +356,10 @@ const formatCOP = (val: number) => {
 
       <!-- CONTENIDO CENTRAL DEL HERO (IDÉNTICO A HBO MAX) -->
       <div class="container-app relative z-10 text-center max-w-4xl mx-auto py-20 sm:py-28 flex flex-col items-center justify-center space-y-6">
-        <!-- Logotipo Central StreamStore en Relieve / 3D Blanco Puro -->
-        <div class="flex flex-col items-center justify-center space-y-2">
-          <div class="size-20 sm:size-24 rounded-3xl p-1 bg-gradient-to-b from-white/30 via-white/5 to-transparent border border-white/25 shadow-[0_10px_40px_rgba(0,0,0,0.8),0_0_40px_rgba(128,87,255,0.4)] backdrop-blur-xl group hover:scale-105 transition-all duration-300">
-            <img
-              src="/streamstore_logo_official.png"
-              alt="StreamStore"
-              class="w-full h-full object-contain rounded-[20px] bg-black/80 p-2"
-            />
-          </div>
-
-          <h1 class="font-display text-5xl sm:text-7xl md:text-8xl font-black text-white uppercase tracking-tight drop-shadow-[0_12px_35px_rgba(0,0,0,0.95)]">
-            STREAM<span class="text-transparent bg-clip-text bg-gradient-to-r from-cyan-300 via-white to-purple-300">STORE</span>
+        <!-- Nombre Stream Store en Tipografía Cinematográfica Gigante (Estilo HBO Max) -->
+        <div class="flex flex-col items-center justify-center space-y-3">
+          <h1 class="font-display text-5xl sm:text-7xl md:text-8xl lg:text-9xl font-black text-white uppercase tracking-wider drop-shadow-[0_15px_45px_rgba(0,0,0,0.95)] select-none">
+            STREAM <span class="text-white drop-shadow-[0_15px_45px_rgba(0,0,0,0.95)]">STORE</span>
           </h1>
         </div>
 
@@ -394,17 +390,7 @@ const formatCOP = (val: number) => {
           </RouterLink>
         </div>
 
-        <!-- Opción discreta de Intro Cinemática -->
-        <div class="pt-2">
-          <button
-            type="button"
-            class="inline-flex items-center gap-2 text-xs font-mono text-cyan-300 hover:text-white transition-colors cursor-pointer py-1 px-3 rounded-full hover:bg-white/5"
-            @click="startCinematicIntro"
-          >
-            <Play class="size-3.5 fill-cyan-400 text-cyan-400" />
-            <span>Ver Animación Cinemática Tipo Netflix</span>
-          </button>
-        </div>
+
 
         <!-- 4 Métricas de Confianza Integradas con Estilo Minimalista Oscuro -->
         <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-5 pt-8 w-full max-w-3xl border-t border-white/10 mt-6">
