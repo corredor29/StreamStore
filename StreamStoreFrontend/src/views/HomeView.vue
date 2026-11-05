@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onMounted, ref } from 'vue'
+import { onMounted, onUnmounted, ref, computed } from 'vue'
 import { RouterLink, useRouter } from 'vue-router'
 import { 
   ArrowRight, 
@@ -228,10 +228,59 @@ function closeCinematicIntro() {
   showNetflixIntro.value = false
 }
 
-// Reproducir animación automáticamente al entrar / abrir la página
+// Tracking reactivo del scroll para efecto cinemático de desvanecer y aparecer
+const scrollY = ref(0)
+let scrollTicking = false
+
+function handleScroll() {
+  if (!scrollTicking) {
+    window.requestAnimationFrame(() => {
+      scrollY.value = window.scrollY
+      scrollTicking = false
+    })
+    scrollTicking = true
+  }
+}
+
+// Reproducir animación automáticamente al entrar y activar listeners de scroll
 onMounted(() => {
+  if (typeof window !== 'undefined') {
+    scrollY.value = window.scrollY
+    window.addEventListener('scroll', handleScroll, { passive: true })
+  }
   startCinematicIntro()
   setTimeout(() => handleStoryObserver(), 500)
+})
+
+onUnmounted(() => {
+  if (typeof window !== 'undefined') {
+    window.removeEventListener('scroll', handleScroll)
+  }
+})
+
+// Computados reactivos para la transición fluida (Desvanecer y Aparecer)
+const heroContentStyle = computed(() => {
+  const p = Math.min(1, Math.max(0, scrollY.value / 320))
+  return {
+    opacity: (1 - p).toFixed(2),
+    transform: `translate3d(0, -${(p * 45).toFixed(1)}px, 0)`,
+    pointerEvents: (p > 0.85 ? 'none' : 'auto') as any,
+  }
+})
+
+const heroDarkenStyle = computed(() => {
+  const p = Math.min(1, Math.max(0, scrollY.value / 260))
+  return {
+    opacity: p.toFixed(2),
+  }
+})
+
+const sectionRevealStyle = computed(() => {
+  const p = Math.min(1, Math.max(0, (scrollY.value - 60) / 240))
+  return {
+    opacity: p.toFixed(2),
+    transform: `translate3d(0, ${((1 - p) * 30).toFixed(1)}px, 0)`,
+  }
 })
 
 function toggleMute() {
@@ -400,7 +449,7 @@ const formatCOP = (val: number) => {
     </Teleport>
 
     <!-- ================= 1. CINEMATIC WEBSITE HERO (ESTILO HBO MAX) ================= -->
-    <section class="relative min-h-[92vh] flex items-center justify-center overflow-hidden border-b border-white/10 bg-black">
+    <section class="relative min-h-screen flex items-center justify-center overflow-hidden bg-black">
       <!-- FONDO: MOSAICO DE ENTRETENIMIENTO AL ESTILO HBO MAX -->
       <div
         class="absolute inset-0 bg-cover bg-center transition-transform duration-[25000ms] ease-out kenburns-bg opacity-75"
@@ -410,11 +459,20 @@ const formatCOP = (val: number) => {
         <div class="absolute inset-0 bg-gradient-to-b from-black/85 via-black/45 via-60% to-black pointer-events-none" />
         
         <!-- Radial sutil para concentrar la atención en el centro -->
-        <div class="absolute inset-0 bg-[radial-gradient(circle_at_center,transparent_20%,rgba(0,0,0,0.8)_85%)] pointer-events-none" />
+        <div class="absolute inset-0 bg-[radial-gradient(circle_at_center,transparent_20%,rgba(0,0,0,0.85)_85%)] pointer-events-none" />
+
+        <!-- Oscurecimiento dinámico a negro absoluto al hacer scroll -->
+        <div
+          class="absolute inset-0 bg-black pointer-events-none transition-opacity duration-150"
+          :style="heroDarkenStyle"
+        />
       </div>
 
       <!-- CONTENIDO CENTRAL DEL HERO (IDÉNTICO A HBO MAX) -->
-      <div class="container-app relative z-10 text-center max-w-4xl mx-auto py-20 sm:py-28 flex flex-col items-center justify-center space-y-6">
+      <div
+        class="container-app relative z-10 text-center max-w-4xl mx-auto py-16 sm:py-24 flex flex-col items-center justify-center space-y-6 transition-all duration-150 ease-out will-change-transform"
+        :style="heroContentStyle"
+      >
         <!-- Nombre Stream Store con los Colores Oficiales del Logo -->
         <div class="flex flex-col items-center justify-center space-y-2">
           <h1 class="font-display text-5xl sm:text-7xl md:text-8xl lg:text-9xl font-black uppercase tracking-tight select-none leading-none drop-shadow-[0_15px_45px_rgba(0,0,0,0.95)]">
@@ -474,13 +532,8 @@ const formatCOP = (val: number) => {
       </div>
     </section>
 
-    <!-- FASE DE TRANSICIÓN A OSCURIDAD TOTAL (LA PANTALLA SE OSCURECE TOTALMENTE) -->
-    <div class="relative z-20 h-[50vh] sm:h-[65vh] bg-gradient-to-b from-black via-black to-black flex flex-col items-center justify-center text-center pointer-events-none">
-      <div class="size-1 rounded-full bg-white/20 animate-pulse" />
-    </div>
-
-    <!-- ================= 2. EXPERIENCIA SCROLLYTELLING (REVELACIÓN LENTA DESDE LA OSCURIDAD) ================= -->
-    <section id="plataformas" class="relative bg-black scroll-mt-10 overflow-hidden">
+    <!-- ================= 2. EXPERIENCIA SCROLLYTELLING (APARICIÓN FLUIDA Y CINEMÁTICA) ================= -->
+    <section id="plataformas" class="relative bg-black scroll-mt-6">
 
       <!-- CONTENEDOR DE FONDOS FIJOS CON CROSSFADE INTERACTIVO (FOTOS DE PERSONAS VIENDO CADA PLATAFORMA) -->
       <div class="sticky top-0 h-screen w-full overflow-hidden pointer-events-none z-0">
@@ -504,11 +557,14 @@ const formatCOP = (val: number) => {
       </div>
 
       <!-- CONTENIDO FOREGROUND (SCROLLYTELLING DIVIDIDO EN 2 COLUMNAS) -->
-      <div class="relative z-10 container-app -mt-[100vh] pb-32">
-        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-16 items-start">
+      <div
+        class="relative z-10 container-app -mt-[100vh] pt-10 sm:pt-14 pb-32 transition-all duration-200 ease-out will-change-transform"
+        :style="sectionRevealStyle"
+      >
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-14 items-start">
           
           <!-- COLUMNA IZQUIERDA: TEXTO QUE ASCIENDE Y QUEDA FIJO / STICKY CON EL SELECTOR -->
-          <div class="lg:col-span-5 lg:sticky lg:top-24 lg:h-[calc(100vh-120px)] flex flex-col justify-between py-6 space-y-8">
+          <div class="lg:col-span-5 lg:sticky lg:top-16 flex flex-col justify-start space-y-7 py-4">
             <div class="space-y-4">
               
 
@@ -579,17 +635,17 @@ const formatCOP = (val: number) => {
           </div>
 
           <!-- COLUMNA DERECHA: CAPÍTULOS DE CADA PLATAFORMA QUE ASCIENDEN CON EL SCROLL -->
-          <div class="lg:col-span-7 space-y-28 pt-8 lg:pt-16">
+          <div class="lg:col-span-7 space-y-24 sm:space-y-36">
             <div
               v-for="(sp, idx) in scrollyPlatforms"
               :key="sp.id"
               :ref="(el) => { if (el) storyCardRefs[idx] = el as HTMLElement }"
               :data-story-index="idx"
-              class="min-h-[85vh] flex items-center justify-center transition-all duration-1000 ease-out transform"
+              class="min-h-[60vh] sm:min-h-[75vh] flex items-center justify-center transition-all duration-700 ease-out transform"
               :class="
                 activeStoryIndex === idx
                   ? 'opacity-100 translate-y-0 scale-100'
-                  : 'opacity-0 translate-y-28 scale-95 pointer-events-none'
+                  : 'opacity-25 translate-y-8 scale-95 pointer-events-none'
               "
             >
               <!-- Tarjeta Cinemática de la Plataforma -->
