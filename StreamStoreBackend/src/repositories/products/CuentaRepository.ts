@@ -6,7 +6,7 @@ import { Plataforma } from "../../models/products/Plataforma"
 import { CambiosPantalla, NuevaCuenta, NuevaPantalla } from "../../interfaces/products/Cuenta"
 
 const includeInventario = [
-    { model: Plataforma, attributes: ["id", "nombre"] },
+    { model: Plataforma, attributes: ["id", "nombre", "portada_url", "max_pantallas"] },
     { model: Pantalla, attributes: ["id", "numero", "perfil", "estado"] }
 ]
 

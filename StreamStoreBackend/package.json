@@ -9,7 +9,8 @@
         "start": "node dist/src/server.js",
         "type-check": "tsc --noEmit",
         "db:reset": "tsx src/database/seed.ts",
-        "seed": "tsx src/database/seed.ts"
+        "seed": "tsx src/database/seed.ts",
+        "migrate": "tsx src/database/migrate.ts"
     },
     "dependencies": {
         "bcrypt": "^6.0.0",

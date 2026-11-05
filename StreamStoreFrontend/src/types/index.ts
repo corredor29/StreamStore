@@ -206,6 +206,7 @@ export interface CrearCuentaPayload {
   plataformaId?: number
   nombrePlataforma?: string
   coverUrl?: string | null
+  coverFile?: File
   correo?: string
   password?: string
   totalPantallas?: number

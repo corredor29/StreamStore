@@ -5,7 +5,7 @@ import { Producto } from "../../models/products/Producto"
 import { TipoProducto } from "../../interfaces/products/Producto"
 import { CreateProductoInput, UpdateProductoInput } from "../../validators/products/ProductoValidators"
 
-const includePlataforma = [{ model: Plataforma, attributes: ["id", "nombre", "logo_url"] }]
+const includePlataforma = [{ model: Plataforma, attributes: ["id", "nombre", "logo_url", "portada_url"] }]
 
 export class ProductoRepository {
     findAll(where: WhereOptions<Producto>) {

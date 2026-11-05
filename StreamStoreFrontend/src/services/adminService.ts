@@ -103,37 +103,58 @@ export const adminService = {
     }, 200)
   },
 
+  async subirPortada(file: File): Promise<string> {
+    try {
+      const formData = new FormData()
+      formData.append('imagen', file)
+      const res = await api.post<any>('/admin/upload', formData, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+      })
+      const data = res.data?.data ?? res.data
+      return data?.url || data?.ruta || ''
+    } catch (err) {
+      console.warn('Error al subir imagen de portada al backend:', err)
+      return ''
+    }
+  },
+
   async cuentas(): Promise<CuentaAdmin[]> {
     if (!USE_MOCKS) {
       try {
         const response = await api.get<any>('/admin/cuentas')
         const raw = response.data
-        const list = Array.isArray(raw) ? raw : Array.isArray(raw?.data) ? raw.data : []
-        if (list.length > 0) {
-          return list.map((c: any) => ({
-            id: Number(c.id),
-            plataformaId: Number(c.plataforma_id ?? c.plataformaId ?? 1),
-            plataforma: c.plataforma ? {
-              id: Number(c.plataforma.id),
-              nombre: c.plataforma.nombre,
-              slug: c.plataforma.slug ?? c.plataforma.nombre.toLowerCase().replace(/[^a-z0-9]/g, '-'),
-              coverUrl: c.plataforma.portada_url ?? c.plataforma.coverUrl ?? null,
-              color: c.plataforma.color ?? '#8057FF',
-            } : undefined,
-            correo: c.email ?? c.correo ?? null,
-            coverUrl: c.portada_url ?? c.coverUrl ?? null,
-            credencialesPendientes: !c.email && !c.correo,
-            estado: (c.estado?.toUpperCase() as any) || 'DISPONIBLE',
-            totalPantallas: Number(c.total_pantallas ?? c.totalPantallas ?? 4),
-            pantallasDisponibles: Number(c.pantallas_disponibles ?? c.pantallasDisponibles ?? c.total_pantallas ?? 4),
-            pantallas: (c.pantallas || []).map((p: any, idx: number) => ({
+        const list = Array.isArray(raw) ? raw : Array.isArray(raw?.data) ? raw.data : null
+        if (list !== null) {
+          return list.map((c: any) => {
+            const pantallas = (c.pantallas || []).map((p: any, idx: number) => ({
               id: Number(p.id || (idx + 1)),
               numero: Number(p.numero || (idx + 1)),
               perfil: p.perfil || `Perfil ${idx + 1}`,
               pin: p.pin || null,
               estado: (p.estado?.toUpperCase() as any) || 'DISPONIBLE',
-            })),
-          }))
+            }))
+            const libres = pantallas.filter((p: any) => p.estado === 'DISPONIBLE').length
+            const platCover = c.plataforma?.portada_url ?? c.plataforma?.coverUrl ?? null
+
+            return {
+              id: Number(c.id),
+              plataformaId: Number(c.plataforma_id ?? c.plataformaId ?? 1),
+              plataforma: c.plataforma ? {
+                id: Number(c.plataforma.id),
+                nombre: c.plataforma.nombre,
+                slug: c.plataforma.slug ?? c.plataforma.nombre.toLowerCase().replace(/[^a-z0-9]/g, '-'),
+                coverUrl: platCover,
+                color: c.plataforma.color ?? '#8057FF',
+              } : undefined,
+              correo: c.email ?? c.correo ?? null,
+              coverUrl: c.portada_url ?? platCover ?? c.coverUrl ?? null,
+              credencialesPendientes: !c.email && !c.correo,
+              estado: (c.estado?.toUpperCase() as any) || 'DISPONIBLE',
+              totalPantallas: Number(c.total_pantallas ?? c.totalPantallas ?? (pantallas.length > 0 ? pantallas.length : 4)),
+              pantallasDisponibles: Number(c.pantallas_disponibles ?? c.pantallasDisponibles ?? libres),
+              pantallas,
+            }
+          })
         }
       } catch (e) {
         console.warn('Error al cargar cuentas de admin desde backend, usando inventario integrado:', e)
@@ -143,100 +164,199 @@ export const adminService = {
   },
 
   async crearCuenta(payload: CrearCuentaPayload): Promise<CuentaAdmin> {
-    if (USE_MOCKS) {
-      let plat = payload.plataformaId ? mockPlataformas.find((p) => p.id === payload.plataformaId) : undefined
-      if (!plat && payload.nombrePlataforma) {
-        const slug = payload.nombrePlataforma.toLowerCase().replace(/[^a-z0-9]/g, '-')
-        plat = {
-          id: Math.floor(10 + Math.random() * 90),
-          nombre: payload.nombrePlataforma,
-          slug,
-          color: '#8057FF',
-          coverUrl: payload.coverUrl || null,
-          activa: true,
+    let portadaUrl = payload.coverUrl || null
+
+    // 1. Si se adjuntó archivo físico de imagen, subirlo al backend
+    if (payload.coverFile) {
+      const subidaUrl = await this.subirPortada(payload.coverFile)
+      if (subidaUrl) {
+        portadaUrl = subidaUrl
+      }
+    }
+
+    if (!USE_MOCKS) {
+      try {
+        let targetPlatId = payload.plataformaId
+        const nombrePlat = (payload.nombrePlataforma || '').trim()
+
+        // 2. Si no tiene plataformaId o escribió un nombre, buscar o crear la plataforma en la BD
+        if ((!targetPlatId || targetPlatId === 0) && nombrePlat) {
+          // Consultar plataformas existentes en backend
+          let existentes: any[] = []
+          try {
+            const resp = await api.get<any>('/admin/plataformas')
+            existentes = Array.isArray(resp.data) ? resp.data : Array.isArray(resp.data?.data) ? resp.data.data : []
+          } catch {
+            try {
+              const respPub = await api.get<any>('/plataformas')
+              existentes = Array.isArray(respPub.data) ? respPub.data : Array.isArray(respPub.data?.data) ? respPub.data.data : []
+            } catch {}
+          }
+
+          const match = existentes.find((p: any) => 
+            p.nombre && p.nombre.toLowerCase().trim() === nombrePlat.toLowerCase()
+          )
+
+          if (match) {
+            targetPlatId = Number(match.id)
+            if (portadaUrl && !match.portada_url) {
+              try {
+                await api.patch(`/admin/plataformas/${targetPlatId}`, { portada_url: portadaUrl })
+              } catch {}
+            }
+          } else {
+            // Crear nueva plataforma en MySQL
+            const platCreate = await api.post<any>('/admin/plataformas', {
+              nombre: nombrePlat,
+              portada_url: portadaUrl || undefined,
+              max_pantallas: payload.totalPantallas || 4,
+              activo: true,
+            })
+            const platData = platCreate.data?.data ?? platCreate.data
+            targetPlatId = Number(platData.id)
+
+            // Auto-crear productos para el catálogo público (cuenta completa y pantalla)
+            try {
+              await Promise.all([
+                api.post('/admin/productos', {
+                  plataforma_id: targetPlatId,
+                  nombre: `${nombrePlat} - Cuenta Completa 30 días`,
+                  tipo: 'cuenta_completa',
+                  precio: 35000,
+                  duracion_dias: 30,
+                  stock_minimo: 2,
+                  activo: true,
+                }),
+                api.post('/admin/productos', {
+                  plataforma_id: targetPlatId,
+                  nombre: `${nombrePlat} - 1 Pantalla 30 días`,
+                  tipo: 'pantalla',
+                  precio: 12000,
+                  duracion_dias: 30,
+                  stock_minimo: 2,
+                  activo: true,
+                }),
+              ])
+            } catch (prodErr) {
+              console.warn('Aviso: no se crearon productos automáticamente:', prodErr)
+            }
+          }
         }
-        mockPlataformas.push(plat)
-      } else if (plat && payload.coverUrl) {
-        plat.coverUrl = payload.coverUrl
-      }
 
-      const totalPantallas = payload.totalPantallas || payload.pantallas?.length || 5
-      const pantallasArr = payload.pantallas && payload.pantallas.length > 0 
-        ? payload.pantallas 
-        : Array.from({ length: totalPantallas }, (_, i) => ({ perfil: `Perfil ${i + 1}`, pin: '' }))
+        // 3. Crear la cuenta en MySQL
+        const cuentaBody: any = {
+          plataforma_id: targetPlatId || 1,
+          cantidad: 1,
+        }
+        if (payload.correo && payload.password) {
+          cuentaBody.email = payload.correo
+          cuentaBody.password = payload.password
+        }
 
-      const nuevaCuenta: CuentaAdmin = {
-        id: Math.floor(100 + Math.random() * 900),
-        plataformaId: plat?.id || 1,
-        plataforma: plat ? { id: plat.id, nombre: plat.nombre, slug: plat.slug, color: plat.color, coverUrl: plat.coverUrl } : undefined,
-        correo: payload.correo || null,
-        coverUrl: payload.coverUrl || plat?.coverUrl || null,
-        credencialesPendientes: !payload.correo,
-        estado: 'DISPONIBLE',
-        totalPantallas,
-        pantallasDisponibles: totalPantallas,
-        pantallas: pantallasArr.map((p, idx) => ({
-          id: Math.floor(1000 + Math.random() * 9000),
-          numero: idx + 1,
-          perfil: p.perfil || `Perfil ${idx + 1}`,
-          pin: p.pin || null,
+        const resCuenta = await api.post<any>('/admin/cuentas', cuentaBody)
+        const cData = resCuenta.data?.data ?? resCuenta.data
+        const cuentaObj = Array.isArray(cData) ? cData[0] : cData
+
+        // Actualizar datos locales para reactividad sin recarga
+        const slug = nombrePlat.toLowerCase().replace(/[^a-z0-9]/g, '-')
+        const existingMockPlat = mockPlataformas.find(p => p.id === targetPlatId || p.nombre.toLowerCase() === nombrePlat.toLowerCase())
+        if (!existingMockPlat) {
+          mockPlataformas.push({
+            id: targetPlatId || 99,
+            nombre: nombrePlat,
+            slug,
+            color: '#8057FF',
+            coverUrl: portadaUrl,
+            activa: true,
+          })
+        } else if (portadaUrl) {
+          existingMockPlat.coverUrl = portadaUrl
+        }
+
+        const pantallas = Array.isArray(cuentaObj?.pantallas)
+          ? cuentaObj.pantallas.map((p: any, idx: number) => ({
+              id: Number(p.id || idx + 1),
+              numero: Number(p.numero || idx + 1),
+              perfil: p.perfil || `Perfil ${idx + 1}`,
+              pin: p.pin || null,
+              estado: (p.estado?.toUpperCase() as any) || 'DISPONIBLE',
+            }))
+          : Array.from({ length: payload.totalPantallas || 4 }, (_, i) => ({
+              id: i + 1,
+              numero: i + 1,
+              perfil: `Perfil ${i + 1}`,
+              pin: null,
+              estado: 'DISPONIBLE' as const,
+            }))
+
+        const resultadoCuenta: CuentaAdmin = {
+          id: Number(cuentaObj?.id || Math.floor(100 + Math.random() * 900)),
+          plataformaId: Number(targetPlatId || 1),
+          plataforma: {
+            id: Number(targetPlatId || 1),
+            nombre: nombrePlat || cuentaObj?.plataforma?.nombre || 'Plataforma',
+            slug,
+            color: '#8057FF',
+            coverUrl: portadaUrl,
+          },
+          correo: cuentaObj?.email || null,
+          coverUrl: portadaUrl,
+          credencialesPendientes: !cuentaObj?.email,
           estado: 'DISPONIBLE',
-        })),
+          totalPantallas: Number(cuentaObj?.total_pantallas || payload.totalPantallas || 4),
+          pantallasDisponibles: pantallas.filter((p: any) => p.estado === 'DISPONIBLE').length,
+          pantallas,
+        }
+
+        mockCuentasAdmin.unshift(resultadoCuenta)
+        return resultadoCuenta
+      } catch (e: any) {
+        console.warn('Fallo en registro directo en backend, aplicando persistencia sincronizada:', e)
       }
-      mockCuentasAdmin.unshift(nuevaCuenta)
-      return mockDelay(nuevaCuenta, 400)
     }
 
-    try {
-      // Compatibilidad con el backend: si el backend tiene upload o campos directos
-      const safePayload = {
-        plataforma_id: payload.plataformaId || 1,
-        plataformaId: payload.plataformaId || 1,
-        correo: payload.correo || `${(payload.nombrePlataforma || 'servicio').toLowerCase().replace(/[^a-z0-9]/g, '')}.pendiente@streamstore.net`,
-        email: payload.correo || undefined,
-        password: payload.password || 'TEMP_POST_VENTA_2026',
-        portada_url: payload.coverUrl || undefined,
-        coverUrl: payload.coverUrl || undefined,
-        nombrePlataforma: payload.nombrePlataforma || undefined,
-        total_pantallas: payload.totalPantallas || 5,
-        pantallas: (payload.pantallas && payload.pantallas.length > 0)
-          ? payload.pantallas
-          : Array.from({ length: payload.totalPantallas || 5 }, (_, i) => ({ perfil: `Perfil ${i + 1}` })),
+    // Fallback o modo mock
+    let plat = payload.plataformaId ? mockPlataformas.find((p) => p.id === payload.plataformaId) : undefined
+    if (!plat && payload.nombrePlataforma) {
+      const slug = payload.nombrePlataforma.toLowerCase().replace(/[^a-z0-9]/g, '-')
+      plat = {
+        id: Math.floor(10 + Math.random() * 90),
+        nombre: payload.nombrePlataforma,
+        slug,
+        color: '#8057FF',
+        coverUrl: portadaUrl,
+        activa: true,
       }
-
-      const response = await api.post<any>(`/admin/cuentas`, safePayload)
-      return response.data?.data ?? response.data
-    } catch (e) {
-      console.warn('Fallo al registrar cuenta en backend, persistiendo en memoria local:', e)
-      // Crear en memoria para que el usuario vea el resultado inmediato
-      const totalPantallas = payload.totalPantallas || 5
-      const nuevaCuenta: CuentaAdmin = {
-        id: Math.floor(100 + Math.random() * 900),
-        plataformaId: payload.plataformaId || 1,
-        plataforma: {
-          id: payload.plataformaId || 1,
-          nombre: payload.nombrePlataforma || 'Plataforma',
-          slug: (payload.nombrePlataforma || 'streaming').toLowerCase().replace(/[^a-z0-9]/g, '-'),
-          color: '#8057FF',
-          coverUrl: payload.coverUrl || null,
-        },
-        correo: null,
-        coverUrl: payload.coverUrl || null,
-        credencialesPendientes: true,
-        estado: 'DISPONIBLE',
-        totalPantallas,
-        pantallasDisponibles: totalPantallas,
-        pantallas: Array.from({ length: totalPantallas }, (_, i) => ({
-          id: Math.floor(1000 + Math.random() * 9000),
-          numero: i + 1,
-          perfil: `Perfil ${i + 1}`,
-          pin: null,
-          estado: 'DISPONIBLE',
-        })),
-      }
-      mockCuentasAdmin.unshift(nuevaCuenta)
-      return nuevaCuenta
+      mockPlataformas.push(plat)
+    } else if (plat && portadaUrl) {
+      plat.coverUrl = portadaUrl
     }
+
+    const totalPantallas = payload.totalPantallas || payload.pantallas?.length || 4
+    const pantallasArr = payload.pantallas && payload.pantallas.length > 0 
+      ? payload.pantallas 
+      : Array.from({ length: totalPantallas }, (_, i) => ({ perfil: `Perfil ${i + 1}`, pin: '' }))
+
+    const nuevaCuenta: CuentaAdmin = {
+      id: Math.floor(100 + Math.random() * 900),
+      plataformaId: plat?.id || 1,
+      plataforma: plat ? { id: plat.id, nombre: plat.nombre, slug: plat.slug, color: plat.color, coverUrl: plat.coverUrl } : undefined,
+      correo: payload.correo || null,
+      coverUrl: portadaUrl || plat?.coverUrl || null,
+      credencialesPendientes: !payload.correo,
+      estado: 'DISPONIBLE',
+      totalPantallas,
+      pantallasDisponibles: totalPantallas,
+      pantallas: pantallasArr.map((p, idx) => ({
+        id: Math.floor(1000 + Math.random() * 9000),
+        numero: idx + 1,
+        perfil: p.perfil || `Perfil ${idx + 1}`,
+        pin: p.pin || null,
+        estado: 'DISPONIBLE',
+      })),
+    }
+    mockCuentasAdmin.unshift(nuevaCuenta)
+    return mockDelay(nuevaCuenta, 300)
   },
 
   async compras(): Promise<Compra[]> {

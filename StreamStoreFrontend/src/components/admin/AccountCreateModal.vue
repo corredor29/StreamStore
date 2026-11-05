@@ -28,6 +28,7 @@ const emit = defineEmits<{
 const nombrePlataforma = ref('')
 const plataformaId = ref<number | null>(null)
 const coverPreview = ref<string | null>(null)
+const selectedCoverFile = ref<File | null>(null)
 const coverInputMode = ref<'upload' | 'url'>('upload')
 const coverUrlInput = ref('')
 const totalPantallas = ref<number>(5)
@@ -104,6 +105,7 @@ function processFile(file?: File) {
     return
   }
   errors.cover = ''
+  selectedCoverFile.value = file
   const reader = new FileReader()
   reader.onload = (e) => {
     coverPreview.value = (e.target?.result as string) || null
@@ -131,11 +133,13 @@ function onDrop(e: DragEvent) {
 function applyCoverUrl() {
   if (!coverUrlInput.value.trim()) return
   coverPreview.value = coverUrlInput.value.trim()
+  selectedCoverFile.value = null
   errors.cover = ''
 }
 
 function removeCover() {
   coverPreview.value = null
+  selectedCoverFile.value = null
   coverUrlInput.value = ''
   if (fileInputRef.value) {
     fileInputRef.value.value = ''
@@ -150,6 +154,7 @@ watch(
       nombrePlataforma.value = ''
       plataformaId.value = null
       coverPreview.value = null
+      selectedCoverFile.value = null
       coverUrlInput.value = ''
       totalPantallas.value = 5
       errors.nombre = ''
@@ -177,6 +182,7 @@ async function onSubmit() {
       plataformaId: plataformaId.value || undefined,
       nombrePlataforma: nombreLimpio,
       coverUrl: coverPreview.value || undefined,
+      coverFile: selectedCoverFile.value || undefined,
       totalPantallas: totalPantallas.value,
       pantallas: Array.from({ length: totalPantallas.value }, (_, i) => ({
         perfil: `Perfil ${i + 1}`,
