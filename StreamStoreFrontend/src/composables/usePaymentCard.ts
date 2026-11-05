@@ -98,6 +98,10 @@ export function usePaymentCard() {
     isFlipped.value = false
   }
 
+  function toggleFlip() {
+    isFlipped.value = !isFlipped.value
+  }
+
   function setBankSkin(skin: CardBankSkin) {
     bankSkin.value = skin
   }
@@ -180,6 +184,7 @@ export function usePaymentCard() {
     setCvv,
     flipToBack,
     flipToFront,
+    toggleFlip,
     setTestCard,
     setBankSkin,
   }

@@ -13,15 +13,15 @@ const emit = defineEmits<{
 </script>
 
 <template>
-  <div role="radiogroup" aria-label="Selecciona tu método de pago" class="space-y-3">
+  <div role="radiogroup" aria-label="Selecciona tu método de pago" class="grid grid-cols-1 sm:grid-cols-2 gap-3">
     <div
       v-for="metodo in METODOS_PAGO"
       :key="metodo.id"
-      class="card cursor-pointer transition-all duration-200 border-2 p-4"
+      class="relative cursor-pointer overflow-hidden rounded-xl border-2 p-4 transition-all duration-300"
       :class="[
         modelValue === metodo.id
-          ? 'border-brand-400 bg-brand-500/10 shadow-sm'
-          : 'border-line bg-surface hover:border-line/80'
+          ? 'border-brand-400 bg-brand-500/10 shadow-[0_0_20px_rgba(124,77,255,0.2)]'
+          : 'border-line/80 bg-surface hover:border-brand-400/50 hover:bg-surface-2/60'
       ]"
       role="radio"
       :aria-checked="modelValue === metodo.id"
@@ -30,28 +30,34 @@ const emit = defineEmits<{
       @keydown.space.prevent="emit('update:modelValue', metodo.id)"
       @keydown.enter.prevent="emit('update:modelValue', metodo.id)"
     >
-      <div class="flex items-center gap-3">
+      <!-- Acento activo en la esquina superior -->
+      <div
+        v-if="modelValue === metodo.id"
+        class="absolute right-0 top-0 size-8 overflow-hidden"
+      >
+        <div class="absolute -right-4 -top-4 size-8 rotate-45 bg-brand-400" />
+      </div>
+
+      <div class="flex items-center gap-3.5">
         <div
-          class="grid size-10 place-items-center rounded-xl transition-colors"
-          :class="modelValue === metodo.id ? 'bg-brand-500 text-white' : 'bg-surface-2 text-muted'"
+          class="grid size-11 shrink-0 place-items-center rounded-xl transition-all duration-300 shadow-sm"
+          :class="
+            modelValue === metodo.id
+              ? 'bg-gradient-to-br from-brand-500 to-brand-600 text-white shadow-brand-500/30'
+              : 'bg-surface-2 text-muted border border-line'
+          "
         >
           <CreditCard v-if="metodo.id === 'TARJETA'" class="size-5" aria-hidden="true" />
           <Smartphone v-else class="size-5" aria-hidden="true" />
         </div>
 
-        <div class="flex-1 min-w-0">
+        <div class="min-w-0 flex-1">
           <div class="flex items-center justify-between">
-            <p class="font-display text-sm font-bold text-fg">
+            <p class="font-display text-sm font-bold tracking-tight text-fg">
               {{ metodo.label }}
             </p>
-            <span
-              class="size-4 rounded-full border-2 flex items-center justify-center transition-all"
-              :class="modelValue === metodo.id ? 'border-brand-400 bg-brand-400' : 'border-line'"
-            >
-              <span v-if="modelValue === metodo.id" class="size-1.5 rounded-full bg-bg" />
-            </span>
           </div>
-          <p class="text-xs text-muted truncate">
+          <p class="mt-0.5 text-xs text-muted truncate">
             {{ metodo.descripcion }}
           </p>
         </div>

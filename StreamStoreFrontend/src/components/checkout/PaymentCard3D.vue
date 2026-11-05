@@ -17,8 +17,28 @@ const props = withDefaults(
   }
 )
 
+const emit = defineEmits<{
+  toggleFlip: []
+}>()
+
 // Estilos dinámicos según el skin de banco seleccionado
 const isDarkText = computed(() => props.bankSkin === 'bancolombia')
+
+const ambientGlowClass = computed(() => {
+  switch (props.bankSkin) {
+    case 'nu':
+      return 'bg-purple-600/40'
+    case 'bancolombia':
+      return 'bg-yellow-400/35'
+    case 'falabella':
+      return 'bg-emerald-500/40'
+    case 'bbva':
+      return 'bg-blue-600/40'
+    case 'streamstore':
+    default:
+      return 'bg-cyan-500/30'
+  }
+})
 
 const cardContainerClasses = computed(() => {
   switch (props.bankSkin) {
@@ -38,7 +58,17 @@ const cardContainerClasses = computed(() => {
 </script>
 
 <template>
-  <div class="card-3d-wrapper mx-auto w-full max-w-[390px] sm:max-w-[420px]" aria-hidden="true">
+  <div
+    class="card-3d-wrapper relative mx-auto w-full max-w-[390px] sm:max-w-[420px] cursor-pointer group select-none"
+    title="Haz clic para voltear la tarjeta"
+    @click="emit('toggleFlip')"
+  >
+    <!-- Aura ambiental dinámica con resplandor suave -->
+    <div
+      class="pointer-events-none absolute -inset-4 rounded-3xl blur-2xl opacity-40 transition-all duration-700 -z-10 group-hover:opacity-75"
+      :class="ambientGlowClass"
+    />
+
     <div
       class="card-3d-inner relative h-[225px] sm:h-[240px] w-full rounded-2xl transition-transform duration-700 ease-out"
       :class="{ 'card-flipped': isFlipped }"
