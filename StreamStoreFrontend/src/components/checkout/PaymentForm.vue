@@ -33,13 +33,11 @@ const {
   flipToBack,
   flipToFront,
   toggleFlip,
-  setTestCard,
   setBankSkin,
-  setCardKind,
 } = props.paymentCard
 
-// Estado para Daviplata
-const daviplata = reactive({
+// Estado para Nequi
+const nequi = reactive({
   celular: '',
   codigoOtp: '',
 })
@@ -53,20 +51,16 @@ const errors = reactive<Record<string, string>>({
   codigoOtp: '',
 })
 
-const expiracionInput = computed({
-  get: () => {
-    if (!card.mes && !card.anio) return ''
-    return `${card.mes}${card.anio ? '/' + card.anio : ''}`
-  },
-  set: (val: string) => {
-    setExpiracion(val)
-  },
+// Presentación de expiración en formato MM/AA
+const expiracionDisplay = computed(() => {
+  if (!card.mes && !card.anio) return ''
+  return card.anio ? `${card.mes}/${card.anio}` : card.mes
 })
 
 // Control inteligente de enfoque según la disposición física de cada banco:
 // - Bancolombia: Número, Titular, Vence y CVC van todos impresos al reverso.
 // - Nu: Número, Válida hasta y CVC van al reverso; el Titular va en el frente.
-// - Falabella y BBVA: Número, Titular y Vence van en el frente; sólo el CVV va al reverso.
+// - Genérica y BBVA: Número, Titular y Vence van en el frente; el CVC va al reverso.
 function onFocusNumero() {
   if (bankSkin.value === 'bancolombia' || bankSkin.value === 'nu') {
     flipToBack()
@@ -79,7 +73,7 @@ function onFocusTitular() {
   if (bankSkin.value === 'bancolombia') {
     flipToBack()
   } else {
-    // En Nu, Falabella y BBVA el nombre del titular se ubica en el frente
+    // En Nu, Genérica y BBVA el titular está en el frente
     flipToFront()
   }
 }
@@ -104,11 +98,66 @@ function onBlurCvv() {
   }
 }
 
-function fillDaviplataDemo() {
-  daviplata.celular = '3001234567'
-  daviplata.codigoOtp = '1234'
-  errors.celular = ''
-  errors.codigoOtp = ''
+// Filtros estrictos de entrada:
+// 1. Número de tarjeta: SOLO dígitos numéricos
+function handleNumeroInput(e: Event) {
+  const target = e.target as HTMLInputElement
+  const clean = target.value.replace(/\D/g, '').slice(0, 16)
+  target.value = clean
+  setNumero(clean)
+  if (errors.numero) errors.numero = ''
+}
+
+// 2. Titular: SOLO letras y espacios (cero números)
+function handleNombreInput(e: Event) {
+  const target = e.target as HTMLInputElement
+  const clean = target.value.replace(/[^a-zA-ZáéíóúÁÉÍÓÚñÑüÜ\s]/g, '').slice(0, 30)
+  target.value = clean
+  setNombre(clean)
+  if (errors.nombre) errors.nombre = ''
+}
+
+// 3. Expiración: Detecta 4 números (ej: 0234) y los convierte automáticamente en "02/34"
+function handleExpiracionInput(e: Event) {
+  const target = e.target as HTMLInputElement
+  const digits = target.value.replace(/\D/g, '').slice(0, 4)
+  if (digits.length <= 2) {
+    setExpiracion(digits)
+    target.value = digits
+  } else {
+    const mm = digits.slice(0, 2)
+    const aa = digits.slice(2, 4)
+    setExpiracion(digits)
+    target.value = `${mm}/${aa}`
+  }
+  if (errors.expiracion) errors.expiracion = ''
+}
+
+// 4. CVV: SOLO números
+function handleCvvInput(e: Event) {
+  const target = e.target as HTMLInputElement
+  const clean = target.value.replace(/\D/g, '').slice(0, 4)
+  target.value = clean
+  setCvv(clean)
+  if (errors.cvv) errors.cvv = ''
+}
+
+// 5. Celular Nequi: SOLO números (10 dígitos)
+function handleNequiCelular(e: Event) {
+  const target = e.target as HTMLInputElement
+  const clean = target.value.replace(/\D/g, '').slice(0, 10)
+  target.value = clean
+  nequi.celular = clean
+  if (errors.celular) errors.celular = ''
+}
+
+// 6. Clave dinámica Nequi: SOLO números
+function handleNequiOtp(e: Event) {
+  const target = e.target as HTMLInputElement
+  const clean = target.value.replace(/\D/g, '').slice(0, 6)
+  target.value = clean
+  nequi.codigoOtp = clean
+  if (errors.codigoOtp) errors.codigoOtp = ''
 }
 
 function validateAndSubmit() {
@@ -119,18 +168,18 @@ function validateAndSubmit() {
     const minLength = brand.value === 'amex' ? 15 : 16
 
     if (!rawNum || rawNum.length < minLength) {
-      errors.numero = `Numero de tarjeta incompleto (${minLength} digitos).`
+      errors.numero = `Número de tarjeta incompleto (${minLength} dígitos).`
     }
     if (!card.nombre.trim() || card.nombre.trim().length < 3) {
       errors.nombre = 'Ingresa el nombre del titular.'
     }
     const mesNum = parseInt(card.mes, 10)
     if (!card.mes || isNaN(mesNum) || mesNum < 1 || mesNum > 12 || !card.anio || card.anio.length < 2) {
-      errors.expiracion = 'Fecha invalida (MM/AA).'
+      errors.expiracion = 'Fecha inválida (MM/AA).'
     }
     const minCvv = brand.value === 'amex' ? 4 : 3
     if (!card.cvv || card.cvv.length < minCvv) {
-      errors.cvv = `CVV incompleto (${minCvv} digitos).`
+      errors.cvv = `CVV incompleto (${minCvv} dígitos).`
     }
 
     if (Object.values(errors).some(Boolean)) return
@@ -141,18 +190,18 @@ function validateAndSubmit() {
       ultimos4: rawNum.slice(-4),
     })
   } else {
-    const cleanCel = daviplata.celular.replace(/\D/g, '')
+    const cleanCel = nequi.celular.replace(/\D/g, '')
     if (!cleanCel || cleanCel.length < 10) {
-      errors.celular = 'Ingresa un numero celular de 10 digitos.'
+      errors.celular = 'Ingresa tu número celular Nequi de 10 dígitos.'
     }
-    if (!daviplata.codigoOtp || daviplata.codigoOtp.length < 4) {
-      errors.codigoOtp = 'Ingresa el codigo OTP de prueba (4 digitos).'
+    if (!nequi.codigoOtp || nequi.codigoOtp.length < 4) {
+      errors.codigoOtp = 'Ingresa tu clave dinámica o código de confirmación (4 a 6 dígitos).'
     }
 
     if (Object.values(errors).some(Boolean)) return
 
     emit('submitPayment', {
-      metodo: 'DAVIPLATA',
+      metodo: 'NEQUI',
       ultimos4: cleanCel.slice(-4),
     })
   }
@@ -161,7 +210,7 @@ function validateAndSubmit() {
 
 <template>
   <div class="space-y-5 font-sans">
-    <!-- ================= ENCABEZADO METODO DE PAGO (Screenshots 1, 2, 3) ================= -->
+    <!-- ================= ENCABEZADO METODO DE PAGO ================= -->
     <div>
       <p class="text-[11px] font-mono tracking-[0.2em] text-[#ff4655] uppercase font-bold">
         METODO DE PAGO
@@ -171,42 +220,42 @@ function validateAndSubmit() {
       </p>
     </div>
 
-    <!-- SELECTOR DE METODO DE PAGO (EFECTIVO / DAVIPLATA vs TARJETA) -->
+    <!-- SELECTOR DE METODO DE PAGO (NEQUI vs TARJETA DÉBITO) -->
     <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-      <!-- Opción 1: DAVIPLATA / EFECTIVO -->
+      <!-- Opción 1: NEQUI -->
       <div
         class="border p-4 rounded-sm cursor-pointer transition-all flex items-center justify-between"
         :class="
-          metodo === 'DAVIPLATA'
-            ? 'border-[#00ece0] bg-[#121b24]'
+          metodo === 'NEQUI'
+            ? 'border-[#FF007A] bg-[#220730]'
             : 'border-gray-800 bg-[#0d1117] hover:border-gray-700'
         "
-        @click="emit('update:metodo', 'DAVIPLATA')"
+        @click="emit('update:metodo', 'NEQUI')"
       >
         <div class="flex items-center gap-3">
           <span class="text-xl">📱</span>
           <div>
             <div class="flex items-center gap-2">
-              <span class="font-mono text-sm font-bold text-white uppercase">Daviplata</span>
-              <span v-if="metodo === 'DAVIPLATA'" class="text-[9px] font-mono uppercase text-[#00ece0] font-bold">
+              <span class="font-mono text-sm font-bold text-white uppercase">Nequi</span>
+              <span v-if="metodo === 'NEQUI'" class="text-[9px] font-mono uppercase text-[#FF007A] font-bold">
                 SELECCIONADO
               </span>
             </div>
             <p class="text-[11px] font-mono text-gray-400 mt-0.5">
-              Monedero movil - activacion automatica
+              Billetera digital Nequi Colombia
             </p>
           </div>
         </div>
 
         <div
           class="size-4 rounded-full border flex items-center justify-center shrink-0 ml-2"
-          :class="metodo === 'DAVIPLATA' ? 'border-[#00ece0]' : 'border-gray-600'"
+          :class="metodo === 'NEQUI' ? 'border-[#FF007A]' : 'border-gray-600'"
         >
-          <div v-if="metodo === 'DAVIPLATA'" class="size-2 rounded-full bg-[#00ece0]" />
+          <div v-if="metodo === 'NEQUI'" class="size-2 rounded-full bg-[#FF007A]" />
         </div>
       </div>
 
-      <!-- Opción 2: TARJETA DE CREDITO / DEBITO -->
+      <!-- Opción 2: TARJETA DÉBITO -->
       <div
         class="border p-4 rounded-sm cursor-pointer transition-all flex items-center justify-between"
         :class="
@@ -220,13 +269,13 @@ function validateAndSubmit() {
           <span class="text-xl">💳</span>
           <div>
             <div class="flex items-center gap-2">
-              <span class="font-mono text-sm font-bold text-white uppercase">Tarjeta</span>
+              <span class="font-mono text-sm font-bold text-white uppercase">Tarjeta Débito</span>
               <span v-if="metodo === 'TARJETA'" class="text-[9px] font-mono uppercase text-[#00ece0] font-bold">
                 SELECCIONADO
               </span>
             </div>
             <p class="text-[11px] font-mono text-gray-400 mt-0.5">
-              Debito o credito - procesamiento inmediato
+              Bancolombia, Nu, Genérica o BBVA
             </p>
           </div>
         </div>
@@ -240,43 +289,9 @@ function validateAndSubmit() {
       </div>
     </div>
 
-    <!-- ================= FLUJO TARJETA ================= -->
+    <!-- ================= FLUJO TARJETA DÉBITO ================= -->
     <div v-if="metodo === 'TARJETA'" class="space-y-4">
-      <!-- 1. AVISO DE SIMULACION AMBAR (Screenshots 1, 2, 3) -->
-      <div class="border border-amber-500/40 bg-amber-500/10 px-3 py-2 text-[10px] font-mono text-amber-300/90 leading-relaxed rounded-sm">
-        Simulacion de pago: el numero y CVV son solo visuales. No se envian ni se cobran. Solo se registra el metodo (Credito/Debito).
-      </div>
-
-      <!-- 2. SELECTOR CREDITO / DEBITO (Screenshots 1, 2, 3) -->
-      <div class="grid grid-cols-2 gap-2">
-        <button
-          type="button"
-          class="py-2.5 text-center text-xs font-mono font-bold uppercase transition-all rounded-sm border"
-          :class="
-            cardKind === 'credito'
-              ? 'border-[#820AD1] bg-[#820AD1]/25 text-white shadow-sm'
-              : 'border-gray-800 bg-[#0d1117] text-gray-400 hover:border-gray-700 hover:text-white'
-          "
-          @click="setCardKind('credito')"
-        >
-          CREDITO
-        </button>
-
-        <button
-          type="button"
-          class="py-2.5 text-center text-xs font-mono font-bold uppercase transition-all rounded-sm border"
-          :class="
-            cardKind === 'debito'
-              ? 'border-[#820AD1] bg-[#820AD1]/25 text-white shadow-sm'
-              : 'border-gray-800 bg-[#0d1117] text-gray-400 hover:border-gray-700 hover:text-white'
-          "
-          @click="setCardKind('debito')"
-        >
-          DEBITO
-        </button>
-      </div>
-
-      <!-- 3. SELECTOR BANCO / DISEÑO DE TARJETA (Screenshots 1, 2, 3) -->
+      <!-- SELECTOR BANCO / DISEÑO DE TARJETA -->
       <div>
         <span class="block text-[9px] font-mono uppercase tracking-wider text-gray-500 mb-1.5">
           BANCO / DISEÑO DE TARJETA
@@ -303,7 +318,7 @@ function validateAndSubmit() {
         </div>
       </div>
 
-      <!-- 4. CONTENEDOR HERO OSCURO DE LA TARJETA (Screenshots 1, 2, 3) -->
+      <!-- CONTENEDOR HERO OSCURO DE LA TARJETA 3D -->
       <div class="bg-[#0a0c10] border border-gray-800/90 rounded-2xl py-6 px-4 sm:px-8 flex flex-col items-center justify-center relative overflow-hidden shadow-2xl">
         <PaymentCard3D
           :brand="brand"
@@ -335,78 +350,14 @@ function validateAndSubmit() {
               {{ isFlipped ? 'Ver frontal (nombre y logo nu)' : 'Ver reverso (número y CVC)' }}
             </span>
             <span v-else>
-              {{ isFlipped ? 'Voltear al frente' : 'Girar para ver CVV' }}
+              {{ isFlipped ? 'Voltear al frente' : 'Girar para ver CVC' }}
             </span>
           </button>
         </div>
-
-        <!-- Indicador contextual oficial para Bancolombia y Nu -->
-        <div
-          v-if="bankSkin === 'bancolombia' || bankSkin === 'nu'"
-          class="mt-2.5 w-full max-w-[370px] text-center text-[9px] font-mono px-3 py-1.5 rounded-sm"
-          :class="bankSkin === 'bancolombia' ? 'bg-[#FFDD00]/10 border border-[#FFDD00]/30 text-[#FFDD00]' : 'bg-[#820AD1]/15 border border-[#820AD1]/40 text-[#d8b4fe]'"
-        >
-          <template v-if="bankSkin === 'nu'">
-            <span v-if="isFlipped">
-              ✓ Mostrando reverso Nu: número de 16 dígitos, Válida hasta y CVC
-            </span>
-            <span v-else>
-              👁️ Mostrando frente Nu: nombre del titular, logo oficial y chip
-            </span>
-          </template>
-          <template v-else>
-            <span v-if="isFlipped">
-              ✓ Mostrando reverso Bancolombia: datos completos impresos atrás
-            </span>
-            <span v-else>
-              👁️ Mostrando frente Bancolombia (= Ba). Clic o escribe para ver reverso
-            </span>
-          </template>
-        </div>
       </div>
 
-      <!-- ACCESOS RAPIDOS DE DEMOSTRACION (1-CLIC) -->
-      <div class="flex items-center gap-1.5 flex-wrap pt-1 text-[10px] font-mono text-gray-400">
-        <span class="text-gray-500">Auto-llenar prueba:</span>
-        <button
-          type="button"
-          class="px-2 py-0.5 rounded border border-gray-800 bg-[#0d1117] text-white hover:border-[#820AD1] transition-colors"
-          @click="setTestCard('nu')"
-        >
-          Nu Bank
-        </button>
-        <button
-          type="button"
-          class="px-2 py-0.5 rounded border border-gray-800 bg-[#0d1117] text-white hover:border-[#FFDD00] transition-colors"
-          @click="setTestCard('bancolombia')"
-        >
-          Bancolombia
-        </button>
-        <button
-          type="button"
-          class="px-2 py-0.5 rounded border border-gray-800 bg-[#0d1117] text-white hover:border-[#2E7D32] transition-colors"
-          @click="setTestCard('falabella')"
-        >
-          Falabella
-        </button>
-        <button
-          type="button"
-          class="px-2 py-0.5 rounded border border-gray-800 bg-[#0d1117] text-white hover:border-[#004481] transition-colors"
-          @click="setTestCard('bbva')"
-        >
-          BBVA
-        </button>
-        <button
-          type="button"
-          class="px-2 py-0.5 rounded border border-rose-900/50 bg-rose-950/20 text-rose-300 hover:border-rose-500 transition-colors"
-          @click="setTestCard('rejected')"
-        >
-          Rechazo (0000)
-        </button>
-      </div>
-
-      <!-- 5. CAMPOS DEL FORMULARIO ESTILO SMARTINVENTORY (Screenshots 1, 2, 3) -->
-      <div class="space-y-4 pt-2">
+      <!-- CAMPOS DEL FORMULARIO DE TARJETA -->
+      <div class="space-y-4 pt-1">
         <!-- Campo Número de Tarjeta -->
         <div>
           <label for="card-number" class="block text-[10px] font-mono uppercase text-gray-400 mb-1">
@@ -421,7 +372,7 @@ function validateAndSubmit() {
             autocomplete="cc-number"
             class="w-full bg-[#0d1117] border border-gray-700 text-white text-sm font-mono px-3.5 py-2.5 outline-none focus:border-[#00ece0] transition-colors disabled:opacity-40 rounded-sm"
             :class="{ 'border-rose-500': !!errors.numero }"
-            @input="(e) => setNumero((e.target as HTMLInputElement).value)"
+            @input="handleNumeroInput"
             @focus="onFocusNumero"
           />
           <p v-if="errors.numero" class="text-xs text-rose-400 font-mono mt-1">
@@ -438,11 +389,11 @@ function validateAndSubmit() {
             id="card-holder"
             :value="card.nombre"
             type="text"
-            placeholder="Como aparece en la tarjeta"
+            placeholder="Como aparece en la tarjeta (solo letras)"
             autocomplete="cc-name"
             class="w-full bg-[#0d1117] border border-gray-700 text-white text-sm font-mono uppercase px-3.5 py-2.5 outline-none focus:border-[#00ece0] transition-colors disabled:opacity-40 rounded-sm"
             :class="{ 'border-rose-500': !!errors.nombre }"
-            @input="(e) => setNombre((e.target as HTMLInputElement).value)"
+            @input="handleNombreInput"
             @focus="onFocusTitular"
           />
           <p v-if="errors.nombre" class="text-xs text-rose-400 font-mono mt-1">
@@ -458,13 +409,14 @@ function validateAndSubmit() {
             </label>
             <input
               id="card-expiry"
-              v-model="expiracionInput"
+              :value="expiracionDisplay"
               type="text"
-              placeholder="MM/YY"
+              placeholder="MM/AA"
               maxlength="5"
               autocomplete="cc-exp"
               class="w-full bg-[#0d1117] border border-gray-700 text-white text-sm font-mono px-3.5 py-2.5 outline-none focus:border-[#00ece0] transition-colors disabled:opacity-40 rounded-sm text-center"
               :class="{ 'border-rose-500': !!errors.expiracion }"
+              @input="handleExpiracionInput"
               @focus="onFocusExpiracion"
             />
             <p v-if="errors.expiracion" class="text-xs text-rose-400 font-mono mt-1">
@@ -474,7 +426,7 @@ function validateAndSubmit() {
 
           <div>
             <label for="card-cvv" class="block text-[10px] font-mono uppercase text-gray-400 mb-1">
-              CVV
+              CVV / CVC
             </label>
             <input
               id="card-cvv"
@@ -486,7 +438,7 @@ function validateAndSubmit() {
               autocomplete="cc-csc"
               class="w-full bg-[#0d1117] border border-gray-700 text-white text-sm font-mono px-3.5 py-2.5 outline-none focus:border-[#00ece0] transition-colors disabled:opacity-40 rounded-sm text-center"
               :class="{ 'border-rose-500': !!errors.cvv }"
-              @input="(e) => setCvv((e.target as HTMLInputElement).value)"
+              @input="handleCvvInput"
               @focus="onFocusCvv"
               @blur="onBlurCvv"
             />
@@ -498,36 +450,32 @@ function validateAndSubmit() {
       </div>
     </div>
 
-    <!-- ================= FLUJO DAVIPLATA ================= -->
+    <!-- ================= FLUJO NEQUI ================= -->
     <div v-else class="space-y-4">
-      <div class="border border-red-500/40 bg-red-950/20 p-4 rounded-sm text-xs font-mono">
-        <div class="flex items-center justify-between">
-          <span class="text-red-300 font-bold uppercase">Pasarela Movil Daviplata</span>
-          <button
-            type="button"
-            class="text-[11px] text-red-200 underline hover:text-white"
-            @click="fillDaviplataDemo"
-          >
-            Auto-llenar Demo
-          </button>
+      <div class="border border-[#FF007A]/40 bg-[#250930] p-4 rounded-sm text-xs font-mono">
+        <div class="flex items-center gap-2">
+          <span class="text-base">📱</span>
+          <span class="text-[#FF007A] font-bold uppercase tracking-wider">Pasarela Móvil Nequi</span>
         </div>
-        <p class="text-gray-400 mt-1 leading-relaxed">
-          Ingresa el celular asociado a tu monedero Daviplata y confirma con el codigo OTP simulado.
+        <p class="text-gray-300 mt-1 leading-relaxed">
+          Ingresa el número celular asociado a tu cuenta Nequi (10 dígitos colombianos) y confirma con la notificación push o clave dinámica.
         </p>
       </div>
 
       <div>
-        <label for="daviplata-cel" class="block text-[10px] font-mono uppercase text-gray-400 mb-1">
-          NUMERO CELULAR DAVIPLATA
+        <label for="nequi-cel" class="block text-[10px] font-mono uppercase text-gray-400 mb-1">
+          NUMERO CELULAR NEQUI
         </label>
         <input
-          id="daviplata-cel"
-          v-model="daviplata.celular"
+          id="nequi-cel"
+          :value="nequi.celular"
           type="tel"
+          inputmode="numeric"
           placeholder="300 123 4567"
           maxlength="10"
-          class="w-full bg-[#0d1117] border border-gray-700 text-white text-sm font-mono px-3.5 py-2.5 outline-none focus:border-[#00ece0] transition-colors rounded-sm"
+          class="w-full bg-[#0d1117] border border-gray-700 text-white text-sm font-mono px-3.5 py-2.5 outline-none focus:border-[#FF007A] transition-colors rounded-sm"
           :class="{ 'border-rose-500': !!errors.celular }"
+          @input="handleNequiCelular"
         />
         <p v-if="errors.celular" class="text-xs text-rose-400 font-mono mt-1">
           {{ errors.celular }}
@@ -535,17 +483,19 @@ function validateAndSubmit() {
       </div>
 
       <div>
-        <label for="daviplata-otp" class="block text-[10px] font-mono uppercase text-gray-400 mb-1">
-          CODIGO OTP DE CONFIRMACION
+        <label for="nequi-otp" class="block text-[10px] font-mono uppercase text-gray-400 mb-1">
+          CLAVE DINÁMICA / CÓDIGO DE CONFIRMACIÓN
         </label>
         <input
-          id="daviplata-otp"
-          v-model="daviplata.codigoOtp"
+          id="nequi-otp"
+          :value="nequi.codigoOtp"
           type="password"
-          placeholder="••••"
+          inputmode="numeric"
+          placeholder="••••••"
           maxlength="6"
-          class="w-full bg-[#0d1117] border border-gray-700 text-white text-base font-mono tracking-widest px-3.5 py-2.5 outline-none focus:border-[#00ece0] transition-colors rounded-sm text-center"
+          class="w-full bg-[#0d1117] border border-gray-700 text-white text-base font-mono tracking-widest px-3.5 py-2.5 outline-none focus:border-[#FF007A] transition-colors rounded-sm text-center"
           :class="{ 'border-rose-500': !!errors.codigoOtp }"
+          @input="handleNequiOtp"
         />
         <p v-if="errors.codigoOtp" class="text-xs text-rose-400 font-mono mt-1">
           {{ errors.codigoOtp }}
@@ -553,11 +503,11 @@ function validateAndSubmit() {
       </div>
     </div>
 
-    <!-- 6. BOTON FINALIZAR COMPRA (Screenshots 1, 2, 3) -->
+    <!-- BOTON FINALIZAR COMPRA -->
     <div class="pt-3">
       <button
         type="button"
-        class="w-full py-4 px-6 text-sm font-mono font-black uppercase tracking-wider text-white transition-all rounded-sm shadow-xl"
+        class="w-full py-4 px-6 text-sm font-mono font-black uppercase tracking-wider text-white transition-all rounded-sm shadow-xl cursor-pointer"
         style="background: #942b3b; clip-path: polygon(10px 0, 100% 0, 100% 100%, 0 100%, 0 10px);"
         :disabled="isProcessing"
         @click="validateAndSubmit"

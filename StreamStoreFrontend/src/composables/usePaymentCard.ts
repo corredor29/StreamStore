@@ -69,23 +69,28 @@ export function usePaymentCard() {
 
   // Métodos de formateo y actualización
   function setNumero(val: string) {
+    // Solo dígitos numéricos, cero letras ni símbolos
     const clean = val.replace(/\D/g, '').slice(0, maxLengthNumero.value)
     card.numero = clean
   }
 
   function setNombre(val: string) {
-    card.nombre = val.slice(0, 30)
+    // Solo letras (incluyendo tildes, diéresis y ñ) y espacios, cero números
+    const clean = val.replace(/[^a-zA-ZáéíóúÁÉÍÓÚñÑüÜ\s]/g, '').slice(0, 30)
+    card.nombre = clean
   }
 
   function setExpiracion(val: string) {
-    // Permite escribir MM/AA con auto-slash
-    let clean = val.replace(/[^\d/]/g, '')
-    if (clean.length === 2 && !clean.includes('/') && card.mes.length < 2) {
-      clean = clean + '/'
+    // Extrae exclusivamente dígitos numéricos (máximo 4: 2 para mes y 2 para año)
+    // Soporta escribir directo "0234" convirtiéndolo en "02/34"
+    const digits = val.replace(/\D/g, '').slice(0, 4)
+    if (digits.length <= 2) {
+      card.mes = digits
+      card.anio = ''
+    } else {
+      card.mes = digits.slice(0, 2)
+      card.anio = digits.slice(2, 4)
     }
-    const parts = clean.split('/')
-    card.mes = parts[0] ? parts[0].slice(0, 2) : ''
-    card.anio = parts[1] ? parts[1].slice(0, 2) : ''
   }
 
   function setCvv(val: string) {
@@ -119,7 +124,7 @@ export function usePaymentCard() {
   }
 
   // Preajustes de prueba oficiales para revisión rápida
-  function setTestCard(type: 'visa' | 'mastercard' | 'amex' | 'rejected' | 'nu' | 'bancolombia' | 'falabella' | 'bbva') {
+  function setTestCard(type: 'visa' | 'mastercard' | 'amex' | 'rejected' | 'nu' | 'bancolombia' | 'generica' | 'falabella' | 'bbva') {
     if (type === 'bancolombia') {
       bankSkin.value = 'bancolombia'
       setNumero('5300987654321098')
@@ -144,21 +149,21 @@ export function usePaymentCard() {
 
     flipToFront()
     if (type === 'visa') {
-      bankSkin.value = 'streamstore'
+      bankSkin.value = 'generica'
       setNumero('4532015012345678')
       setNombre('CARLOS VISA DEMO')
       card.mes = '12'
       card.anio = '28'
       setCvv('789')
     } else if (type === 'mastercard') {
-      bankSkin.value = 'streamstore'
+      bankSkin.value = 'generica'
       setNumero('5412751234123456')
       setNombre('MARIA MASTERCARD')
       card.mes = '08'
       card.anio = '29'
       setCvv('456')
     } else if (type === 'amex') {
-      bankSkin.value = 'streamstore'
+      bankSkin.value = 'generica'
       setNumero('378282246310005')
       setNombre('ALEX AMEX DEMO')
       card.mes = '11'
@@ -170,9 +175,14 @@ export function usePaymentCard() {
       card.mes = '05'
       card.anio = '28'
       setCvv('999')
-    } else if (type === 'falabella') {
-      bankSkin.value = 'falabella'
-      setNumero('5487123498765432')
+    } else if (type === 'generica' || type === 'falabella') {
+      bankSkin.value = 'generica'
+      setNumero('4587123498765432')
+      setNombre('SANTIAGO TARJETA GENERICA')
+      card.mes = '10'
+      card.anio = '28'
+      setCvv('890')
+    } else if (type === 'bbva') {
       setNombre('SANTIAGO FALABELLA CMR')
       card.mes = '10'
       card.anio = '28'

@@ -29,8 +29,9 @@ const ambientGlowClass = computed(() => {
       return 'bg-purple-600/40'
     case 'bancolombia':
       return 'bg-yellow-400/35'
+    case 'generica':
     case 'falabella':
-      return 'bg-emerald-500/40'
+      return 'bg-cyan-500/40'
     case 'bbva':
       return 'bg-blue-600/40'
     case 'streamstore':
@@ -45,8 +46,9 @@ const cardContainerClasses = computed(() => {
       return 'border-purple-400/20 text-white shadow-2xl'
     case 'bancolombia':
       return 'border-black/15 text-neutral-900 shadow-2xl'
+    case 'generica':
     case 'falabella':
-      return 'border-emerald-400/20 text-white shadow-2xl'
+      return 'border-cyan-400/30 text-white shadow-2xl'
     case 'bbva':
       return 'border-blue-400/20 text-white shadow-2xl'
     case 'streamstore':
@@ -135,10 +137,10 @@ const cardContainerClasses = computed(() => {
 
           <!-- Estructura Frontal Bancolombia: TOTALMENTE LIMPIA, SIN NÚMEROS NI TITULAR (Todo va atrás) -->
           <div class="relative z-10 flex h-full flex-col justify-between text-black">
-            <!-- Fila Superior: 'débito' o 'crédito' a la izquierda, logo '= Ba' a la derecha -->
+            <!-- Fila Superior: 'débito' a la izquierda, logo '= Ba' a la derecha -->
             <div class="flex justify-between items-start">
               <span class="text-[12px] font-sans font-semibold lowercase text-black tracking-tight">
-                {{ cardKind === 'credito' ? 'crédito' : 'débito' }}
+                débito
               </span>
 
               <!-- Logotipo Oficial Bancolombia: 3 barras horizontales + 'Ba' en negrita -->
@@ -228,7 +230,7 @@ const cardContainerClasses = computed(() => {
               <!-- crédito / débito y contactless ))) -->
               <div class="flex flex-col gap-1 items-start">
                 <span class="text-[11px] font-sans lowercase text-white font-medium tracking-tight">
-                  {{ cardKind === 'debito' ? 'débito' : 'crédito' }}
+                  débito
                 </span>
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" class="text-white" aria-hidden="true">
                   <path d="M8 8.5c2.2 1.8 2.2 5.2 0 7" stroke="#ffffff" stroke-width="2.2" stroke-linecap="round" />
@@ -269,58 +271,94 @@ const cardContainerClasses = computed(() => {
           </div>
         </template>
 
-        <!-- Skin 3: Falabella CMR -->
-        <template v-else-if="bankSkin === 'falabella'">
+        <!-- Skin 3: Tarjeta Genérica Multibanco (Auto-detecta marca Visa, Mastercard o Amex según el número) -->
+        <template v-else-if="bankSkin === 'generica' || bankSkin === 'falabella'">
           <div
             class="absolute inset-0"
-            style="background: linear-gradient(180deg, #43A047 0%, #2E7D32 55%, #1B5E20 100%);"
+            style="background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0f172a 100%);"
           />
-          <div class="absolute inset-0 opacity-20 bg-[radial-gradient(circle_at_20%_20%,rgba(255,255,255,0.35),transparent_45%)]" />
+          <div class="absolute inset-0 opacity-25 bg-[radial-gradient(#38bdf8_1px,transparent_1px)] [background-size:12px_12px]" />
+          <div class="pointer-events-none absolute -right-10 -top-10 size-40 rounded-full bg-cyan-500/15 blur-2xl" />
 
-          <div class="relative z-10 flex h-full flex-col justify-between text-white">
+          <div class="relative z-10 flex h-full flex-col justify-between text-white p-1">
             <div class="flex items-center justify-between">
-              <div class="flex items-center gap-2">
+              <!-- Chip metálico y ondas Contactless -->
+              <div class="flex items-center gap-2.5">
                 <div
-                  class="relative w-8 h-6 rounded-[3px] border border-black/20 shrink-0 overflow-hidden"
+                  class="relative w-9 h-7 rounded-[3px] border border-black/30 shrink-0 overflow-hidden shadow-sm"
                   style="background: linear-gradient(145deg, #e8d48b 0%, #c9a227 45%, #f0e0a0 70%, #a67c00 100%);"
                 >
-                  <div class="absolute inset-[2px] grid grid-cols-3 grid-rows-2 gap-px opacity-40">
-                    <span v-for="i in 6" :key="i" class="bg-black/30 rounded-[1px]" />
+                  <div class="absolute inset-[2.5px] border border-black/30 rounded-[1.5px]" />
+                  <div class="absolute inset-0 flex items-center justify-center">
+                    <div class="w-full h-px bg-black/30" />
+                  </div>
+                  <div class="absolute inset-0 flex items-center justify-center">
+                    <div class="h-full w-px bg-black/30" />
                   </div>
                 </div>
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
-                  <path d="M8 8.5c2.2 1.8 2.2 5.2 0 7" stroke="#fff" stroke-width="1.8" stroke-linecap="round" />
-                  <path d="M11 5.5c3.5 2.8 3.5 10.2 0 13" stroke="#fff" stroke-width="1.8" stroke-linecap="round" />
-                  <path d="M14 3c4.8 3.8 4.8 14.2 0 18" stroke="#fff" stroke-width="1.8" stroke-linecap="round" />
+
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" class="text-cyan-300">
+                  <path d="M8 8.5c2.2 1.8 2.2 5.2 0 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+                  <path d="M11 5.5c3.5 2.8 3.5 10.2 0 13" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+                  <path d="M14 3c4.8 3.8 4.8 14.2 0 18" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
                 </svg>
               </div>
 
-              <span class="text-[8px] uppercase tracking-[0.18em] text-white/70 font-mono">
-                {{ cardKind === 'credito' ? 'Credito' : 'Debito' }}
+              <!-- Indicador Débito y Logo Detectado (Visa, Mastercard, Amex, Multibanco) -->
+              <div class="flex items-center gap-2.5">
+                <span class="text-[9px] uppercase tracking-[0.16em] text-cyan-300 font-mono font-bold">
+                  DÉBITO
+                </span>
+
+                <!-- Marca Detectada automáticamente -->
+                <div class="h-6 flex items-center">
+                  <!-- Visa -->
+                  <span
+                    v-if="brand === 'visa'"
+                    class="font-black italic text-lg tracking-tighter text-white font-sans pr-1"
+                  >
+                    VISA
+                  </span>
+                  <!-- Mastercard -->
+                  <div v-else-if="brand === 'mastercard'" class="relative inline-block w-9 h-6">
+                    <span class="absolute left-0 top-0 size-6 rounded-full bg-[#eb001b]" />
+                    <span class="absolute right-0 top-0 size-6 rounded-full bg-[#f79e1b] mix-blend-screen" />
+                  </div>
+                  <!-- Amex -->
+                  <span
+                    v-else-if="brand === 'amex'"
+                    class="px-1.5 py-0.5 rounded bg-blue-600 text-white font-black text-[9px] font-sans tracking-tight"
+                  >
+                    AMEX
+                  </span>
+                  <!-- Multibanco Genérico -->
+                  <span
+                    v-else
+                    class="text-[9px] font-mono tracking-wider text-gray-400 uppercase border border-gray-700 px-1.5 py-0.5 rounded"
+                  >
+                    UNIVERSAL
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            <div class="my-auto py-1">
+              <span class="text-[8px] font-mono text-cyan-400/70 uppercase tracking-widest">
+                Tarjeta Débito Universal
               </span>
             </div>
 
-            <div class="my-auto">
-              <p class="text-[30px] font-black tracking-tight leading-none text-white font-sans">
-                CMR
-              </p>
-              <p class="text-[10px] font-medium mt-1 tracking-wide text-white/90">Banco Falabella</p>
-            </div>
-
-            <div class="mt-auto">
-              <p class="text-[12px] font-mono tracking-[0.12em] tabular-nums text-white">
+            <div class="mt-auto space-y-1">
+              <p class="text-[13px] sm:text-[14px] font-mono tracking-[0.15em] tabular-nums text-white drop-shadow">
                 {{ displayNumero }}
               </p>
-              <div class="flex justify-between items-end mt-1.5 gap-2">
-                <p class="text-[10px] font-semibold truncate uppercase text-white tracking-wide">
+              <div class="flex justify-between items-end gap-2">
+                <p class="text-[11px] font-semibold truncate uppercase text-white tracking-wide">
                   {{ displayNombre }}
                 </p>
                 <div class="flex items-center gap-2 shrink-0">
-                  <p class="text-[10px] font-mono text-white/90">{{ displayExpiracion }}</p>
-                  <div class="relative inline-block w-8 h-5">
-                    <span class="absolute left-0 top-0 w-[58%] h-full rounded-full bg-[#eb001b]" />
-                    <span class="absolute right-0 top-0 w-[58%] h-full rounded-full bg-[#f79e1b] mix-blend-screen" />
-                  </div>
+                  <span class="text-[7.5px] uppercase font-bold text-gray-400">VENCE</span>
+                  <p class="text-[10.5px] font-mono text-cyan-300 font-bold">{{ displayExpiracion }}</p>
                 </div>
               </div>
             </div>
@@ -352,8 +390,8 @@ const cardContainerClasses = computed(() => {
             <div class="flex justify-between items-start">
               <div>
                 <p class="text-[12px] font-bold tracking-[0.2em] uppercase text-white font-sans">BBVA</p>
-                <p class="text-[7px] uppercase tracking-widest text-white/60 mt-0.5 font-mono">
-                  {{ cardKind === 'credito' ? 'Credito' : 'Debito' }}
+                <p class="text-[7px] uppercase tracking-widest text-cyan-300 mt-0.5 font-mono font-bold">
+                  DÉBITO
                 </p>
               </div>
               <div class="relative inline-block w-8 h-5">

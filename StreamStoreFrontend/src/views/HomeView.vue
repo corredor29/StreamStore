@@ -96,7 +96,7 @@ const faqs = ref([
   },
   {
     q: '¿Cuáles son los métodos de pago disponibles en Colombia?',
-    a: 'Admitimos simulación para Tarjetas de Crédito y Débito (Visa, Mastercard, Amex con skins de Nu, Bancolombia, Falabella CMR y BBVA) y la pasarela móvil directa para Daviplata con verificación de código OTP.',
+    a: 'Admitimos pagos con Tarjeta Débito (Bancolombia, Nu, Genérica multimarca y BBVA con auto-detección de Visa, Mastercard y Amex) y la pasarela móvil directa para Nequi con confirmación en tu celular.',
     open: false,
   },
 ])

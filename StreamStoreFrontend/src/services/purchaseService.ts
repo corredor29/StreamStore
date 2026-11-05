@@ -2,9 +2,10 @@ import { api, mockDelay, USE_MOCKS } from './api'
 import type { Compra, MetodoPago, PagoPayload, PagoResultado, CarritoItem } from '@/types'
 import { accountService } from './accountService'
 
-/** Métodos de pago disponibles en la demostración. Daviplata es independiente. */
+/** Métodos de pago disponibles en la tienda. Nequi y Tarjeta Débito. */
 export const METODOS_PAGO: ReadonlyArray<{ id: MetodoPago; label: string; descripcion: string }> = [
-  { id: 'TARJETA', label: 'Tarjeta débito / crédito', descripcion: 'Visa, Mastercard o American Express (solo números de prueba)' },
+  { id: 'TARJETA', label: 'Tarjeta Débito', descripcion: 'Visa, Mastercard o American Express (solo débito)' },
+  { id: 'NEQUI', label: 'Nequi', descripcion: 'Billetera digital Nequi Colombia' },
   { id: 'DAVIPLATA', label: 'Daviplata', descripcion: 'Billetera digital (simulada)' },
 ]
 

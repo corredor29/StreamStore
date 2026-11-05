@@ -102,15 +102,15 @@ export interface Compra {
 
 // ---------- Pagos (demostración, sin procesamiento real) ----------
 
-export type MetodoPago = 'TARJETA' | 'DAVIPLATA'
+export type MetodoPago = 'TARJETA' | 'NEQUI' | 'DAVIPLATA'
 
 export type MarcaTarjeta = 'visa' | 'mastercard' | 'amex' | 'generic'
 
-export type CardKind = 'credito' | 'debito'
+export type CardKind = 'debito'
 
-export type CardBank = 'nu' | 'bancolombia' | 'falabella' | 'bbva'
+export type CardBank = 'nu' | 'bancolombia' | 'generica' | 'bbva'
 
-export type CardBankSkin = 'streamstore' | 'nu' | 'bancolombia' | 'falabella' | 'bbva'
+export type CardBankSkin = 'streamstore' | 'nu' | 'bancolombia' | 'generica' | 'falabella' | 'bbva'
 
 export interface CardBankOption {
   id: CardBankSkin
@@ -128,7 +128,7 @@ export const CARD_BANKS: {
 }[] = [
   { id: 'nu', label: 'NU', hint: 'Morada', accent: '#820AD1' },
   { id: 'bancolombia', label: 'BANCOLOMBIA', hint: 'Amarilla', accent: '#FFDD00' },
-  { id: 'falabella', label: 'FALABELLA', hint: 'Verde CMR', accent: '#2E7D32' },
+  { id: 'generica', label: 'GENÉRICA', hint: 'Auto-detecta', accent: '#00ece0' },
   { id: 'bbva', label: 'BBVA', hint: 'Azul', accent: '#004481' },
 ]
 
