@@ -58,6 +58,22 @@
         {
             "key": "resetToken",
             "value": ""
+        },
+        {
+            "key": "portadaUrl",
+            "value": ""
+        },
+        {
+            "key": "plataformaEntregaId",
+            "value": ""
+        },
+        {
+            "key": "productoEntregaId",
+            "value": ""
+        },
+        {
+            "key": "servicioPendienteId",
+            "value": ""
         }
     ],
     "item": [
@@ -1756,6 +1772,586 @@
                                 "admin",
                                 "plataformas",
                                 "{{plataformaId}}"
+                            ]
+                        },
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{adminToken}}",
+                                    "type": "string"
+                                }
+                            ]
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            "name": "7. Portadas y entrega de credenciales",
+            "item": [
+                {
+                    "name": "Subir portada",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "pm.test(\"Status 2xx\", () => pm.expect(pm.response.code).to.be.within(200, 299))",
+                                    "const d = pm.response.json().data",
+                                    "if (d) pm.collectionVariables.set(\"portadaUrl\", d.url)"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "header": [],
+                        "url": {
+                            "raw": "{{baseUrl}}/admin/upload",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "admin",
+                                "upload"
+                            ]
+                        },
+                        "description": "Selecciona una imagen en el campo `imagen` (form-data). Devuelve `data.url`, que se guarda en portadaUrl.",
+                        "body": {
+                            "mode": "formdata",
+                            "formdata": [
+                                {
+                                    "key": "imagen",
+                                    "type": "file",
+                                    "src": [],
+                                    "description": "JPG, PNG, WEBP o GIF (máx. 2 MB)"
+                                }
+                            ]
+                        },
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{adminToken}}",
+                                    "type": "string"
+                                }
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Crear plataforma con portada",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "pm.test(\"Status 2xx\", () => pm.expect(pm.response.code).to.be.within(200, 299))",
+                                    "const d = pm.response.json().data",
+                                    "if (d) pm.collectionVariables.set(\"plataformaEntregaId\", d.id)",
+                                    "pm.test(\"Guarda la portada\", () => pm.expect(pm.response.json().data.portada_url).to.eql(pm.collectionVariables.get(\"portadaUrl\")))"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/admin/plataformas",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "admin",
+                                "plataformas"
+                            ]
+                        },
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"nombre\": \"Entrega {{$timestamp}}\",\n    \"descripcion\": \"Inventario sin credenciales\",\n    \"portada_url\": \"{{portadaUrl}}\",\n    \"max_pantallas\": 2\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        },
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{adminToken}}",
+                                    "type": "string"
+                                }
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Crear producto de pantalla",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "pm.test(\"Status 2xx\", () => pm.expect(pm.response.code).to.be.within(200, 299))",
+                                    "const d = pm.response.json().data",
+                                    "if (d) pm.collectionVariables.set(\"productoEntregaId\", d.id)"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/admin/productos",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "admin",
+                                "productos"
+                            ]
+                        },
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"plataforma_id\": \"{{plataformaEntregaId}}\",\n    \"nombre\": \"Pantalla 30 días\",\n    \"tipo\": \"pantalla\",\n    \"precio\": 8000,\n    \"duracion_dias\": 30,\n    \"stock_minimo\": 1\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        },
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{adminToken}}",
+                                    "type": "string"
+                                }
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Cargar cuentas pendientes de asignación",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "pm.test(\"Status 2xx\", () => pm.expect(pm.response.code).to.be.within(200, 299))",
+                                    "pm.test(\"Sin credenciales\", () => pm.expect(pm.response.json().data[0].credenciales_asignadas).to.eql(false))"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/admin/cuentas",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "admin",
+                                "cuentas"
+                            ]
+                        },
+                        "description": "Sin email ni password: la cuenta se vende y el admin entrega las credenciales después.",
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"plataforma_id\": \"{{plataformaEntregaId}}\",\n    \"cantidad\": 1\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        },
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{adminToken}}",
+                                    "type": "string"
+                                }
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Cuentas pendientes de asignación",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "pm.test(\"Status 2xx\", () => pm.expect(pm.response.code).to.be.within(200, 299))"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{baseUrl}}/admin/cuentas?credenciales=pendientes&plataforma_id={{plataformaEntregaId}}",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "admin",
+                                "cuentas"
+                            ],
+                            "query": [
+                                {
+                                    "key": "credenciales",
+                                    "value": "pendientes"
+                                },
+                                {
+                                    "key": "plataforma_id",
+                                    "value": "{{plataformaEntregaId}}"
+                                }
+                            ]
+                        },
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{adminToken}}",
+                                    "type": "string"
+                                }
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Cliente agrega la pantalla",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "pm.test(\"Status 2xx\", () => pm.expect(pm.response.code).to.be.within(200, 299))"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/carrito",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "carrito"
+                            ]
+                        },
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"producto_id\": \"{{productoEntregaId}}\",\n    \"cantidad\": 1\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        }
+                    }
+                },
+                {
+                    "name": "Cliente hace checkout",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "pm.test(\"Status 2xx\", () => pm.expect(pm.response.code).to.be.within(200, 299))",
+                                    "const d = pm.response.json().data",
+                                    "if (d) pm.collectionVariables.set(\"compraId\", d.id)"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/compras",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "compras"
+                            ]
+                        },
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"metodo_pago\": \"simulado\"\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        }
+                    }
+                },
+                {
+                    "name": "Cliente paga",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "pm.test(\"Status 2xx\", () => pm.expect(pm.response.code).to.be.within(200, 299))"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "header": [],
+                        "url": {
+                            "raw": "{{baseUrl}}/compras/{{compraId}}/pagar",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "compras",
+                                "{{compraId}}",
+                                "pagar"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Servicio queda pendiente de asignación",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "pm.test(\"Status 2xx\", () => pm.expect(pm.response.code).to.be.within(200, 299))",
+                                    "const s = pm.response.json().data.find((x) => x.producto && String(x.producto.id) === pm.collectionVariables.get(\"productoEntregaId\"))",
+                                    "if (s) pm.collectionVariables.set(\"servicioPendienteId\", s.id)",
+                                    "pm.test(\"Pendiente y sin credenciales\", () => { pm.expect(s.estado_entrega).to.eql(\"pendiente_asignacion\"); pm.expect(s.credenciales).to.eql(null) })"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{baseUrl}}/servicios/mios",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "servicios",
+                                "mios"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Servicios pendientes de entrega",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "pm.test(\"Status 2xx\", () => pm.expect(pm.response.code).to.be.within(200, 299))"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{baseUrl}}/admin/servicios?entrega=pendiente_asignacion",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "admin",
+                                "servicios"
+                            ],
+                            "query": [
+                                {
+                                    "key": "entrega",
+                                    "value": "pendiente_asignacion"
+                                }
+                            ]
+                        },
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{adminToken}}",
+                                    "type": "string"
+                                }
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Asignar credenciales y enviarlas",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "pm.test(\"Status 2xx\", () => pm.expect(pm.response.code).to.be.within(200, 299))",
+                                    "pm.test(\"Entregado\", () => pm.expect(pm.response.json().data.estado_entrega).to.eql(\"entregado\"))"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "PATCH",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/admin/servicios/{{servicioPendienteId}}/credenciales",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "admin",
+                                "servicios",
+                                "{{servicioPendienteId}}",
+                                "credenciales"
+                            ]
+                        },
+                        "description": "Guarda las credenciales en la cuenta, el PIN/perfil en la pantalla del servicio, lo marca como entregado y le envía el correo al cliente (notificar: false para no enviarlo).",
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"email\": \"entrega{{$timestamp}}@streamstore-demo.test\",\n    \"password\": \"Entrega-123!\",\n    \"pin\": \"4321\",\n    \"perfil\": \"Cliente\"\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        },
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{adminToken}}",
+                                    "type": "string"
+                                }
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Cliente ve sus credenciales",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "pm.test(\"Status 2xx\", () => pm.expect(pm.response.code).to.be.within(200, 299))",
+                                    "pm.test(\"Con PIN asignado\", () => pm.expect(pm.response.json().data.credenciales.pantallas[0].pin).to.eql(\"4321\"))"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{baseUrl}}/servicios/{{servicioPendienteId}}",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "servicios",
+                                "{{servicioPendienteId}}"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Desactivar plataforma de prueba",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "pm.test(\"Status 2xx\", () => pm.expect(pm.response.code).to.be.within(200, 299))"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "DELETE",
+                        "header": [],
+                        "url": {
+                            "raw": "{{baseUrl}}/admin/plataformas/{{plataformaEntregaId}}",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "admin",
+                                "plataformas",
+                                "{{plataformaEntregaId}}"
                             ]
                         },
                         "auth": {
