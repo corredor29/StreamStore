@@ -20,6 +20,130 @@ const cart = useCartStore()
 
 const modalidadSeleccionada = ref<TipoProducto>('CUENTA_COMPLETA')
 
+// Estado y datos de Scrollytelling
+const activeStoryIndex = ref(0)
+const storyCardRefs = ref<HTMLElement[]>([])
+
+const scrollyPlatforms = [
+  {
+    id: 1,
+    nombre: 'Netflix Premium 4K',
+    tag: 'NETFLIX · 4K ULTRA HD',
+    slug: 'netflix',
+    color: '#E50914',
+    bgImage: '/watching_netflix.jpg',
+    headline: 'El catálogo más grande del mundo en Ultra HD.',
+    desc: 'Disfruta de series exclusivas, películas taquilleras y documentales en 4K Ultra HD con audio espacial y perfiles protegidos.',
+    features: [
+      'Calidad 4K Ultra HD + HDR10 + Dolby Vision',
+      'Audio espacial inmersivo para cine en casa',
+      'Descargas ilimitadas para disfrutar sin conexión',
+      'Garantía total de 30 días sin caídas',
+      'Activación automática e inmediata tras el pago'
+    ],
+    productoIdCompleta: 1,
+    productoIdPantalla: 2,
+    precioCompleta: 38000,
+    precioPantalla: 12000,
+    stats: 'Más de 15.000 títulos disponibles'
+  },
+  {
+    id: 2,
+    nombre: 'Disney+ Total Family',
+    tag: 'DISNEY+ · FAMILIAR & MARVEL',
+    slug: 'disney',
+    color: '#113CCF',
+    bgImage: '/watching_disney.jpg',
+    headline: 'Tus mundos favoritos juntos en un solo lugar.',
+    desc: 'Todo el universo Disney, Pixar, Marvel, Star Wars, National Geographic y deportes en vivo de ESPN con la máxima fidelidad.',
+    features: [
+      'Contenido completo de Marvel Studios, Star Wars y Pixar',
+      'Transmisiones deportivas de ESPN en vivo',
+      'Formatos IMAX Enhanced en títulos seleccionados',
+      'Control parental avanzado con PIN por perfil',
+      'Activación digital en menos de 10 segundos'
+    ],
+    productoIdCompleta: 3,
+    productoIdPantalla: 4,
+    precioCompleta: 30000,
+    precioPantalla: 9000,
+    stats: 'Entretenimiento para toda la familia'
+  },
+  {
+    id: 3,
+    nombre: 'Max (HBO) 4K Ultra',
+    tag: 'MAX · HBO ORIGINALS & WARNER',
+    slug: 'max',
+    color: '#7B2FF7',
+    bgImage: '/watching_max.jpg',
+    headline: 'Historias extraordinarias que definen la cultura.',
+    desc: 'Desde La Casa del Dragón y The Last of Us hasta los clásicos inmortales de Warner Bros, DC Comics y HBO en 4K Ultra HD.',
+    features: [
+      'Series HBO galardonadas con múltiples premios Emmy',
+      'Estrenos cinematográficos de Warner Bros y DC',
+      'Audio envolvente Dolby Atmos disponible',
+      'Perfiles privados protegidos con código PIN',
+      'Reemplazo inmediato garantizado ante fallas'
+    ],
+    productoIdCompleta: 5,
+    productoIdPantalla: 6,
+    precioCompleta: 28000,
+    precioPantalla: 9500,
+    stats: 'La casa del cine y televisión de culto'
+  },
+  {
+    id: 4,
+    nombre: 'Amazon Prime Video',
+    tag: 'PRIME VIDEO · ORIGINALS & DEPORTES',
+    slug: 'prime',
+    color: '#00A8E1',
+    bgImage: '/watching_prime.jpg',
+    headline: 'Producciones originales y canales exclusivos.',
+    desc: 'Disfruta de producciones icónicas como The Boys, El Señor de los Anillos y eventos deportivos en vivo con reproducción simultánea.',
+    features: [
+      'Producciones exclusivas Amazon Originals',
+      'X-Ray con información de actores y música en vivo',
+      'Compatibilidad universal con cualquier Smart TV',
+      'Soporte técnico preferencial 24/7 vía WhatsApp',
+      'Precios transparentes en pesos colombianos'
+    ],
+    productoIdCompleta: 7,
+    productoIdPantalla: 8,
+    precioCompleta: 25000,
+    precioPantalla: 8000,
+    stats: 'Calidad 4K sin costo adicional'
+  }
+]
+
+function scrollToStoryPlatform(index: number) {
+  activeStoryIndex.value = index
+  const el = storyCardRefs.value[index]
+  if (el) {
+    el.scrollIntoView({ behavior: 'smooth', block: 'center' })
+  }
+}
+
+function handleStoryObserver() {
+  if (typeof IntersectionObserver === 'undefined') return
+  const observer = new IntersectionObserver(
+    (entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          const idx = Number(entry.target.getAttribute('data-story-index'))
+          if (!isNaN(idx)) {
+            activeStoryIndex.value = idx
+          }
+        }
+      })
+    },
+    { threshold: 0.5, rootMargin: '-10% 0px -20% 0px' }
+  )
+
+  storyCardRefs.value.forEach((card) => {
+    if (card) observer.observe(card)
+  })
+}
+
 // Estado de la Animación Cinemática Tipo Netflix
 const showNetflixIntro = ref(false)
 const introStage = ref<'black' | 'logo' | 'mosaic' | 'finished'>('finished')
@@ -107,88 +231,23 @@ function closeCinematicIntro() {
 // Reproducir animación automáticamente al entrar / abrir la página
 onMounted(() => {
   startCinematicIntro()
+  setTimeout(() => handleStoryObserver(), 500)
 })
 
 function toggleMute() {
   isMuted.value = !isMuted.value
 }
 
-const plataformas = [
-  {
-    id: 1,
-    productoIdCompleta: 1,
-    productoIdPantalla: 2,
-    nombre: 'Netflix Premium 4K',
-    slug: 'netflix',
-    desc: 'Acceso completo en 4K Ultra HD. Compatible con Smart TVs, consolas y dispositivos móviles.',
-    color: '#E50914',
-    badge: 'Ultra HD 4K',
-    precioCompleta: 38000,
-    precioPantalla: 12000,
-  },
-  {
-    id: 2,
-    productoIdCompleta: 3,
-    productoIdPantalla: 4,
-    nombre: 'Disney+ Total Family',
-    slug: 'disney',
-    desc: 'Todo el universo Disney, Pixar, Marvel, Star Wars y Star+ sin interrupciones con audio envolvente.',
-    color: '#113CCF',
-    badge: 'Familiar',
-    precioCompleta: 30000,
-    precioPantalla: 9000,
-  },
-  {
-    id: 3,
-    productoIdCompleta: 5,
-    productoIdPantalla: 6,
-    nombre: 'Max (HBO) 4K Ultra',
-    slug: 'max',
-    desc: 'Series icónicas de HBO, Warner Bros, Max Originals y transmisiones de alta calidad.',
-    color: '#7B2FF7',
-    badge: 'HBO & Warner',
-    precioCompleta: 28000,
-    precioPantalla: 9500,
-  },
-  {
-    id: 4,
-    productoIdCompleta: 7,
-    productoIdPantalla: 8,
-    nombre: 'Amazon Prime Video',
-    slug: 'prime',
-    desc: 'Producciones originales galardonadas, canales en vivo y transmisiones deportivas en HD.',
-    color: '#00A8E1',
-    badge: 'Originals',
-    precioCompleta: 25000,
-    precioPantalla: 8000,
-  },
-  {
-    id: 5,
-    productoIdCompleta: 9,
-    productoIdPantalla: 10,
-    nombre: 'Spotify Individual Premium',
-    slug: 'spotify',
-    desc: 'Música ilimitada sin anuncios, audio de máxima calidad y descargas offline para tus viajes.',
-    color: '#1DB954',
-    badge: 'Audio HQ',
-    precioCompleta: 14900,
-    precioPantalla: 7500,
-  },
-  {
-    id: 6,
-    productoIdCompleta: 11,
-    productoIdPantalla: 12,
-    nombre: 'Crunchyroll Mega Fan',
-    slug: 'crunchyroll',
-    desc: 'El catálogo de anime más extenso del mundo en simulcast con subtítulos y doblaje en español.',
-    color: '#F47521',
-    badge: 'Anime HD',
-    precioCompleta: 15000,
-    precioPantalla: 8500,
-  },
-]
-
-function comprarPlataforma(p: typeof plataformas[0]) {
+function comprarPlataforma(p: {
+  id: number
+  productoIdCompleta: number
+  productoIdPantalla: number
+  nombre: string
+  slug: string
+  color: string
+  precioCompleta: number
+  precioPantalla: number
+}) {
   const prodId = modalidadSeleccionada.value === 'CUENTA_COMPLETA' 
     ? p.productoIdCompleta 
     : p.productoIdPantalla
@@ -415,97 +474,201 @@ const formatCOP = (val: number) => {
       </div>
     </section>
 
-    <!-- ================= 2. ELIGE TU MODALIDAD Y CATÁLOGO RÁPIDO ================= -->
-    <section id="plataformas" class="container-app space-y-8 scroll-mt-24">
-      <div class="flex flex-col sm:flex-row items-start sm:items-end justify-between gap-4 border-b border-line pb-6">
-        <div>
-          <span class="text-xs font-mono uppercase tracking-[0.25em] text-cyan-400 font-bold block mb-1">
-            Planes y Suscripciones
-          </span>
-          <h2 class="font-display text-2xl sm:text-4xl font-black text-fg tracking-tight">
-            ELIGE EL MEJOR PLAN PARA TI
-          </h2>
-        </div>
+    <!-- ================= 2. EXPERIENCIA SCROLLYTELLING ESTILO HBO MAX ================= -->
+    <section id="plataformas" class="relative bg-black scroll-mt-20 overflow-hidden">
+      <!-- Transición suave a negro puro desde el hero -->
+      <div class="h-28 bg-gradient-to-b from-transparent to-black pointer-events-none -mt-28 relative z-20" />
 
-        <!-- Segmented Toggle Cuentas Completas vs Pantallas Individuales -->
-        <div class="flex p-1 rounded-xl border border-line bg-surface-2 self-stretch sm:self-auto">
-          <button
-            type="button"
-            class="flex-1 sm:flex-none px-4 py-2 rounded-lg text-xs font-bold transition-all duration-200 cursor-pointer"
-            :class="
-              modalidadSeleccionada === 'CUENTA_COMPLETA'
-                ? 'bg-brand-500 text-white shadow-sm'
-                : 'text-muted hover:text-fg'
-            "
-            @click="modalidadSeleccionada = 'CUENTA_COMPLETA'"
-          >
-            Cuentas Completas
-          </button>
-          <button
-            type="button"
-            class="flex-1 sm:flex-none px-4 py-2 rounded-lg text-xs font-bold transition-all duration-200 cursor-pointer"
-            :class="
-              modalidadSeleccionada === 'PANTALLA'
-                ? 'bg-cyan-500 text-neutral-900 shadow-sm'
-                : 'text-muted hover:text-fg'
-            "
-            @click="modalidadSeleccionada = 'PANTALLA'"
-          >
-            Pantallas Individuales (PIN)
-          </button>
+      <!-- CONTENEDOR DE FONDOS FIJOS CON CROSSFADE INTERACTIVO (FOTOS DE PERSONAS VIENDO CADA PLATAFORMA) -->
+      <div class="sticky top-0 h-screen w-full overflow-hidden pointer-events-none z-0">
+        <div
+          v-for="(sp, idx) in scrollyPlatforms"
+          :key="sp.id"
+          class="absolute inset-0 bg-cover bg-center transition-all duration-1000 ease-out"
+          :class="activeStoryIndex === idx ? 'opacity-50 scale-100' : 'opacity-0 scale-105'"
+          :style="{ backgroundImage: `url('${sp.bgImage}')` }"
+        >
+          <!-- Viñeta oscura cinemática y resplandor ambiental del color de la plataforma -->
+          <div class="absolute inset-0 bg-gradient-to-r from-black via-black/75 to-black/90 pointer-events-none" />
+          <div class="absolute inset-0 bg-gradient-to-t from-black via-transparent to-black/90 pointer-events-none" />
+          
+          <!-- Halo ambiental luminoso correspondiente a la plataforma activa -->
+          <div
+            class="absolute top-1/3 left-1/3 size-[500px] rounded-full blur-[140px] opacity-25 pointer-events-none transition-colors duration-700"
+            :style="{ backgroundColor: sp.color }"
+          />
         </div>
       </div>
 
-      <!-- Cuadrícula de las 6 Plataformas Principales -->
-      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        <div
-          v-for="p in plataformas"
-          :key="p.id"
-          class="card group relative flex flex-col justify-between overflow-hidden border-line hover:border-brand-400/60 transition-all duration-300 hover:shadow-xl hover:shadow-brand-500/10"
-        >
-          <!-- Acento de Color de la Plataforma -->
-          <div
-            class="h-1.5 w-full absolute top-0 left-0 transition-opacity duration-300"
-            :style="{ backgroundColor: p.color }"
-          />
+      <!-- CONTENIDO FOREGROUND (SCROLLYTELLING DIVIDIDO EN 2 COLUMNAS) -->
+      <div class="relative z-10 container-app -mt-[100vh] pb-32">
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-16 items-start">
+          
+          <!-- COLUMNA IZQUIERDA: TEXTO QUE ASCIENDE Y QUEDA FIJO / STICKY CON EL SELECTOR -->
+          <div class="lg:col-span-5 lg:sticky lg:top-24 lg:h-[calc(100vh-120px)] flex flex-col justify-between py-6 space-y-8">
+            <div class="space-y-4">
+              <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-white/15 bg-white/5 backdrop-blur-md">
+                <span class="size-2 rounded-full animate-ping" :style="{ backgroundColor: scrollyPlatforms[activeStoryIndex]?.color || '#8057FF' }" />
+                <span class="text-[11px] font-mono uppercase tracking-[0.2em] text-white/80 font-bold">
+                  {{ scrollyPlatforms[activeStoryIndex]?.tag || 'PLANES OFICIALES' }}
+                </span>
+              </div>
 
-          <div class="p-2 space-y-4">
-            <div class="flex items-center justify-between pt-2">
-              <span class="text-xs font-mono uppercase tracking-wider px-2 py-0.5 rounded border border-line bg-surface-2 text-muted">
-                {{ p.badge }}
-              </span>
-              <span class="text-xs font-semibold text-emerald-400 flex items-center gap-1">
-                <span class="size-1.5 rounded-full bg-emerald-400 animate-pulse" />
-                Disponible
-              </span>
+              <!-- Título que asciende con fuerza y elegancia -->
+              <h2 class="font-display text-3xl sm:text-5xl lg:text-6xl font-black text-white uppercase tracking-tight leading-[1.05] drop-shadow-2xl">
+                ELIGE EL MEJOR <br />
+                <span class="bg-gradient-to-r from-brand-300 via-cyan-300 to-white bg-clip-text text-transparent">
+                  PLAN PARA TI
+                </span>
+              </h2>
+
+              <p class="text-sm sm:text-base text-slate-300/90 leading-relaxed font-sans max-w-md">
+                Desliza hacia abajo para recorrer cada una de las principales plataformas en una experiencia cinematográfica. Cuentas completas y perfiles individuales con activación inmediata.
+              </p>
+
+              <!-- Selector de Modalidad (Cuentas Completas vs Pantallas Individuales) -->
+              <div class="pt-2">
+                <div class="flex p-1 rounded-full border border-white/20 bg-black/70 backdrop-blur-xl w-full max-w-sm shadow-xl">
+                  <button
+                    type="button"
+                    class="flex-1 py-2.5 px-4 rounded-full text-xs font-black transition-all duration-300 cursor-pointer text-center"
+                    :class="
+                      modalidadSeleccionada === 'CUENTA_COMPLETA'
+                        ? 'bg-white text-neutral-950 shadow-lg'
+                        : 'text-slate-400 hover:text-white'
+                    "
+                    @click="modalidadSeleccionada = 'CUENTA_COMPLETA'"
+                  >
+                    Cuentas Completas
+                  </button>
+                  <button
+                    type="button"
+                    class="flex-1 py-2.5 px-4 rounded-full text-xs font-black transition-all duration-300 cursor-pointer text-center"
+                    :class="
+                      modalidadSeleccionada === 'PANTALLA'
+                        ? 'bg-cyan-400 text-neutral-950 shadow-lg'
+                        : 'text-slate-400 hover:text-white'
+                    "
+                    @click="modalidadSeleccionada = 'PANTALLA'"
+                  >
+                    Pantallas (PIN)
+                  </button>
+                </div>
+              </div>
             </div>
 
-            <div>
-              <h3 class="font-display text-xl font-bold text-fg group-hover:text-cyan-300 transition-colors">
-                {{ p.nombre }}
-              </h3>
-              <p class="text-xs text-muted mt-1 leading-relaxed line-clamp-2">
-                {{ p.desc }}
-              </p>
+            <!-- Navegación Interactiva de Plataformas / Indicador de Progreso -->
+            <div class="hidden lg:flex flex-col gap-2.5 border-t border-white/10 pt-6">
+              <span class="text-[10px] font-mono uppercase tracking-[0.25em] text-slate-400">Plataformas Disponibles:</span>
+              <div class="flex flex-wrap gap-2">
+                <button
+                  v-for="(sp, idx) in scrollyPlatforms"
+                  :key="sp.id"
+                  type="button"
+                  class="px-3.5 py-1.5 rounded-full text-xs font-bold transition-all duration-300 border flex items-center gap-2 cursor-pointer"
+                  :class="
+                    activeStoryIndex === idx
+                      ? 'bg-white text-neutral-950 border-white shadow-[0_0_20px_rgba(255,255,255,0.4)] scale-105'
+                      : 'border-white/20 text-slate-400 hover:text-white hover:border-white/50 bg-black/40'
+                  "
+                  @click="scrollToStoryPlatform(idx)"
+                >
+                  <span class="size-1.5 rounded-full" :style="{ backgroundColor: sp.color }" />
+                  <span>{{ sp.nombre.split(' ')[0] }}</span>
+                </button>
+              </div>
             </div>
           </div>
 
-          <div class="p-2 pt-4 border-t border-line/60 mt-auto flex items-center justify-between">
-            <div>
-              <span class="text-[10px] font-mono uppercase text-muted block">Precio mensual</span>
-              <span class="font-display text-lg font-black text-cyan-300">
-                {{ formatCOP(modalidadSeleccionada === 'CUENTA_COMPLETA' ? p.precioCompleta : p.precioPantalla) }}
-              </span>
-            </div>
-
-            <button
-              type="button"
-              class="btn-primary text-xs py-2 px-3.5 font-bold shadow-md shadow-brand-500/20 flex items-center gap-1.5 cursor-pointer"
-              @click="comprarPlataforma(p)"
+          <!-- COLUMNA DERECHA: CAPÍTULOS DE CADA PLATAFORMA QUE ASCIENDEN CON EL SCROLL -->
+          <div class="lg:col-span-7 space-y-28 pt-8 lg:pt-16">
+            <div
+              v-for="(sp, idx) in scrollyPlatforms"
+              :key="sp.id"
+              :ref="(el) => { if (el) storyCardRefs[idx] = el as HTMLElement }"
+              :data-story-index="idx"
+              class="min-h-[75vh] flex items-center justify-center transition-all duration-700 transform"
+              :class="
+                activeStoryIndex === idx
+                  ? 'opacity-100 translate-y-0 scale-100'
+                  : 'opacity-40 translate-y-12 scale-[0.97]'
+              "
             >
-              <span>{{ modalidadSeleccionada === 'CUENTA_COMPLETA' ? 'Comprar Cuenta' : 'Comprar Pantalla' }}</span>
-              <ArrowRight class="size-3.5" />
-            </button>
+              <!-- Tarjeta Cinemática de la Plataforma -->
+              <div
+                class="w-full rounded-3xl border border-white/20 bg-black/80 backdrop-blur-2xl p-6 sm:p-10 shadow-2xl relative overflow-hidden transition-all duration-500 hover:border-white/40"
+                :style="{ boxShadow: activeStoryIndex === idx ? `0 20px 60px ${sp.color}25` : undefined }"
+              >
+                <!-- Línea Neón Superior de la Plataforma -->
+                <div
+                  class="absolute top-0 left-0 right-0 h-1.5 transition-all duration-500"
+                  :style="{ backgroundColor: sp.color, boxShadow: `0 0 20px ${sp.color}` }"
+                />
+
+                <div class="space-y-6">
+                  <!-- Cabecera de la Tarjeta -->
+                  <div class="flex items-start justify-between gap-4">
+                    <div>
+                      <span class="text-xs font-mono uppercase tracking-wider font-bold" :style="{ color: sp.color }">
+                        {{ sp.tag }}
+                      </span>
+                      <h3 class="font-display text-2xl sm:text-3xl font-black text-white mt-1">
+                        {{ sp.nombre }}
+                      </h3>
+                      <p class="text-xs sm:text-sm text-cyan-300 font-medium mt-0.5">
+                        {{ sp.headline }}
+                      </p>
+                    </div>
+
+                    <span class="rounded-full px-3 py-1 text-xs font-bold text-emerald-400 border border-emerald-500/30 bg-emerald-500/10 flex items-center gap-1.5 shrink-0">
+                      <span class="size-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                      Disponible
+                    </span>
+                  </div>
+
+                  <p class="text-xs sm:text-sm text-slate-300 leading-relaxed font-sans">
+                    {{ sp.desc }}
+                  </p>
+
+                  <!-- Checklist de Beneficios Premium -->
+                  <ul class="space-y-2.5 border-y border-white/10 py-4 my-4">
+                    <li
+                      v-for="(feat, fIdx) in sp.features"
+                      :key="fIdx"
+                      class="flex items-center gap-3 text-xs sm:text-sm text-white/90 font-medium"
+                    >
+                      <CheckCircle2 class="size-4 shrink-0 text-cyan-400" />
+                      <span>{{ feat }}</span>
+                    </li>
+                  </ul>
+
+                  <!-- Precios y Botón de Compra Directo -->
+                  <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pt-2">
+                    <div>
+                      <span class="text-[11px] font-mono uppercase text-slate-400 block">
+                        {{ modalidadSeleccionada === 'CUENTA_COMPLETA' ? 'Precio Cuenta Completa 30 días' : 'Precio 1 Pantalla con PIN 30 días' }}
+                      </span>
+                      <div class="flex items-baseline gap-2">
+                        <span class="font-display text-3xl sm:text-4xl font-black text-white">
+                          {{ formatCOP(modalidadSeleccionada === 'CUENTA_COMPLETA' ? sp.precioCompleta : sp.precioPantalla) }}
+                        </span>
+                        <span class="text-xs text-slate-400">/ mes</span>
+                      </div>
+                    </div>
+
+                    <button
+                      type="button"
+                      class="w-full sm:w-auto inline-flex items-center justify-center rounded-full text-sm font-black py-3.5 px-8 shadow-xl transition-all duration-200 hover:scale-105 active:scale-95 cursor-pointer gap-2"
+                      :style="{ backgroundColor: sp.color, color: '#ffffff', boxShadow: `0 0 30px ${sp.color}50` }"
+                      @click="comprarPlataforma(sp)"
+                    >
+                      <span>{{ modalidadSeleccionada === 'CUENTA_COMPLETA' ? 'Comprar Cuenta Completa' : 'Comprar Pantalla Individual' }}</span>
+                      <ArrowRight class="size-4" />
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
