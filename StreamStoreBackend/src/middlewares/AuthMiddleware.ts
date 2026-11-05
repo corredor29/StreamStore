@@ -6,12 +6,19 @@ import { AuthUser } from "../interfaces/AuthUser"
 
 export const AuthMiddleware = (req: Request, _res: Response, next: NextFunction) => {
     const header = req.headers.authorization
-    const token = req.cookies?.token ?? (header?.startsWith("Bearer ") ? header.slice(7) : undefined)
-    if (!token) return next(new HttpError(401, "No autenticado"))
+    const token = (header?.startsWith("Bearer ") ? header.slice(7) : undefined) ?? req.cookies?.token
+    if (!token) return next(new HttpError("No autenticado", 401))
     try {
-        req.user = jwt.verify(token, config.jwt.secret) as AuthUser
+        const { id, email, nombre, rol } = jwt.verify(token, config.jwt.secret) as AuthUser
+        req.user = { id, email, nombre, rol }
         next()
     } catch {
-        next(new HttpError(401, "Token inválido"))
+        next(new HttpError("Token inválido o expirado", 401))
     }
+}
+
+export const RoleMiddleware = (...roles: AuthUser["rol"][]) => (req: Request, _res: Response, next: NextFunction) => {
+    if (!req.user) return next(new HttpError("No autenticado", 401))
+    if (!roles.includes(req.user.rol)) return next(new HttpError("No tienes permisos para este recurso", 403))
+    next()
 }
