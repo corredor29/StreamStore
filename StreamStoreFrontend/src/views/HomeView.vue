@@ -356,10 +356,11 @@ const formatCOP = (val: number) => {
 
       <!-- CONTENIDO CENTRAL DEL HERO (IDÉNTICO A HBO MAX) -->
       <div class="container-app relative z-10 text-center max-w-4xl mx-auto py-20 sm:py-28 flex flex-col items-center justify-center space-y-6">
-        <!-- Nombre Stream Store en Tipografía Cinematográfica Gigante (Estilo HBO Max) -->
-        <div class="flex flex-col items-center justify-center space-y-3">
-          <h1 class="font-display text-5xl sm:text-7xl md:text-8xl lg:text-9xl font-black text-white uppercase tracking-wider drop-shadow-[0_15px_45px_rgba(0,0,0,0.95)] select-none">
-            STREAM <span class="text-white drop-shadow-[0_15px_45px_rgba(0,0,0,0.95)]">STORE</span>
+        <!-- Nombre Stream Store con los Colores Oficiales del Logo -->
+        <div class="flex flex-col items-center justify-center space-y-2">
+          <h1 class="font-display text-5xl sm:text-7xl md:text-8xl lg:text-9xl font-black uppercase tracking-tight select-none leading-none drop-shadow-[0_15px_45px_rgba(0,0,0,0.95)]">
+            <span class="text-white drop-shadow-[0_10px_25px_rgba(0,0,0,0.9)]">STREAM</span>
+            <span class="block sm:inline sm:ml-4 bg-gradient-to-r from-[#8057FF] via-[#9B51E0] to-[#06B6D4] bg-clip-text text-transparent filter drop-shadow-[0_0_40px_rgba(6,182,212,0.5)]">STORE</span>
           </h1>
         </div>
 
