@@ -29,7 +29,13 @@ api.interceptors.request.use((config) => {
 })
 
 api.interceptors.response.use(
-  (res) => res,
+  (res) => {
+    // Si la respuesta del backend viene estructurada en { message, data }, se desenvuelve 'data'
+    if (res.data && typeof res.data === 'object' && 'data' in res.data && 'message' in res.data) {
+      return { ...res, data: res.data.data }
+    }
+    return res
+  },
   (error: AxiosError<{ message?: string; error?: string; code?: string }>) => {
     const normalized = normalizeError(error)
     if (normalized.status === 401) onUnauthorized()
