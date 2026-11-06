@@ -32,7 +32,7 @@ const presentationImage = computed(() => {
     return '/targetyas/HBO_Max.webp'
   }
   if (slug.includes('prime') || slug.includes('amazon') || name.includes('prime') || slug.includes('pv')) {
-    return '/targetyas/prime_video.avif'
+    return '/targetyas/prime_video_card.svg'
   }
   if (slug.includes('crunchyroll') || slug.includes('anime') || name.includes('crunchyroll')) {
     return '/targetyas/Crunchyroll.webp'
@@ -89,14 +89,14 @@ function onAgregar() {
 
 <template>
   <article
-    class="group relative flex flex-col justify-between overflow-hidden rounded-xl bg-white border border-slate-200 shadow-sm hover:shadow-xl hover:border-slate-300 transition-all duration-300 h-full"
+    class="group relative flex flex-col justify-between overflow-hidden rounded-2xl bg-neutral-900/90 border border-white/10 shadow-xl hover:border-cyan-500/50 hover:shadow-[0_15px_35px_rgba(6,182,212,0.15)] transition-all duration-300 h-full backdrop-blur-xl"
     :class="{ 'opacity-60 grayscale-[30%]': isAgotado }"
     :aria-labelledby="`product-title-${producto.id}`"
   >
     <!-- TOP: PORTADA DE BORDE A BORDE (LLENA TODA LA CABECERA SIN ESPACIOS EN BLANCO) -->
     <RouterLink
       :to="`/producto/${producto.id}`"
-      class="relative h-44 sm:h-48 w-full overflow-hidden block select-none cursor-pointer bg-slate-950 group"
+      class="relative h-44 sm:h-48 w-full overflow-hidden block select-none cursor-pointer bg-black group"
     >
       <!-- Tarjeta gráfica oficial ocupando el 100% del contenedor -->
       <img
@@ -107,7 +107,7 @@ function onAgregar() {
       />
 
       <!-- Sutil gradiente oscuro para legibilidad óptima de badges -->
-      <div class="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-black/30 pointer-events-none" />
+      <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-black/30 pointer-events-none" />
 
       <!-- Badges superiores flotantes con efecto glassmorphism -->
       <div class="absolute top-2.5 left-2.5 z-10">
@@ -128,12 +128,12 @@ function onAgregar() {
       </div>
     </RouterLink>
 
-    <!-- CUERPO DE LA TARJETA (ESTILO LION TECH STORE) -->
-    <div class="p-4 sm:p-5 flex-1 flex flex-col justify-between bg-white space-y-3">
+    <!-- CUERPO DE LA TARJETA (DARK MODE PREMIUM STREAMSTORE) -->
+    <div class="p-4 sm:p-5 flex-1 flex flex-col justify-between bg-neutral-900/60 space-y-3">
       <div>
         <h3
           :id="`product-title-${producto.id}`"
-          class="font-display text-xs sm:text-sm font-bold text-slate-800 group-hover:text-cyan-600 transition-colors uppercase tracking-tight line-clamp-2 min-h-[2.5rem] leading-snug"
+          class="font-display text-xs sm:text-sm font-bold text-slate-100 group-hover:text-cyan-300 transition-colors uppercase tracking-tight line-clamp-2 min-h-[2.5rem] leading-snug"
         >
           <RouterLink :to="`/producto/${producto.id}`">
             {{ displayTitle }}
@@ -141,35 +141,35 @@ function onAgregar() {
         </h3>
 
         <!-- Precio prominente en negrita -->
-        <p class="font-display text-xl sm:text-2xl font-black text-slate-950 tracking-tight mt-2">
-          {{ formatPrice(producto.precio) }}
+        <p class="font-display text-xl sm:text-2xl font-black text-white tracking-tight mt-1 flex items-baseline gap-1">
+          <span>{{ formatPrice(producto.precio) }}</span>
         </p>
 
-        <!-- Indicador de Stock: 'en stock' estilo Lion Tech Store -->
+        <!-- Indicador de Stock -->
         <div class="mt-1 flex items-center gap-1.5 text-xs font-semibold">
           <template v-if="isAgotado">
-            <span class="text-rose-600 font-medium">agotado</span>
+            <span class="text-rose-400 font-bold">Agotado</span>
           </template>
           <template v-else-if="producto.stock <= 3">
-            <span class="text-amber-600 font-medium">¡últimas {{ producto.stock }} en stock!</span>
+            <span class="text-amber-400 font-bold">¡Últimas {{ producto.stock }} en stock!</span>
           </template>
           <template v-else>
-            <span class="text-emerald-600 font-medium lowercase">en stock</span>
+            <span class="text-emerald-400 font-medium">En stock</span>
           </template>
         </div>
       </div>
 
       <!-- Fila de Agregar al Carrito -->
-      <div class="pt-3 border-t border-slate-100 flex items-center gap-2">
+      <div class="pt-3 border-t border-white/10 flex items-center gap-2">
         <!-- Selector de cantidad -->
         <div v-if="!isAgotado && maxSeleccionable > 1" class="w-16">
           <label :for="`qty-${producto.id}`" class="sr-only">Cantidad</label>
           <select
             :id="`qty-${producto.id}`"
             v-model.number="cantidad"
-            class="w-full rounded-lg border border-slate-200 bg-slate-50 px-2 py-2 text-xs font-mono font-bold text-slate-800 focus:border-slate-400 focus:outline-none cursor-pointer"
+            class="w-full rounded-lg border border-white/15 bg-white/5 px-2 py-2 text-xs font-mono font-bold text-white hover:border-white/30 focus:border-cyan-400 focus:outline-none cursor-pointer"
           >
-            <option v-for="n in maxSeleccionable" :key="n" :value="n">
+            <option v-for="n in maxSeleccionable" :key="n" :value="n" class="bg-neutral-900 text-white">
               {{ n }} ud
             </option>
           </select>
@@ -178,19 +178,19 @@ function onAgregar() {
         <!-- Botón de compra -->
         <button
           type="button"
-          class="flex-1 py-2 px-3 rounded-lg font-bold text-xs uppercase tracking-wider flex items-center justify-center gap-1.5 transition-all shadow-xs cursor-pointer active:scale-95"
+          class="flex-1 py-2 px-3 rounded-lg font-black text-xs uppercase tracking-wider flex items-center justify-center gap-1.5 transition-all shadow-md cursor-pointer active:scale-95 select-none"
           :class="
             isAgotado
-              ? 'cursor-not-allowed bg-slate-100 text-slate-400 border border-slate-200'
+              ? 'cursor-not-allowed bg-white/5 text-slate-500 border border-white/10'
               : agregado
-                ? 'bg-emerald-600 text-white font-black'
-                : 'bg-slate-900 hover:bg-black text-white font-bold'
+                ? 'bg-emerald-500 text-neutral-950 font-black shadow-[0_0_20px_rgba(16,185,129,0.4)]'
+                : 'bg-gradient-to-r from-cyan-400 to-blue-500 hover:from-cyan-300 hover:to-blue-400 text-neutral-950 font-black shadow-[0_0_20px_rgba(6,182,212,0.3)]'
           "
           :disabled="isAgotado || agregado"
           @click="onAgregar"
         >
           <template v-if="agregado">
-            <Check class="size-4" aria-hidden="true" />
+            <Check class="size-4 stroke-[3]" aria-hidden="true" />
             <span>¡Agregado!</span>
           </template>
           <template v-else-if="isAgotado">

@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 675" width="1200" height="675">
+  <defs>
+    <radialGradient id="primeBg" cx="50%" cy="50%" r="65%">
+      <stop offset="0%" stop-color="#112d4e" />
+      <stop offset="55%" stop-color="#0a1a2f" />
+      <stop offset="100%" stop-color="#050d18" />
+    </radialGradient>
+  </defs>
+  <!-- Fondo cinematográfico Prime Video -->
+  <rect width="1200" height="675" fill="url(#primeBg)" />
+
+  <!-- Logo Prime Video centrado con márgenes seguros -->
+  <g transform="translate(320, 240)">
+    <!-- Texto 'prime' en blanco -->
+    <text x="0" y="80" font-family="'Arial Black', Arial, Helvetica, sans-serif" font-weight="900" font-size="82" fill="#FFFFFF" letter-spacing="-2">
+      prime
+    </text>
+    <!-- Texto 'video' en cyan oficial -->
+    <text x="275" y="80" font-family="'Arial Black', Arial, Helvetica, sans-serif" font-weight="900" font-size="82" fill="#00A8E1" letter-spacing="-2">
+      video
+    </text>
+    <!-- Sonrisa icónica de Amazon Prime con flecha -->
+    <path d="M 8 112 C 75 146 195 146 265 112" stroke="#00A8E1" stroke-width="8" stroke-linecap="round" fill="none"/>
+    <path d="M 255 104 L 275 115 L 257 128 Z" fill="#00A8E1"/>
+  </g>
+</svg>
