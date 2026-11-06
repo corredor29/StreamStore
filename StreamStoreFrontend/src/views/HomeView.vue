@@ -1,24 +1,6 @@
-<script setup lang="ts">
-import { onMounted, onUnmounted, ref, computed } from 'vue'
-import { RouterLink, useRouter } from 'vue-router'
-import { 
-  ArrowRight, 
-  ChevronDown, 
-  Headphones, 
-  ShieldCheck, 
-  Volume2, 
-  VolumeX, 
-  Zap,
-  CheckCircle2,
-  X
-} from '@lucide/vue'
-import type { TipoProducto } from '@/types'
-import { useCartStore } from '@/stores/cart'
-
-const router = useRouter()
-const cart = useCartStore()
-
-const modalidadSeleccionada = ref<TipoProducto>('CUENTA_COMPLETA')
+<script lang="ts">
+// Variable en memoria a nivel módulo: persiste durante la sesión en el cliente
+let introHasPlayedSession = false
 
 export interface ScrollyPlatform {
   id: number
@@ -39,6 +21,30 @@ export interface ScrollyPlatform {
   precioPantalla: number
   stats: string
 }
+</script>
+
+<script setup lang="ts">
+import { onMounted, onUnmounted, ref, computed, watch } from 'vue'
+import { RouterLink, useRoute, useRouter } from 'vue-router'
+import { 
+  ArrowRight, 
+  ChevronDown, 
+  Headphones, 
+  ShieldCheck, 
+  Volume2, 
+  VolumeX, 
+  Zap,
+  CheckCircle2,
+  X
+} from '@lucide/vue'
+import type { TipoProducto } from '@/types'
+import { useCartStore } from '@/stores/cart'
+
+const router = useRouter()
+const route = useRoute()
+const cart = useCartStore()
+
+const modalidadSeleccionada = ref<TipoProducto>('CUENTA_COMPLETA')
 
 const scrollyPlatforms: ScrollyPlatform[] = [
   {
@@ -561,8 +567,28 @@ onMounted(() => {
     window.addEventListener('resize', updateScrollTargets, { passive: true })
     setTimeout(updateScrollTargets, 100)
   }
-  startCinematicIntro()
+
+  // La intro cinematica solo se reproduce al recargar la pagina o si se pulsa el logo (?intro=true)
+  const forceIntro = route.query.intro === 'true'
+  if (!introHasPlayedSession || forceIntro) {
+    introHasPlayedSession = true
+    startCinematicIntro()
+    if (forceIntro) {
+      router.replace({ query: { ...route.query, intro: undefined } })
+    }
+  }
 })
+
+// Escuchar si se pulsa el logo estando ya en Home
+watch(
+  () => route.query.intro,
+  (val) => {
+    if (val === 'true') {
+      startCinematicIntro()
+      router.replace({ query: { ...route.query, intro: undefined } })
+    }
+  }
+)
 
 onUnmounted(() => {
   if (typeof window !== 'undefined') {

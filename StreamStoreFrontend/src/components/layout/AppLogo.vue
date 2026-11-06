@@ -16,10 +16,9 @@ withDefaults(
   }
 )
 
-// Si la sesión está iniciada, el logo redirige a /catalogo.
-// Solo devuelve a la landing page (/) cuando NO hay sesión iniciada.
+// Al hacer clic en el logo se dirige a Inicio activando la intro cinematica
 const destinationRoute = computed(() => {
-  return auth.isAuthenticated ? '/catalogo' : '/'
+  return { path: '/', query: { intro: 'true' } }
 })
 </script>
 

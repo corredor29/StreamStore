@@ -1,8 +1,10 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue'
+import { computed, ref, watch } from 'vue'
 import { 
   Check, 
   ChevronDown, 
+  ChevronLeft,
+  ChevronRight,
   Copy, 
   Eye, 
   KeyRound, 
@@ -34,6 +36,10 @@ const estadoFiltro = ref<string>('TODOS')
 const searchQuery = ref('')
 const sortBy = ref<'id-desc' | 'disponibles-desc' | 'disponibles-asc' | 'plataforma'>('id-desc')
 
+// Paginación interactiva
+const itemsPerPage = ref(6)
+const currentPage = ref(1)
+
 function toggleExpand(id: number) {
   expandedAccounts.value[id] = !expandedAccounts.value[id]
 }
@@ -41,7 +47,7 @@ function toggleExpand(id: number) {
 async function copyText(text: string, label: string) {
   try {
     await navigator.clipboard.writeText(text)
-    copiedNotice.value = `¡${label} copiado!`
+    copiedNotice.value = `${label} copiado exitosamente`
     setTimeout(() => {
       copiedNotice.value = null
     }, 2000)
@@ -133,21 +139,41 @@ const cuentasFiltradas = computed(() => {
       return 0
     })
 })
+
+const totalPages = computed(() => {
+  return Math.max(1, Math.ceil(cuentasFiltradas.value.length / itemsPerPage.value))
+})
+
+const cuentasPaginadas = computed(() => {
+  const start = (currentPage.value - 1) * itemsPerPage.value
+  return cuentasFiltradas.value.slice(start, start + itemsPerPage.value)
+})
+
+// Reiniciar a página 1 cuando los filtros cambien
+watch([plataformaFiltro, estadoFiltro, searchQuery, sortBy], () => {
+  currentPage.value = 1
+})
+
+function irAPagina(pagina: number) {
+  if (pagina >= 1 && pagina <= totalPages.value) {
+    currentPage.value = pagina
+  }
+}
 </script>
 
 <template>
-  <div class="space-y-3">
+  <div class="space-y-4">
     <!-- Toast de Notificación Copiado -->
     <div
       v-if="copiedNotice"
-      class="fixed bottom-6 right-6 z-50 flex items-center gap-2 rounded-lg border border-white/15 bg-[#141B2D] px-3.5 py-2 text-xs font-semibold text-white shadow-xl shadow-black/80"
+      class="fixed bottom-6 right-6 z-50 flex items-center gap-2 rounded-xl border border-white/15 bg-[#141B2D] px-4 py-2.5 text-xs font-semibold text-white shadow-2xl shadow-black/90"
     >
       <Check class="size-4 text-emerald-400" />
       <span>{{ copiedNotice }}</span>
     </div>
 
     <!-- Barra de Herramientas y Filtros -->
-    <div class="rounded-xl border border-white/10 bg-[#0E1322] p-3 flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3 shadow-sm">
+    <div class="rounded-2xl border border-white/10 bg-gradient-to-b from-[#131A2E] to-[#0E1322] p-3.5 flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3 shadow-lg shadow-black/20">
       <!-- Buscador -->
       <div class="relative flex-1 max-w-md">
         <Search class="absolute left-3 top-2.5 size-4 text-slate-400" />
@@ -155,7 +181,7 @@ const cuentasFiltradas = computed(() => {
           v-model="searchQuery"
           type="text"
           placeholder="Buscar por correo, plataforma o #ID..."
-          class="w-full rounded-lg border border-white/10 bg-[#0B0F19] pl-9 pr-8 py-2 text-xs text-white placeholder:text-slate-500 focus:border-cyan-400 focus:outline-none transition-colors"
+          class="w-full rounded-xl border border-white/10 bg-[#0B0F19] pl-9 pr-8 py-2 text-xs text-white placeholder:text-slate-500 focus:border-cyan-400 focus:outline-none transition-colors"
         />
         <button
           v-if="searchQuery"
@@ -172,7 +198,7 @@ const cuentasFiltradas = computed(() => {
         <!-- Selector Plataforma -->
         <select
           v-model="plataformaFiltro"
-          class="rounded-lg border border-white/10 bg-[#0B0F19] px-3 py-2 text-xs text-slate-200 focus:border-cyan-400 focus:outline-none cursor-pointer"
+          class="rounded-xl border border-white/10 bg-[#0B0F19] px-3 py-2 text-xs text-slate-200 focus:border-cyan-400 focus:outline-none cursor-pointer"
         >
           <option value="TODAS">Todas las plataformas ({{ props.cuentas.length }})</option>
           <option v-for="plat in plataformas" :key="plat.id" :value="plat.slug || plat.nombre">
@@ -183,7 +209,7 @@ const cuentasFiltradas = computed(() => {
         <!-- Selector Estado -->
         <select
           v-model="estadoFiltro"
-          class="rounded-lg border border-white/10 bg-[#0B0F19] px-3 py-2 text-xs text-slate-200 focus:border-cyan-400 focus:outline-none cursor-pointer"
+          class="rounded-xl border border-white/10 bg-[#0B0F19] px-3 py-2 text-xs text-slate-200 focus:border-cyan-400 focus:outline-none cursor-pointer"
         >
           <option value="TODOS">Todos los estados</option>
           <option value="DISPONIBLE">Disponibles</option>
@@ -194,7 +220,7 @@ const cuentasFiltradas = computed(() => {
         <!-- Selector Orden -->
         <select
           v-model="sortBy"
-          class="rounded-lg border border-white/10 bg-[#0B0F19] px-3 py-2 text-xs text-slate-200 focus:border-cyan-400 focus:outline-none cursor-pointer"
+          class="rounded-xl border border-white/10 bg-[#0B0F19] px-3 py-2 text-xs text-slate-200 focus:border-cyan-400 focus:outline-none cursor-pointer"
         >
           <option value="id-desc">Más recientes primero</option>
           <option value="disponibles-desc">Mayor stock libre</option>
@@ -203,31 +229,31 @@ const cuentasFiltradas = computed(() => {
         </select>
 
         <span class="text-slate-400 font-mono text-[11px] ml-1 hidden sm:inline">
-          {{ cuentasFiltradas.length }} de {{ props.cuentas.length }}
+          {{ cuentasFiltradas.length }} en total
         </span>
       </div>
     </div>
 
-    <!-- TABLA DE INVENTARIO CLARA Y DIRECTA -->
-    <div class="rounded-xl border border-white/10 bg-[#0E1322] overflow-hidden shadow-sm">
+    <!-- TABLA DE INVENTARIO CON PROFUNDIDAD Y SIN EMOJIS -->
+    <div class="rounded-2xl border border-white/10 bg-[#0E1322] overflow-hidden shadow-xl shadow-black/30">
       <div class="overflow-x-auto">
         <table class="w-full text-left text-xs border-collapse">
           <thead class="bg-[#0B0F19] border-b border-white/10 text-slate-400 uppercase text-[11px] font-semibold tracking-wider">
             <tr>
-              <th class="py-3 px-4 w-12 text-center">ID</th>
-              <th class="py-3 px-4">Plataforma</th>
-              <th class="py-3 px-4">Correo Maestro / Acceso</th>
-              <th class="py-3 px-4 text-center">Pantallas Libres</th>
-              <th class="py-3 px-4 text-center">Estado</th>
-              <th class="py-3 px-4 text-right">Acciones</th>
+              <th class="py-3.5 px-4 w-12 text-center">ID</th>
+              <th class="py-3.5 px-4">Plataforma</th>
+              <th class="py-3.5 px-4">Correo Maestro / Acceso</th>
+              <th class="py-3.5 px-4 text-center">Pantallas Libres</th>
+              <th class="py-3.5 px-4 text-center">Estado</th>
+              <th class="py-3.5 px-4 text-right">Acciones</th>
             </tr>
           </thead>
 
           <tbody class="divide-y divide-white/[0.06]">
-            <template v-for="cuenta in cuentasFiltradas" :key="cuenta.id">
+            <template v-for="cuenta in cuentasPaginadas" :key="cuenta.id">
               <tr
-                class="hover:bg-white/[0.02] transition-colors cursor-pointer group"
-                :class="{ 'bg-white/[0.03]': expandedAccounts[cuenta.id] }"
+                class="hover:bg-white/[0.03] transition-colors cursor-pointer group"
+                :class="{ 'bg-white/[0.04]': expandedAccounts[cuenta.id] }"
                 @click="toggleExpand(cuenta.id)"
               >
                 <!-- ID -->
@@ -240,13 +266,13 @@ const cuentasFiltradas = computed(() => {
                   <div class="flex items-center gap-2.5">
                     <div
                       v-if="cuenta.plataforma?.coverUrl"
-                      class="size-7 rounded overflow-hidden bg-black shrink-0 border border-white/10"
+                      class="size-7 rounded-lg overflow-hidden bg-black shrink-0 border border-white/15 shadow-sm"
                     >
                       <img :src="cuenta.plataforma.coverUrl" :alt="cuenta.plataforma.nombre" class="w-full h-full object-cover" />
                     </div>
                     <div
                       v-else
-                      class="size-7 rounded flex items-center justify-center text-[10px] font-bold text-white uppercase shrink-0 font-mono"
+                      class="size-7 rounded-lg flex items-center justify-center text-[10px] font-bold text-white uppercase shrink-0 font-mono shadow-sm"
                       :style="{ backgroundColor: cuenta.plataforma?.color || '#06b6d4' }"
                     >
                       {{ (cuenta.plataforma?.nombre || 'SS').slice(0, 2) }}
@@ -257,7 +283,7 @@ const cuentasFiltradas = computed(() => {
                   </div>
                 </td>
 
-                <!-- Correo Maestro -->
+                <!-- Correo Maestro con Icono SVG (Sin Emojis) -->
                 <td class="py-3.5 px-4">
                   <div class="flex items-center gap-2">
                     <span
@@ -266,14 +292,15 @@ const cuentasFiltradas = computed(() => {
                     >
                       {{ cuenta.correo }}
                     </span>
-                    <span v-else class="inline-flex items-center gap-1 rounded bg-amber-400/10 border border-amber-400/20 text-amber-300 px-2 py-0.5 text-[11px] font-medium">
-                      🔑 Asignación automática post-compra
+                    <span v-else class="inline-flex items-center gap-1.5 rounded-lg bg-amber-400/10 border border-amber-400/20 text-amber-300 px-2.5 py-0.5 text-[11px] font-medium">
+                      <KeyRound class="size-3 text-amber-400 shrink-0" />
+                      <span>Asignación automática post-compra</span>
                     </span>
 
                     <button
                       v-if="cuenta.correo && !cuenta.correo.includes('pendiente')"
                       type="button"
-                      class="text-slate-400 hover:text-white p-1 rounded transition-colors cursor-pointer"
+                      class="text-slate-400 hover:text-white p-1 rounded-md transition-colors cursor-pointer"
                       title="Copiar correo"
                       @click.stop="copyText(cuenta.correo, 'Correo')"
                     >
@@ -284,7 +311,7 @@ const cuentasFiltradas = computed(() => {
 
                 <!-- Capacidad / Pantallas -->
                 <td class="py-3.5 px-4 text-center whitespace-nowrap">
-                  <div class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg border"
+                  <div class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg border font-mono"
                     :class="[
                       cuenta.pantallasDisponibles === 0
                         ? 'border-rose-500/20 bg-rose-500/10 text-rose-300'
@@ -294,7 +321,7 @@ const cuentasFiltradas = computed(() => {
                     ]"
                   >
                     <Tv class="size-3" />
-                    <span class="font-mono font-bold text-xs">
+                    <span class="font-bold text-xs">
                       {{ cuenta.pantallasDisponibles }} de {{ cuenta.totalPantallas }} libres
                     </span>
                   </div>
@@ -317,7 +344,7 @@ const cuentasFiltradas = computed(() => {
                     <!-- Botón Ver Perfiles -->
                     <button
                       type="button"
-                      class="inline-flex items-center gap-1 text-slate-300 hover:text-white font-medium text-xs px-2.5 py-1 rounded-md border border-white/10 bg-white/5 hover:bg-white/10 transition-colors cursor-pointer"
+                      class="inline-flex items-center gap-1 text-slate-300 hover:text-white font-medium text-xs px-2.5 py-1 rounded-lg border border-white/10 bg-white/5 hover:bg-white/10 transition-colors cursor-pointer"
                       @click.stop="toggleExpand(cuenta.id)"
                     >
                       <Eye class="size-3" />
@@ -331,7 +358,7 @@ const cuentasFiltradas = computed(() => {
                     <!-- Botón Eliminar Cuenta -->
                     <button
                       type="button"
-                      class="text-slate-400 hover:text-rose-400 p-1.5 rounded-md hover:bg-rose-500/10 transition-colors cursor-pointer"
+                      class="text-slate-400 hover:text-rose-400 p-1.5 rounded-lg hover:bg-rose-500/10 transition-colors cursor-pointer"
                       title="Eliminar esta cuenta del inventario"
                       :disabled="deletingId === cuenta.id"
                       @click.stop="handleEliminarCuenta(cuenta)"
@@ -367,7 +394,7 @@ const cuentasFiltradas = computed(() => {
                       <div
                         v-for="p in cuenta.pantallas"
                         :key="p.id"
-                        class="rounded-lg border p-2.5 text-xs flex flex-col justify-between gap-1.5"
+                        class="rounded-xl border p-2.5 text-xs flex flex-col justify-between gap-1.5 shadow-sm"
                         :class="[
                           p.estado === 'DISPONIBLE'
                             ? 'border-white/10 bg-[#0E1322]'
@@ -426,6 +453,59 @@ const cuentasFiltradas = computed(() => {
             Restablecer todos los filtros
           </button>
         </div>
+      </div>
+    </div>
+
+    <!-- BARRA DE PAGINACIÓN INTERACTIVA (< 1 2 3 4 >) -->
+    <div
+      v-if="cuentasFiltradas.length > 0"
+      class="rounded-2xl border border-white/10 bg-gradient-to-b from-[#131A2E] to-[#0E1322] px-4 py-3 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs shadow-lg shadow-black/20"
+    >
+      <div class="text-slate-400 font-mono text-[11px]">
+        Mostrando cuentas <strong class="text-white">{{ (currentPage - 1) * itemsPerPage + 1 }}</strong> a
+        <strong class="text-white">{{ Math.min(currentPage * itemsPerPage, cuentasFiltradas.length) }}</strong> de
+        <strong class="text-white">{{ cuentasFiltradas.length }}</strong>
+      </div>
+
+      <!-- Controles de Navegación de Página -->
+      <div class="flex items-center gap-1.5">
+        <!-- Botón Anterior -->
+        <button
+          type="button"
+          class="size-8 rounded-xl border border-white/10 bg-[#0B0F19] hover:bg-white/10 text-slate-300 hover:text-white flex items-center justify-center transition-all cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed shadow-sm"
+          :disabled="currentPage === 1"
+          title="Página anterior"
+          @click="irAPagina(currentPage - 1)"
+        >
+          <ChevronLeft class="size-4" />
+        </button>
+
+        <!-- Botones Numéricos de Página -->
+        <button
+          v-for="page in totalPages"
+          :key="page"
+          type="button"
+          class="size-8 rounded-xl font-mono text-xs font-bold transition-all cursor-pointer shadow-sm"
+          :class="[
+            currentPage === page
+              ? 'bg-cyan-500 text-white shadow-md shadow-cyan-500/30 border border-cyan-400'
+              : 'border border-white/10 bg-[#0B0F19] text-slate-400 hover:text-white hover:border-white/20'
+          ]"
+          @click="irAPagina(page)"
+        >
+          {{ page }}
+        </button>
+
+        <!-- Botón Siguiente -->
+        <button
+          type="button"
+          class="size-8 rounded-xl border border-white/10 bg-[#0B0F19] hover:bg-white/10 text-slate-300 hover:text-white flex items-center justify-center transition-all cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed shadow-sm"
+          :disabled="currentPage === totalPages"
+          title="Página siguiente"
+          @click="irAPagina(currentPage + 1)"
+        >
+          <ChevronRight class="size-4" />
+        </button>
       </div>
     </div>
   </div>
