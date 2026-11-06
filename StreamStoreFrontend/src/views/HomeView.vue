@@ -558,8 +558,8 @@ onMounted(() => {
   if (typeof window !== 'undefined') {
     scrollY.value = window.scrollY
     window.addEventListener('scroll', handleScroll, { passive: true })
-    window.addEventListener('resize', updateScrollMetrics, { passive: true })
-    setTimeout(updateScrollMetrics, 100)
+    window.addEventListener('resize', updateScrollTargets, { passive: true })
+    setTimeout(updateScrollTargets, 100)
   }
   startCinematicIntro()
 })
@@ -567,7 +567,8 @@ onMounted(() => {
 onUnmounted(() => {
   if (typeof window !== 'undefined') {
     window.removeEventListener('scroll', handleScroll)
-    window.removeEventListener('resize', updateScrollMetrics)
+    window.removeEventListener('resize', updateScrollTargets)
+    if (rafId) window.cancelAnimationFrame(rafId)
   }
 })
 
@@ -899,7 +900,7 @@ const formatCOP = (val: number) => {
         >
           <!-- FOTO DE REFERENCIA CINEMÁTICA DE FONDO: CLARA, VÍVIDA Y APRECIABLE -->
           <div
-            class="absolute inset-0 bg-cover bg-center transition-transform duration-300 ease-out opacity-85 sm:opacity-90 saturate-[1.12] contrast-[1.06] brightness-[0.92]"
+            class="absolute inset-0 bg-cover bg-center opacity-85 sm:opacity-90 saturate-[1.12] contrast-[1.06] brightness-[0.92] will-change-transform pointer-events-none"
             :style="getBgParallax(idx, sp.bgImage)"
           />
 
@@ -912,9 +913,9 @@ const formatCOP = (val: number) => {
 
           <!-- 3. Halo neón ambiental con el color distintivo de la plataforma iluminando la escena -->
           <div
-            class="absolute top-1/2 -translate-y-1/2 size-[650px] rounded-full blur-[150px] opacity-40 pointer-events-none transition-all duration-700"
+            class="absolute top-1/2 -translate-y-1/2 size-[680px] rounded-full blur-[140px] pointer-events-none will-change-transform"
             :class="idx % 2 === 0 ? 'right-10' : 'left-10'"
-            :style="{ backgroundColor: sp.color }"
+            :style="getHaloStyle(idx, sp.color)"
           />
 
           <!-- CONTENIDO EN 2 COLUMNAS ALTERNADAS (CON ANIMACIÓN DE ENTRADA Y SALIDA) -->
@@ -925,7 +926,7 @@ const formatCOP = (val: number) => {
               <template v-if="idx % 2 === 0">
                 <!-- COLUMNA IZQUIERDA: INFORMACIÓN Y PROPUESTA DE VALOR -->
                 <div
-                  class="lg:col-span-6 space-y-6 text-left transition-all duration-300 ease-out"
+                  class="lg:col-span-6 space-y-6 text-left will-change-transform"
                   :style="getInfoStyle(idx)"
                 >
                   <!-- Logotipo Oficial de Marca Libre y Grande (Sin caja contenedora) -->
@@ -971,7 +972,7 @@ const formatCOP = (val: number) => {
                 <!-- COLUMNA DERECHA: TARJETA DE PRECIO Y COMPRA DIRECTA -->
                 <div class="lg:col-span-6 flex justify-center lg:justify-end">
                   <div
-                    class="w-full max-w-lg rounded-3xl border border-white/25 bg-gradient-to-b from-black/85 via-[#0B0E1F]/90 to-black/95 backdrop-blur-2xl p-7 sm:p-9 shadow-2xl relative overflow-hidden transition-all duration-300 group hover:scale-[1.02]"
+                    class="w-full max-w-lg rounded-3xl border border-white/25 bg-gradient-to-b from-black/85 via-[#0B0E1F]/90 to-black/95 backdrop-blur-2xl p-7 sm:p-9 shadow-2xl relative overflow-hidden group hover:border-white/40 will-change-transform"
                     :style="getCardStyle(idx, sp.color)"
                   >
                     <!-- Línea Neón Superior Resplandeciente -->
@@ -1043,7 +1044,7 @@ const formatCOP = (val: number) => {
                 <!-- COLUMNA IZQUIERDA: TARJETA DE PRECIO Y COMPRA DIRECTA -->
                 <div class="lg:col-span-6 flex justify-center lg:justify-start order-2 lg:order-1">
                   <div
-                    class="w-full max-w-lg rounded-3xl border border-white/25 bg-gradient-to-b from-black/85 via-[#0B0E1F]/90 to-black/95 backdrop-blur-2xl p-7 sm:p-9 shadow-2xl relative overflow-hidden transition-all duration-300 group hover:scale-[1.02]"
+                    class="w-full max-w-lg rounded-3xl border border-white/25 bg-gradient-to-b from-black/85 via-[#0B0E1F]/90 to-black/95 backdrop-blur-2xl p-7 sm:p-9 shadow-2xl relative overflow-hidden group hover:border-white/40 will-change-transform"
                     :style="getCardStyle(idx, sp.color)"
                   >
                     <!-- Línea Neón Superior Resplandeciente -->
@@ -1111,7 +1112,7 @@ const formatCOP = (val: number) => {
 
                 <!-- COLUMNA DERECHA: INFORMACIÓN Y PROPUESTA DE VALOR -->
                 <div
-                  class="lg:col-span-6 space-y-6 text-left order-1 lg:order-2 transition-all duration-300 ease-out"
+                  class="lg:col-span-6 space-y-6 text-left order-1 lg:order-2 will-change-transform"
                   :style="getInfoStyle(idx)"
                 >
                   <!-- Logotipo Oficial de Marca Libre y Grande (Sin caja contenedora) -->
