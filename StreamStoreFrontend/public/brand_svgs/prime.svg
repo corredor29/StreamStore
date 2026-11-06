@@ -1,8 +1,0 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 280 80" width="280" height="80" fill="none">
-  <text x="15" y="48" font-family="'Arial Black', Arial, sans-serif" font-weight="900" font-size="34" fill="#FFFFFF" letter-spacing="-0.5">
-    prime <tspan font-weight="500" fill="#00A8E1">video</tspan>
-  </text>
-  <!-- Sonrisa azul icónica -->
-  <path d="M 18 58 C 45 74 85 74 125 58" stroke="#00A8E1" stroke-width="4" stroke-linecap="round" fill="none"/>
-  <path d="M 121 54 L 129 60 L 122 66 Z" fill="#00A8E1"/>
-</svg>
