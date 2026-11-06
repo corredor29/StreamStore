@@ -47,7 +47,7 @@ const scrollyPlatforms: ScrollyPlatform[] = [
     tag: 'NETFLIX · 4K ULTRA HD',
     slug: 'netflix',
     logo: '/netflix.webp',
-    logoFilter: 'drop-shadow(0 4px 16px rgba(229,9,20,0.6))',
+    logoFilter: 'drop-shadow(0 4px 18px rgba(229,9,20,0.7))',
     color: '#E50914',
     bgImage: '/watching_netflix.jpg',
     badge: '🔥 MÁS VENDIDO',
@@ -72,7 +72,7 @@ const scrollyPlatforms: ScrollyPlatform[] = [
     tag: 'DISNEY+ · FAMILIAR & MARVEL',
     slug: 'disney',
     logo: '/disne.png',
-    logoFilter: 'brightness(0) invert(1) drop-shadow(0 4px 18px rgba(17,60,207,0.9)) drop-shadow(0 0 8px rgba(255,255,255,0.8))',
+    logoFilter: 'drop-shadow(0 4px 20px rgba(17,60,207,0.8)) drop-shadow(0 0 10px rgba(255,255,255,0.4))',
     color: '#113CCF',
     bgImage: '/watching_disney.jpg',
     badge: '⭐ TOP FAMILIAR',
@@ -97,7 +97,7 @@ const scrollyPlatforms: ScrollyPlatform[] = [
     tag: 'MAX · HBO ORIGINALS & WARNER',
     slug: 'max',
     logo: '/hbomax.png',
-    logoFilter: 'brightness(0) invert(1) drop-shadow(0 4px 18px rgba(123,47,247,0.9)) drop-shadow(0 0 8px rgba(255,255,255,0.8))',
+    logoFilter: 'drop-shadow(0 4px 20px rgba(123,47,247,0.85)) drop-shadow(0 0 10px rgba(255,255,255,0.4))',
     color: '#7B2FF7',
     bgImage: '/watching_max.jpg',
     badge: '🏆 SERIES EMMY',
@@ -122,7 +122,7 @@ const scrollyPlatforms: ScrollyPlatform[] = [
     tag: 'PRIME VIDEO · ORIGINALS & DEPORTES',
     slug: 'prime',
     logo: '/primevideo.png',
-    logoFilter: 'brightness(0) invert(1) drop-shadow(0 4px 18px rgba(0,168,225,0.9)) drop-shadow(0 0 8px rgba(255,255,255,0.8))',
+    logoFilter: 'drop-shadow(0 4px 20px rgba(0,168,225,0.85)) drop-shadow(0 0 10px rgba(255,255,255,0.4))',
     color: '#00A8E1',
     bgImage: '/watching_prime.jpg',
     badge: '🎬 ORIGINALS & CINE',
@@ -147,7 +147,7 @@ const scrollyPlatforms: ScrollyPlatform[] = [
     tag: 'PARAMOUNT+ · BLOCKBUSTERS & SHOWTIME',
     slug: 'paramount',
     logo: '/paramont.webp',
-    logoFilter: 'brightness(0) invert(1) drop-shadow(0 4px 18px rgba(0,100,255,0.9)) drop-shadow(0 0 8px rgba(255,255,255,0.8))',
+    logoFilter: 'drop-shadow(0 4px 20px rgba(0,100,255,0.85)) drop-shadow(0 0 10px rgba(255,255,255,0.4))',
     color: '#0064FF',
     bgImage: '/hero_cinema_wall.jpg',
     badge: '🚀 BLOCKBUSTERS 4K',
@@ -172,7 +172,7 @@ const scrollyPlatforms: ScrollyPlatform[] = [
     tag: 'CRUNCHYROLL · ANIME EN SIMULCAST',
     slug: 'crunchyroll',
     logo: '/crunchiroll.png',
-    logoFilter: 'drop-shadow(0 4px 18px rgba(244,117,33,0.85)) drop-shadow(0 0 6px rgba(255,255,255,0.6))',
+    logoFilter: 'drop-shadow(0 4px 20px rgba(244,117,33,0.85)) drop-shadow(0 0 10px rgba(255,255,255,0.4))',
     color: '#F47521',
     bgImage: '/hero_cinema_wall.jpg',
     badge: '⚡ SIMULCAST JAPÓN',
@@ -197,7 +197,7 @@ const scrollyPlatforms: ScrollyPlatform[] = [
     tag: 'SPOTIFY · MÚSICA & AUDIO HI-FI',
     slug: 'spotify',
     logo: '/spotify.png',
-    logoFilter: 'drop-shadow(0 4px 18px rgba(29,185,84,0.85)) drop-shadow(0 0 6px rgba(255,255,255,0.6))',
+    logoFilter: 'drop-shadow(0 4px 20px rgba(29,185,84,0.85)) drop-shadow(0 0 10px rgba(255,255,255,0.4))',
     color: '#1DB954',
     bgImage: '/hbo_max_mosaic_bg.jpg',
     badge: '🎧 AUDIO SIN ANUNCIOS',
@@ -222,7 +222,7 @@ const scrollyPlatforms: ScrollyPlatform[] = [
     tag: 'APPLE TV+ · APPLE ORIGINALS',
     slug: 'appletv',
     logo: '/appletv.webp',
-    logoFilter: 'brightness(0) invert(1) drop-shadow(0 4px 18px rgba(255,255,255,0.9)) drop-shadow(0 0 8px rgba(255,255,255,0.7))',
+    logoFilter: 'drop-shadow(0 4px 20px rgba(255,255,255,0.6)) drop-shadow(0 0 10px rgba(255,255,255,0.3))',
     color: '#E2E8F0',
     bgImage: '/watching_prime.jpg',
     badge: '🌟 CALIDAD OSCAR & EMMY',
@@ -327,13 +327,33 @@ function closeCinematicIntro() {
   showNetflixIntro.value = false
 }
 
-// ================= SCROLLYTELLING CON MÉTRICAS EN TIEMPO REAL =================
+// ================= SCROLLYTELLING CON FÍSICA SUAVE (LERP + EASING) =================
 const scrollY = ref(0)
 const activeIndex = ref(0)
 const sectionProgress = ref<number[]>(scrollyPlatforms.map(() => 0.5))
-let scrollTicking = false
 
-function updateScrollMetrics() {
+// Valores objetivo y suavizados para interpolación continua (LERP)
+const targetProgress = scrollyPlatforms.map(() => 0.5)
+const currentProgress = scrollyPlatforms.map(() => 0.5)
+let rafId: number | null = null
+let isAnimating = false
+
+// Funciones de suavizado cinemático (Easing Curves)
+function easeOutCubic(t: number): number {
+  const f = t - 1
+  return f * f * f + 1
+}
+
+function easeInCubic(t: number): number {
+  return t * t * t
+}
+
+function smoothstep(min: number, max: number, value: number): number {
+  const x = Math.max(0, Math.min(1, (value - min) / (max - min)))
+  return x * x * (3 - 2 * x)
+}
+
+function updateScrollTargets() {
   if (typeof window === 'undefined') return
   scrollY.value = window.scrollY
   const windowHeight = window.innerHeight || 800
@@ -344,33 +364,60 @@ function updateScrollMetrics() {
     const rect = el.getBoundingClientRect()
     const totalTravel = windowHeight + rect.height
     const currentTravel = windowHeight - rect.top
-    const rawProgress = currentTravel / totalTravel
-    const clampedProgress = Math.min(1.25, Math.max(-0.25, rawProgress))
-    sectionProgress.value[idx] = clampedProgress
+    const raw = currentTravel / totalTravel
+    targetProgress[idx] = Math.min(1.25, Math.max(-0.25, raw))
 
     // Detectar el capítulo activo que domina el centro de la pantalla
     if (rect.top <= windowHeight * 0.55 && rect.bottom >= windowHeight * 0.40) {
       activeIndex.value = idx
     }
   })
+
+  startPhysicsLoop()
+}
+
+function startPhysicsLoop() {
+  if (isAnimating) return
+  isAnimating = true
+
+  const step = () => {
+    let hasMotion = false
+    const lerpFactor = 0.12 // 12% por fotograma para amortiguación sedosa estilo Apple
+
+    for (let i = 0; i < scrollyPlatforms.length; i++) {
+      const diff = targetProgress[i] - currentProgress[i]
+      if (Math.abs(diff) > 0.0004) {
+        currentProgress[i] += diff * lerpFactor
+        hasMotion = true
+      } else {
+        currentProgress[i] = targetProgress[i]
+      }
+    }
+
+    sectionProgress.value = [...currentProgress]
+
+    if (hasMotion) {
+      rafId = window.requestAnimationFrame(step)
+    } else {
+      isAnimating = false
+      rafId = null
+    }
+  }
+
+  rafId = window.requestAnimationFrame(step)
 }
 
 function handleScroll() {
-  if (!scrollTicking) {
-    window.requestAnimationFrame(() => {
-      updateScrollMetrics()
-      scrollTicking = false
-    })
-    scrollTicking = true
-  }
+  updateScrollTargets()
 }
 
 // Transiciones fluidas del Hero
 const heroContentStyle = computed(() => {
   const p = Math.min(1, Math.max(0, scrollY.value / 320))
+  const eased = easeOutCubic(p)
   return {
     opacity: (1 - p).toFixed(2),
-    transform: `translate3d(0, -${(p * 45).toFixed(1)}px, 0)`,
+    transform: `translate3d(0, -${(eased * 45).toFixed(1)}px, 0)`,
     pointerEvents: (p > 0.85 ? 'none' : 'auto') as any,
   }
 })
@@ -386,86 +433,113 @@ const heroDarkenStyle = computed(() => {
 function getCardStyle(idx: number, color: string) {
   const p = sectionProgress.value[idx] ?? 0.5
 
-  // 1. Fase de Entrada (p: 0.0 a 0.35): Deslizando desde abajo, escalando y ganando nitidez
-  if (p < 0.35) {
-    const t = Math.max(0, Math.min(1, (p - 0.05) / 0.30))
-    const translateY = (1 - t) * 75
-    const scale = 0.88 + t * 0.12
-    const opacity = Math.max(0.05, t)
-    const blur = (1 - t) * 5
+  // 1. Fase de Entrada (p: 0.05 a 0.40): Deslizando desde abajo con curva suave y ganando nitidez
+  if (p < 0.40) {
+    const t = Math.max(0, Math.min(1, (p - 0.05) / 0.35))
+    const eased = easeOutCubic(t)
+    const translateY = (1 - eased) * 85
+    const scale = 0.90 + eased * 0.10
+    const opacity = Math.max(0.04, Math.pow(t, 1.2))
+    const blur = (1 - eased) * 6
+
     return {
       transform: `translate3d(0, ${translateY.toFixed(1)}px, 0) scale(${scale.toFixed(3)})`,
       opacity: opacity.toFixed(2),
-      filter: blur > 0.4 ? `blur(${blur.toFixed(1)}px)` : 'none',
+      filter: blur > 0.3 ? `blur(${blur.toFixed(1)}px)` : 'none',
       boxShadow: `0 25px 60px -15px ${color}35, 0 0 1px 1px ${color}45`,
       willChange: 'transform, opacity, filter',
     }
   }
 
-  // 2. Fase Activa / Enfocada (p: 0.35 a 0.65): Foco total, halo neón intenso y presencia magnética
-  if (p >= 0.35 && p <= 0.65) {
-    const norm = (p - 0.35) / 0.30
-    const subtleLift = Math.sin(norm * Math.PI) * 8
+  // 2. Fase Activa / Enfocada (p: 0.40 a 0.60): Sweet Spot con halo neón reactivo y flotación suave
+  if (p >= 0.40 && p <= 0.60) {
+    const centerNorm = (p - 0.40) / 0.20
+    const floatY = Math.sin(centerNorm * Math.PI) * 8
+    const neonIntensity = (0.55 + Math.sin(centerNorm * Math.PI) * 0.35).toFixed(2)
+
     return {
-      transform: `translate3d(0, -${subtleLift.toFixed(1)}px, 0) scale(1)`,
+      transform: `translate3d(0, -${floatY.toFixed(1)}px, 0) scale(1)`,
       opacity: '1',
       filter: 'none',
-      boxShadow: `0 35px 90px -15px ${color}65, 0 0 3px 2px ${color}95`,
+      boxShadow: `0 35px 90px -15px ${color}75, 0 0 30px -5px ${color}${Math.round(parseFloat(neonIntensity) * 255).toString(16).padStart(2, '0')}, 0 0 1px 1px ${color}90`,
       willChange: 'transform, opacity, filter',
     }
   }
 
-  // 3. Fase de Salida (p: 0.65 a 1.05): Flotando suavemente hacia arriba y desvaneciéndose
-  const t = Math.min(1, Math.max(0, (p - 0.65) / 0.35))
-  const translateY = -t * 65
-  const scale = 1 - t * 0.08
-  const opacity = Math.max(0.1, 1 - t * 0.90)
-  const blur = t * 5
+  // 3. Fase de Salida (p: 0.60 a 1.05): Flotando suavemente hacia arriba y desvaneciéndose con elegancia
+  const t = Math.max(0, Math.min(1, (p - 0.60) / 0.40))
+  const eased = easeInCubic(t)
+  const translateY = -eased * 80
+  const scale = 1 - eased * 0.08
+  const opacity = Math.max(0.04, 1 - eased * 0.96)
+  const blur = eased * 6
+
   return {
     transform: `translate3d(0, ${translateY.toFixed(1)}px, 0) scale(${scale.toFixed(3)})`,
     opacity: opacity.toFixed(2),
-    filter: blur > 0.4 ? `blur(${blur.toFixed(1)}px)` : 'none',
+    filter: blur > 0.3 ? `blur(${blur.toFixed(1)}px)` : 'none',
     boxShadow: `0 15px 40px -15px ${color}25, 0 0 1px 1px ${color}30`,
     willChange: 'transform, opacity, filter',
   }
 }
 
-// Sincronización de entrada y salida para la columna de información
+// ================= SINCRONIZACIÓN DE HISTORIA Y PROPUESTA DE VALOR =================
 function getInfoStyle(idx: number) {
   const p = sectionProgress.value[idx] ?? 0.5
 
-  if (p < 0.35) {
-    const t = Math.max(0, Math.min(1, (p - 0.05) / 0.30))
-    const translateY = (1 - t) * 45
+  if (p < 0.40) {
+    const t = Math.max(0, Math.min(1, (p - 0.05) / 0.35))
+    const eased = easeOutCubic(t)
+    const translateY = (1 - eased) * 55
     return {
       transform: `translate3d(0, ${translateY.toFixed(1)}px, 0)`,
-      opacity: Math.max(0.08, t).toFixed(2),
+      opacity: Math.max(0.06, t).toFixed(2),
       willChange: 'transform, opacity',
     }
   }
 
-  if (p >= 0.35 && p <= 0.65) {
+  if (p >= 0.40 && p <= 0.60) {
+    const centerNorm = (p - 0.40) / 0.20
+    const floatY = Math.sin(centerNorm * Math.PI) * 4
     return {
-      transform: 'translate3d(0, 0, 0)',
+      transform: `translate3d(0, -${floatY.toFixed(1)}px, 0)`,
       opacity: '1',
       willChange: 'transform, opacity',
     }
   }
 
-  const t = Math.min(1, Math.max(0, (p - 0.65) / 0.35))
-  const translateY = -t * 40
+  const t = Math.max(0, Math.min(1, (p - 0.60) / 0.40))
+  const eased = easeInCubic(t)
+  const translateY = -eased * 50
   return {
     transform: `translate3d(0, ${translateY.toFixed(1)}px, 0)`,
-    opacity: Math.max(0.12, 1 - t * 0.88).toFixed(2),
+    opacity: Math.max(0.08, 1 - eased * 0.92).toFixed(2),
     willChange: 'transform, opacity',
   }
 }
 
-// Efecto parallax en la imagen de fondo para profundidad cinemática
+// ================= HALO AMBIENTAL REACTIVO AL ENFOQUE =================
+function getHaloStyle(idx: number, color: string) {
+  const p = sectionProgress.value[idx] ?? 0.5
+  const dist = Math.abs(p - 0.50)
+  const norm = Math.max(0, 1 - dist / 0.40)
+  const eased = smoothstep(0, 1, norm)
+  const opacity = (0.15 + eased * 0.40).toFixed(2)
+  const scale = (0.90 + eased * 0.25).toFixed(2)
+
+  return {
+    backgroundColor: color,
+    opacity: opacity,
+    transform: `scale(${scale})`,
+    willChange: 'opacity, transform',
+  }
+}
+
+// ================= EFECTO PARALLAX CINEMÁTICO EN EL FONDO =================
 function getBgParallax(idx: number, bgImage: string) {
   const p = sectionProgress.value[idx] ?? 0.5
-  const zoom = 1.02 + Math.min(0.08, Math.max(0, p * 0.08))
-  const panY = (p - 0.5) * 30
+  const zoom = 1.03 + Math.min(0.07, Math.max(0, p * 0.07))
+  const panY = (p - 0.5) * 45
   return {
     backgroundImage: `url('${bgImage}')`,
     transform: `translate3d(0, ${panY.toFixed(1)}px, 0) scale(${zoom.toFixed(3)})`,
@@ -799,8 +873,7 @@ const formatCOP = (val: number) => {
             v-if="sp.logo"
             :src="sp.logo"
             :alt="sp.nombre"
-            class="max-h-full max-w-full object-contain"
-            :style="{ filter: sp.logoFilter }"
+            class="max-h-7 max-w-8 sm:max-h-8 sm:max-w-9 object-contain drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]"
           />
           <span v-else class="text-[10px] font-black" :style="{ color: sp.color }">
             {{ sp.slug.substring(0, 3).toUpperCase() }}
@@ -860,7 +933,7 @@ const formatCOP = (val: number) => {
                     <img 
                       :src="sp.logo" 
                       :alt="sp.nombre" 
-                      class="h-14 sm:h-20 w-auto max-w-[240px] object-contain transition-transform duration-300"
+                      class="h-14 sm:h-20 w-auto max-w-[260px] sm:max-w-[320px] object-contain transition-transform duration-300"
                       :style="{ filter: sp.logoFilter }"
                     />
                   </div>
@@ -919,11 +992,11 @@ const formatCOP = (val: number) => {
                       </div>
 
                       <!-- Logotipo Oficial Libre, Nítido y Prominente (Sin caja ni marco) -->
-                      <div v-if="sp.logo" class="h-11 sm:h-13 flex items-center shrink-0">
+                      <div v-if="sp.logo" class="h-12 sm:h-14 flex items-center justify-end shrink-0">
                         <img 
                           :src="sp.logo" 
                           :alt="sp.nombre" 
-                          class="h-10 sm:h-12 w-auto max-w-[160px] object-contain transition-transform duration-300 group-hover:scale-105"
+                          class="h-10 sm:h-12 w-auto max-w-[170px] sm:max-w-[210px] object-contain transition-transform duration-300 group-hover:scale-105"
                           :style="{ filter: sp.logoFilter }"
                         />
                       </div>
@@ -991,11 +1064,11 @@ const formatCOP = (val: number) => {
                       </div>
 
                       <!-- Logotipo Oficial Libre, Nítido y Prominente (Sin caja ni marco) -->
-                      <div v-if="sp.logo" class="h-11 sm:h-13 flex items-center shrink-0">
+                      <div v-if="sp.logo" class="h-12 sm:h-14 flex items-center justify-end shrink-0">
                         <img 
                           :src="sp.logo" 
                           :alt="sp.nombre" 
-                          class="h-10 sm:h-12 w-auto max-w-[160px] object-contain transition-transform duration-300 group-hover:scale-105"
+                          class="h-10 sm:h-12 w-auto max-w-[170px] sm:max-w-[210px] object-contain transition-transform duration-300 group-hover:scale-105"
                           :style="{ filter: sp.logoFilter }"
                         />
                       </div>
@@ -1046,7 +1119,7 @@ const formatCOP = (val: number) => {
                     <img 
                       :src="sp.logo" 
                       :alt="sp.nombre" 
-                      class="h-14 sm:h-20 w-auto max-w-[240px] object-contain transition-transform duration-300"
+                      class="h-14 sm:h-20 w-auto max-w-[260px] sm:max-w-[320px] object-contain transition-transform duration-300"
                       :style="{ filter: sp.logoFilter }"
                     />
                   </div>

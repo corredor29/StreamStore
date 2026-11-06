@@ -1,8 +1,61 @@
 import { api, mockDelay, USE_MOCKS } from './api'
-import type { Compra, CrearCuentaPayload, CuentaAdmin, ResumenAdmin } from '@/types'
+import type { ComboPromo, Compra, CrearComboPayload, CrearCuentaPayload, CuentaAdmin, ResumenAdmin } from '@/types'
 import { mockPlataformas } from '@/mocks/mockData'
 import { mockComprasRealizadas } from './purchaseService'
 import { mockServiciosEnMemoria } from './accountService'
+
+// Combos y Promociones iniciales (ej. Netflix + HBO Max)
+export const mockCombosPromocionales: ComboPromo[] = [
+  {
+    id: 1,
+    nombre: 'Combo Dúo Cine: Netflix + Max (HBO)',
+    descripcion: 'Acceso a catálogo completo de Netflix Ultra HD + Max HBO para 1 pantalla simultánea en cada plataforma.',
+    plataformas: [
+      { id: 1, nombre: 'Netflix', slug: 'netflix', color: '#E50914', logoUrl: '/netflix.webp' },
+      { id: 4, nombre: 'Max', slug: 'max', color: '#7B2FF7', logoUrl: '/hbomax.png' },
+    ],
+    precioPromo: 32000,
+    precioRegular: 48000,
+    pantallasPorPlataforma: 1,
+    duracionDias: 30,
+    etiquetaPromo: 'COMBO DÚO 2X1',
+    activo: true,
+    creadoEn: new Date().toISOString(),
+  },
+  {
+    id: 2,
+    nombre: 'Combo Familiar: Disney+ & Prime Video',
+    descripcion: 'Lo mejor de Disney, Pixar, Marvel y Star Wars junto con Prime Video Series y Envíos.',
+    plataformas: [
+      { id: 2, nombre: 'Disney+', slug: 'disney', color: '#113CCF', logoUrl: '/disne.png' },
+      { id: 3, nombre: 'Prime Video', slug: 'prime', color: '#00A8E1', logoUrl: '/primevideo.png' },
+    ],
+    precioPromo: 25000,
+    precioRegular: 38000,
+    pantallasPorPlataforma: 1,
+    duracionDias: 30,
+    etiquetaPromo: 'AHORRA 35%',
+    activo: true,
+    creadoEn: new Date().toISOString(),
+  },
+  {
+    id: 3,
+    nombre: 'Mega Pack Streaming Trío: Netflix + Max + Disney+',
+    descripcion: 'El paquete definitivo de entretenimiento digital. 3 plataformas premium con entrega inmediata de perfiles.',
+    plataformas: [
+      { id: 1, nombre: 'Netflix', slug: 'netflix', color: '#E50914', logoUrl: '/netflix.webp' },
+      { id: 4, nombre: 'Max', slug: 'max', color: '#7B2FF7', logoUrl: '/hbomax.png' },
+      { id: 2, nombre: 'Disney+', slug: 'disney', color: '#113CCF', logoUrl: '/disne.png' },
+    ],
+    precioPromo: 44900,
+    precioRegular: 65000,
+    pantallasPorPlataforma: 1,
+    duracionDias: 30,
+    etiquetaPromo: 'MÁS VENDIDO 🔥',
+    activo: true,
+    creadoEn: new Date().toISOString(),
+  },
+]
 
 // Cuentas iniciales de administración con datos realistas
 export const mockCuentasAdmin: CuentaAdmin[] = [
@@ -375,6 +428,22 @@ export const adminService = {
     return mockDelay([...mockComprasRealizadas], 200)
   },
 
+  async servicios(): Promise<any[]> {
+    if (!USE_MOCKS) {
+      try {
+        const response = await api.get<any>('/admin/servicios')
+        const raw = response.data
+        const list = Array.isArray(raw) ? raw : Array.isArray(raw?.data) ? raw.data : []
+        if (list.length > 0) {
+          return list
+        }
+      } catch (e) {
+        console.warn('Error al cargar servicios de clientes desde backend:', e)
+      }
+    }
+    return mockDelay([...mockServiciosEnMemoria], 200)
+  },
+
   async ejecutarCron(): Promise<{ mensaje: string }> {
     if (!USE_MOCKS) {
       try {
@@ -385,5 +454,74 @@ export const adminService = {
       }
     }
     return mockDelay({ mensaje: 'Tarea cron ejecutada con éxito. Inventario y vencimientos actualizados.' }, 500)
+  },
+
+  async combos(): Promise<ComboPromo[]> {
+    if (!USE_MOCKS) {
+      try {
+        const response = await api.get<any>('/admin/combos')
+        const raw = response.data
+        const list = Array.isArray(raw) ? raw : Array.isArray(raw?.data) ? raw.data : []
+        if (list.length > 0) return list
+      } catch (e) {
+        // Fallback a mockCombosPromocionales
+      }
+    }
+    return mockDelay([...mockCombosPromocionales], 200)
+  },
+
+  async crearCombo(payload: CrearComboPayload): Promise<ComboPromo> {
+    const plats = (payload.plataformaIds || []).map((id: number) => {
+      const found = mockPlataformas.find((p) => p.id === id)
+      return found || { id, nombre: `Plataforma #${id}`, slug: `plat-${id}`, color: '#8057FF', activa: true }
+    })
+
+    const nuevo: ComboPromo = {
+      id: Math.floor(100 + Math.random() * 900),
+      nombre: payload.nombre,
+      descripcion: payload.descripcion || 'Acceso combinado multi-servicio.',
+      plataformas: plats,
+      precioPromo: payload.precioPromo,
+      precioRegular: payload.precioRegular,
+      pantallasPorPlataforma: payload.pantallasPorPlataforma || 1,
+      duracionDias: payload.duracionDias || 30,
+      etiquetaPromo: payload.etiquetaPromo || 'COMBO ESPECIAL',
+      activo: payload.activo !== undefined ? payload.activo : true,
+      creadoEn: new Date().toISOString(),
+    }
+
+    if (!USE_MOCKS) {
+      try {
+        const res = await api.post<any>('/admin/combos', payload)
+        const data = res.data?.data ?? res.data
+        if (data && data.id) {
+          mockCombosPromocionales.unshift(data)
+          return data
+        }
+      } catch (e) {
+        console.warn('Fallo al registrar combo en backend, guardando localmente:', e)
+      }
+    }
+
+    mockCombosPromocionales.unshift(nuevo)
+    return mockDelay(nuevo, 300)
+  },
+
+  async toggleCombo(id: number): Promise<boolean> {
+    const item = mockCombosPromocionales.find((c) => c.id === id)
+    if (item) {
+      item.activo = !item.activo
+      return mockDelay(item.activo, 150)
+    }
+    return false
+  },
+
+  async eliminarCombo(id: number): Promise<boolean> {
+    const idx = mockCombosPromocionales.findIndex((c) => c.id === id)
+    if (idx !== -1) {
+      mockCombosPromocionales.splice(idx, 1)
+      return mockDelay(true, 150)
+    }
+    return false
   },
 }

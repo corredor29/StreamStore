@@ -223,6 +223,34 @@ export interface ResumenAdmin {
   serviciosActivos: number
 }
 
+// ---------- Promociones y Combos Multi-Plataforma ----------
+
+export interface ComboPromo {
+  id: number
+  nombre: string
+  descripcion?: string | null
+  plataformas: Array<{ id: number; nombre: string; slug: string; color?: string | null; logoUrl?: string | null }>
+  precioPromo: number
+  precioRegular: number
+  pantallasPorPlataforma: number
+  duracionDias: number
+  etiquetaPromo: string
+  activo: boolean
+  creadoEn?: string
+}
+
+export interface CrearComboPayload {
+  nombre: string
+  descripcion?: string
+  plataformaIds: number[]
+  precioPromo: number
+  precioRegular: number
+  pantallasPorPlataforma: number
+  duracionDias: number
+  etiquetaPromo: string
+  activo?: boolean
+}
+
 // ---------- Utilidades ----------
 
 export interface ApiError {

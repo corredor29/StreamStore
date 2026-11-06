@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
 import { RouterLink } from 'vue-router'
-import { Check, ShoppingCart } from '@lucide/vue'
+import { Check, Clock, ShoppingCart, Tv, Users } from '@lucide/vue'
 import type { Producto } from '@/types'
 import { formatPrice } from '@/composables/useFormat'
 import { useCartStore } from '@/stores/cart'
@@ -12,12 +12,47 @@ const props = defineProps<{
 
 const cart = useCartStore()
 const agregado = ref(false)
+const cantidad = ref(1)
 
 const isAgotado = computed(() => props.producto.stock <= 0)
+const maxSeleccionable = computed(() => Math.min(props.producto.stock, 5))
+
+const platformColor = computed(() => props.producto.plataforma?.color || '#8057FF')
+
+// Foto cinemática de fondo según plataforma
+const posterPhoto = computed(() => {
+  const slug = (props.producto.plataforma?.slug || props.producto.plataforma?.nombre || '').toLowerCase()
+  if (slug.includes('netflix') || slug.includes('nf')) return '/watching_netflix.jpg'
+  if (slug.includes('disney') || slug.includes('dp')) return '/watching_disney.jpg'
+  if (slug.includes('max') || slug.includes('hbo')) return '/watching_max.jpg'
+  if (slug.includes('prime') || slug.includes('amazon')) return '/watching_prime.jpg'
+  if (slug.includes('paramount') || slug.includes('paramont')) return '/hero_cinema_wall.jpg'
+  if (slug.includes('crunchyroll') || slug.includes('anime')) return '/hero_cinema_wall.jpg'
+  if (slug.includes('spotify') || slug.includes('musica')) return '/hbo_max_mosaic_bg.jpg'
+  if (slug.includes('apple') || slug.includes('appletv')) return '/watching_prime.jpg'
+  return '/hero_cinema_wall.jpg'
+})
+
+// Filtro de iluminación para que logos transparentes resalten en el fondo fotográfico
+const logoFilter = computed(() => {
+  const slug = (props.producto.plataforma?.slug || '').toLowerCase()
+  if (slug.includes('max')) return 'brightness(0) invert(1) drop-shadow(0 4px 16px rgba(123,47,247,0.9)) drop-shadow(0 0 8px rgba(255,255,255,0.7))'
+  if (slug.includes('disney')) return 'brightness(0) invert(1) drop-shadow(0 4px 16px rgba(17,60,207,0.9)) drop-shadow(0 0 8px rgba(255,255,255,0.7))'
+  if (slug.includes('prime')) return 'brightness(0) invert(1) drop-shadow(0 4px 16px rgba(0,168,225,0.9)) drop-shadow(0 0 8px rgba(255,255,255,0.7))'
+  if (slug.includes('paramount')) return 'brightness(0) invert(1) drop-shadow(0 4px 16px rgba(0,100,255,0.9)) drop-shadow(0 0 8px rgba(255,255,255,0.7))'
+  if (slug.includes('apple')) return 'brightness(0) invert(1) drop-shadow(0 4px 16px rgba(255,255,255,0.9)) drop-shadow(0 0 8px rgba(255,255,255,0.7))'
+  return 'drop-shadow(0 4px 18px rgba(0,0,0,0.95)) drop-shadow(0 0 6px rgba(255,255,255,0.4))'
+})
+
+const tipoBadge = computed(() => {
+  return props.producto.tipo === 'CUENTA_COMPLETA'
+    ? { label: 'Cuenta Completa', icon: Users, cls: 'bg-black/60 text-brand-300 border-brand-500/30' }
+    : { label: '1 Pantalla (PIN)', icon: Tv, cls: 'bg-black/60 text-cyan-300 border-cyan-500/30' }
+})
 
 function onAgregar() {
   if (isAgotado.value) return
-  const res = cart.addItem(props.producto, 1)
+  const res = cart.addItem(props.producto, cantidad.value)
   if (res.success) {
     agregado.value = true
     setTimeout(() => {
@@ -29,69 +64,153 @@ function onAgregar() {
 
 <template>
   <article
-    class="group relative flex flex-col justify-between overflow-hidden rounded-xl bg-white border border-slate-200/90 shadow-xs hover:shadow-xl hover:border-slate-300 transition-all duration-300 h-[370px] p-4 cursor-pointer"
+    class="group relative flex flex-col justify-between overflow-hidden rounded-2xl bg-neutral-900 border border-white/10 shadow-xl hover:border-white/30 hover:shadow-2xl transition-all duration-300"
     :class="{ 'opacity-70 grayscale-[20%]': isAgotado }"
     :aria-labelledby="`product-title-${producto.id}`"
   >
-    <!-- TOP 65%: CANVAS BLANCO LIMPIO CON LOGO GIGANTE CENTRADO (ESTILO LION STORE) -->
+    <!-- TOP: FOTO CINEMÁTICA REAL DE FONDO CON LOGO OFICIAL FLOTANTE -->
     <RouterLink
       :to="`/producto/${producto.id}`"
-      class="flex-1 w-full flex items-center justify-center p-3 select-none"
+      class="relative h-48 sm:h-52 w-full overflow-hidden block select-none cursor-pointer"
     >
-      <img
-        v-if="producto.plataforma?.logoUrl"
-        :src="producto.plataforma.logoUrl"
-        :alt="producto.plataforma?.nombre"
-        class="max-h-24 max-w-[85%] object-contain group-hover:scale-105 transition-transform duration-300"
+      <!-- Foto de fondo cinemática (gente viendo TV o póster de cine) -->
+      <div
+        class="absolute inset-0 bg-cover bg-center transition-transform duration-700 ease-out group-hover:scale-105"
+        :style="{ backgroundImage: `url('${posterPhoto}')` }"
       />
-      <span v-else class="font-display text-2xl font-black text-slate-900 tracking-tight">
-        {{ producto.plataforma?.nombre }}
-      </span>
+
+      <!-- Capas de degradado para profundidad y legibilidad del texto/logo -->
+      <div class="absolute inset-0 bg-gradient-to-t from-neutral-900 via-neutral-900/40 to-black/70 pointer-events-none" />
+
+      <!-- Halo de color de plataforma -->
+      <div
+        class="absolute -top-10 -right-10 size-40 rounded-full blur-3xl opacity-40 pointer-events-none"
+        :style="{ backgroundColor: platformColor }"
+      />
+
+      <!-- Acento superior fino de color neón -->
+      <div
+        class="absolute left-0 top-0 h-1 w-full z-10"
+        :style="{ backgroundColor: platformColor, boxShadow: `0 0 10px ${platformColor}` }"
+      />
+
+      <!-- Badges superiores flotantes: Modalidad y Duración -->
+      <div class="absolute top-3 left-3 z-10">
+        <span
+          class="inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-[10px] font-mono font-bold uppercase tracking-wider backdrop-blur-md"
+          :class="tipoBadge.cls"
+        >
+          <component :is="tipoBadge.icon" class="size-3" aria-hidden="true" />
+          {{ tipoBadge.label }}
+        </span>
+      </div>
+
+      <div class="absolute top-3 right-3 z-10">
+        <span class="inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-[10px] font-mono font-bold text-slate-200 bg-black/60 border border-white/15 backdrop-blur-md">
+          <Clock class="size-3 text-cyan-300" />
+          {{ producto.duracionDias }}d
+        </span>
+      </div>
+
+      <!-- LOGO OFICIAL CENTRADO SOBRE LA FOTO CINEMÁTICA -->
+      <div class="absolute inset-0 flex items-center justify-center p-6 z-10">
+        <img
+          v-if="producto.plataforma?.logoUrl"
+          :src="producto.plataforma.logoUrl"
+          :alt="producto.plataforma?.nombre"
+          class="max-h-16 sm:max-h-20 max-w-[80%] object-contain transition-transform duration-300 group-hover:scale-110"
+          :style="{ filter: logoFilter }"
+        />
+        <span v-else class="font-display text-2xl font-black text-white tracking-tight drop-shadow-lg">
+          {{ producto.plataforma?.nombre }}
+        </span>
+      </div>
     </RouterLink>
 
-    <!-- BOTTOM 35%: TÍTULO, PRECIO Y EN STOCK (EXACTO A LA REFERENCIA) -->
-    <div class="pt-3 border-t border-slate-100 flex flex-col justify-between">
+    <!-- CUERPO DE LA TARJETA -->
+    <div class="p-5 flex-1 flex flex-col justify-between space-y-4 bg-neutral-900">
       <div>
+        <span class="text-[10px] font-mono uppercase tracking-widest text-slate-400 font-bold block mb-1">
+          {{ producto.plataforma?.nombre || 'STREAMING' }}
+        </span>
         <h3
           :id="`product-title-${producto.id}`"
-          class="font-sans text-[13px] font-semibold text-slate-700 uppercase leading-snug line-clamp-2 group-hover:text-cyan-700 transition-colors"
+          class="font-display text-base font-bold text-white group-hover:text-cyan-300 transition-colors uppercase tracking-tight line-clamp-1"
         >
           <RouterLink :to="`/producto/${producto.id}`">
             {{ producto.nombre }}
           </RouterLink>
         </h3>
+        <p class="text-xs text-slate-400 mt-1 line-clamp-1">
+          Entrega inmediata · PIN privado · Garantía total activa
+        </p>
       </div>
 
-      <div class="mt-2.5 flex items-baseline justify-between">
-        <p class="font-display text-lg sm:text-xl font-bold text-slate-900 tracking-tight">
-          {{ formatPrice(producto.precio) }}
-        </p>
+      <div class="pt-3 border-t border-white/10 space-y-3">
+        <!-- Fila de Precio y Disponibilidad -->
+        <div class="flex items-baseline justify-between">
+          <div>
+            <p class="font-display text-2xl sm:text-3xl font-black text-white tracking-tight">
+              {{ formatPrice(producto.precio) }}
+            </p>
+            <!-- Badge de Stock -->
+            <div class="mt-1 flex items-center gap-1.5 text-xs font-semibold">
+              <template v-if="isAgotado">
+                <span class="size-2 rounded-full bg-rose-500 inline-block"></span>
+                <span class="text-rose-400 font-medium">Agotado</span>
+              </template>
+              <template v-else-if="producto.stock <= 3">
+                <span class="size-2 rounded-full bg-amber-500 inline-block animate-pulse"></span>
+                <span class="text-amber-300 font-medium">¡Últimas {{ producto.stock }}!</span>
+              </template>
+              <template v-else>
+                <span class="size-2 rounded-full bg-emerald-500 inline-block animate-pulse"></span>
+                <span class="text-emerald-400 font-medium lowercase">en stock</span>
+              </template>
+            </div>
+          </div>
 
-        <!-- Botón rápido de agregar al carrito -->
+          <!-- Selector de cantidad si hay más de 1 -->
+          <div v-if="!isAgotado && maxSeleccionable > 1" class="w-16">
+            <label :for="`qty-${producto.id}`" class="sr-only">Cantidad</label>
+            <select
+              :id="`qty-${producto.id}`"
+              v-model.number="cantidad"
+              class="w-full rounded-lg border border-white/15 bg-black/60 px-2 py-1.5 text-xs font-mono font-bold text-white focus:border-cyan-400 focus:outline-none cursor-pointer"
+            >
+              <option v-for="n in maxSeleccionable" :key="n" :value="n">
+                {{ n }} ud
+              </option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Botón de Compra / Agregar al Carrito -->
         <button
           type="button"
-          class="inline-flex items-center justify-center size-8 rounded-lg transition-all cursor-pointer shadow-xs"
+          class="w-full py-2.5 px-4 rounded-xl font-bold text-xs uppercase tracking-wider flex items-center justify-center gap-2 transition-all shadow-md cursor-pointer"
           :class="
             isAgotado
-              ? 'bg-slate-100 text-slate-400 cursor-not-allowed'
+              ? 'cursor-not-allowed bg-white/5 text-slate-500 border border-white/10'
               : agregado
-                ? 'bg-emerald-600 text-white'
-                : 'bg-slate-900 hover:bg-slate-800 text-white'
+                ? 'bg-emerald-500 text-neutral-950 font-black shadow-[0_0_15px_rgba(16,185,129,0.4)]'
+                : 'bg-white hover:bg-slate-200 text-neutral-950 font-black hover:shadow-lg'
           "
           :disabled="isAgotado || agregado"
-          :title="isAgotado ? 'Agotado' : 'Agregar al carrito'"
-          @click.stop="onAgregar"
+          @click="onAgregar"
         >
-          <Check v-if="agregado" class="size-4" />
-          <ShoppingCart v-else class="size-4" />
+          <template v-if="agregado">
+            <Check class="size-4" aria-hidden="true" />
+            <span>¡Agregado al carrito!</span>
+          </template>
+          <template v-else-if="isAgotado">
+            <span>Agotado</span>
+          </template>
+          <template v-else>
+            <ShoppingCart class="size-3.5" aria-hidden="true" />
+            <span>Agregar al Carrito</span>
+          </template>
         </button>
-      </div>
-
-      <!-- ESTADO 'en stock' EXACTO A LA REFERENCIA -->
-      <div class="mt-1 text-[11px] font-normal text-slate-500">
-        <span v-if="isAgotado" class="text-rose-600 font-medium">agotado</span>
-        <span v-else-if="producto.stock <= 3" class="text-amber-700 font-medium">¡últimas {{ producto.stock }} en stock!</span>
-        <span v-else class="text-slate-500">en stock</span>
       </div>
     </div>
   </article>
