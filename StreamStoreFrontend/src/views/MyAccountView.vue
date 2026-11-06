@@ -9,11 +9,9 @@ import {
   RefreshCw, 
   Search, 
   ShoppingBag, 
-  Sparkles,
   Tv, 
   XCircle 
 } from '@lucide/vue'
-import { useAuthStore } from '@/stores/auth'
 import { accountService } from '@/services/accountService'
 import { purchaseService } from '@/services/purchaseService'
 import type { Compra, Servicio } from '@/types'
@@ -21,8 +19,6 @@ import ServiceCard from '@/components/account/ServiceCard.vue'
 import PurchaseHistory from '@/components/account/PurchaseHistory.vue'
 import AppLoader from '@/components/common/AppLoader.vue'
 import AppAlert from '@/components/common/AppAlert.vue'
-
-const auth = useAuthStore()
 
 const activeTab = ref<'servicios' | 'compras'>('servicios')
 const estadoFiltro = ref<string>('TODOS')
@@ -86,73 +82,38 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="space-y-8">
-    <!-- HERO BANNER DEL CLIENTE -->
-    <header class="relative overflow-hidden rounded-3xl border border-white/10 bg-gradient-to-br from-neutral-900/90 via-black to-[#0B0E1F] p-6 sm:p-8 backdrop-blur-2xl shadow-2xl">
-      <!-- Resplandor ambiental de fondo -->
-      <div class="absolute -right-20 -top-20 size-64 rounded-full bg-cyan-500/10 blur-3xl pointer-events-none" />
-      <div class="absolute -left-20 -bottom-20 size-64 rounded-full bg-brand-500/10 blur-3xl pointer-events-none" />
-
-      <div class="relative z-10 flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6">
-        <div>
-          <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-cyan-400/30 bg-cyan-950/40 text-[11px] font-mono font-bold uppercase tracking-widest text-cyan-300 mb-3">
-            <Sparkles class="size-3 text-cyan-400" />
-            <span>Panel Oficial de Suscripciones</span>
-          </div>
-
-          <h1 class="font-display text-2xl sm:text-4xl font-black text-white tracking-tight">
-            Hola, {{ auth.usuario?.nombre || 'Cliente' }}
-          </h1>
-          <p class="mt-1 text-xs sm:text-sm text-slate-300 max-w-xl leading-relaxed">
-            Administra tus suscripciones activas, credenciales de acceso privadas e historial de compras con garantía 24/7.
-          </p>
-        </div>
-
-        <!-- Acciones Rápidas -->
-        <div class="flex flex-wrap items-center gap-3">
-          <button
-            type="button"
-            class="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/5 hover:bg-white/10 text-white text-xs font-bold px-4 py-2.5 transition-all cursor-pointer shadow-md"
-            :disabled="loading"
-            @click="loadData"
-          >
-            <RefreshCw class="size-3.5" :class="{ 'animate-spin': loading }" aria-hidden="true" />
-            <span>Actualizar</span>
-          </button>
-
-          <RouterLink
-            to="/catalogo"
-            class="inline-flex items-center gap-2 rounded-full bg-white hover:bg-slate-200 text-neutral-950 text-xs font-black px-5 py-2.5 transition-all shadow-[0_0_25px_rgba(255,255,255,0.3)] hover:scale-105 active:scale-95"
-          >
-            <ShoppingBag class="size-3.5" />
-            <span>Explorar Catálogo</span>
-          </RouterLink>
-        </div>
+  <div class="space-y-6">
+    <!-- ENCABEZADO DIRECTO Y LIMPIO -->
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-white/10">
+      <div>
+        <h1 class="font-display text-2xl sm:text-3xl font-black text-white tracking-tight">
+          Mis Servicios
+        </h1>
+        <p class="text-xs text-slate-400 mt-1">
+          Accede a tus cuentas, credenciales de streaming y PIN de perfiles activos.
+        </p>
       </div>
 
-      <!-- Tarjetas de Resumen Rápido (KPIs) -->
-      <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4 mt-6 pt-6 border-t border-white/10">
-        <div class="rounded-2xl border border-white/10 bg-white/5 p-3.5 backdrop-blur-md">
-          <span class="text-[10px] font-mono uppercase tracking-wider text-slate-400">Total Servicios</span>
-          <p class="font-display text-2xl font-black text-white mt-0.5">{{ conteoEstados.total }}</p>
-        </div>
+      <div class="flex items-center gap-2.5">
+        <button
+          type="button"
+          class="inline-flex items-center gap-2 rounded-xl border border-white/15 bg-white/5 hover:bg-white/10 text-white text-xs font-semibold px-3.5 py-2 transition-all cursor-pointer"
+          :disabled="loading"
+          @click="loadData"
+        >
+          <RefreshCw class="size-3.5" :class="{ 'animate-spin': loading }" aria-hidden="true" />
+          <span>Actualizar</span>
+        </button>
 
-        <div class="rounded-2xl border border-emerald-500/20 bg-emerald-500/5 p-3.5 backdrop-blur-md">
-          <span class="text-[10px] font-mono uppercase tracking-wider text-emerald-400 font-bold">Activos</span>
-          <p class="font-display text-2xl font-black text-emerald-300 mt-0.5">{{ conteoEstados.activos }}</p>
-        </div>
-
-        <div class="rounded-2xl border border-amber-500/20 bg-amber-500/5 p-3.5 backdrop-blur-md">
-          <span class="text-[10px] font-mono uppercase tracking-wider text-amber-400 font-bold">Por Vencer</span>
-          <p class="font-display text-2xl font-black text-amber-300 mt-0.5">{{ conteoEstados.porVencer }}</p>
-        </div>
-
-        <div class="rounded-2xl border border-rose-500/20 bg-rose-500/5 p-3.5 backdrop-blur-md">
-          <span class="text-[10px] font-mono uppercase tracking-wider text-rose-400 font-bold">Vencidos</span>
-          <p class="font-display text-2xl font-black text-rose-300 mt-0.5">{{ conteoEstados.vencidos }}</p>
-        </div>
+        <RouterLink
+          to="/catalogo"
+          class="inline-flex items-center gap-2 rounded-xl bg-cyan-400 hover:bg-cyan-300 text-neutral-950 text-xs font-black px-4 py-2 transition-all shadow-md"
+        >
+          <ShoppingBag class="size-3.5" />
+          <span>Comprar más planes</span>
+        </RouterLink>
       </div>
-    </header>
+    </div>
 
     <!-- Pestañas de Navegación del Panel -->
     <div role="tablist" aria-label="Secciones del panel" class="flex border-b border-white/10 gap-3">
