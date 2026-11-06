@@ -478,6 +478,22 @@ export const adminService = {
     return mockDelay(nuevaCuenta, 300)
   },
 
+  async eliminarCuenta(id: number): Promise<boolean> {
+    if (!USE_MOCKS) {
+      try {
+        await api.delete(`/admin/cuentas/${id}`)
+      } catch (e) {
+        console.warn('Error al eliminar cuenta en backend, aplicando fallback en memoria:', e)
+      }
+    }
+    const idx = mockCuentasAdmin.findIndex((c) => c.id === id)
+    if (idx !== -1) {
+      mockCuentasAdmin.splice(idx, 1)
+      return mockDelay(true, 150)
+    }
+    return false
+  },
+
   async compras(): Promise<Compra[]> {
     if (!USE_MOCKS) {
       try {

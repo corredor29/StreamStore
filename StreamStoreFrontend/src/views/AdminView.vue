@@ -32,7 +32,7 @@ const auth = useAuthStore()
 const route = useRoute()
 const router = useRouter()
 
-type TabKey = 'inventario' | 'servicios' | 'ventas' | 'plataformas'
+type TabKey = 'inventario' | 'plataformas' | 'servicios' | 'ventas'
 
 const activeTab = ref<TabKey>('inventario')
 
@@ -194,95 +194,115 @@ onMounted(() => {
     </div>
 
     <!-- Panel Administrativo Completo -->
-    <div v-else class="space-y-6">
-      <!-- Encabezado de la Consola -->
-      <header class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pb-6 border-b border-line/70">
+    <div v-else class="space-y-5">
+      <!-- Encabezado Limpio y Directo -->
+      <header class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pb-4 border-b border-white/10">
         <div>
           <div class="flex items-center gap-2">
             <span class="rounded bg-cyan-400/10 border border-cyan-400/20 px-2 py-0.5 text-[10px] font-mono font-bold text-cyan-300 uppercase tracking-widest">
-              StreamStore Console
+              Panel de Control
             </span>
-            <span class="text-xs text-slate-400 font-mono">Control de Operaciones</span>
+            <span class="text-xs text-slate-400 font-mono">StreamStore Oficial</span>
           </div>
           <h1 class="mt-1.5 font-display text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
-            Panel de Inventario y Ventas
+            Inventario & Gestión de Ventas
           </h1>
-          <p class="mt-1 text-xs sm:text-sm text-slate-400">
-            Monitoreo en tiempo real de cuentas maestras, asignación de perfiles y facturación.
+          <p class="mt-0.5 text-xs sm:text-sm text-slate-400">
+            Administra tus marcas de streaming, cuentas maestras en stock y pedidos de clientes.
           </p>
         </div>
 
-        <!-- Acciones Principales -->
-        <div class="flex flex-wrap items-center gap-2.5 self-stretch sm:self-auto">
-          <!-- Botón Ejecutar Cron -->
+        <!-- Acciones de Herramienta -->
+        <div class="flex items-center gap-2">
           <button
             type="button"
             class="inline-flex items-center gap-2 rounded-xl border border-white/10 bg-[#0E1322] hover:bg-white/5 text-slate-300 hover:text-white text-xs font-semibold px-3 py-2 transition-all cursor-pointer"
             :disabled="isCronExecuting"
+            title="Ejecutar cron para verificar y actualizar vencimientos"
             @click="onEjecutarCron"
           >
             <Clock class="size-3.5 text-amber-400" :class="{ 'animate-spin': isCronExecuting }" />
-            <span>{{ isCronExecuting ? 'Ejecutando...' : 'Ejecutar Cron Vencimientos' }}</span>
+            <span>{{ isCronExecuting ? 'Verificando...' : 'Cron Vencimientos' }}</span>
           </button>
 
-          <!-- Botón Sincronizar -->
           <button
             type="button"
             class="inline-flex items-center gap-2 rounded-xl border border-white/10 bg-[#0E1322] hover:bg-white/5 text-slate-300 hover:text-white text-xs font-semibold px-3 py-2 transition-all cursor-pointer"
             :disabled="loading"
+            title="Recargar datos del inventario"
             @click="loadAdminData"
           >
             <RefreshCw class="size-3.5 text-cyan-400" :class="{ 'animate-spin': loading }" />
             <span>Actualizar</span>
           </button>
+        </div>
+      </header>
 
-          <!-- Botón Paso 1: Nueva Plataforma -->
+      <!-- BARRA GUÍA: FLUJO EN 2 PASOS (CLARIDAD ABSOLUTA PARA EL USUARIO) -->
+      <div class="rounded-xl border border-cyan-400/20 bg-gradient-to-r from-cyan-950/40 via-[#0E1322] to-purple-950/30 p-4 flex flex-col md:flex-row items-start md:items-center justify-between gap-4 shadow-sm">
+        <div class="flex items-center gap-3">
+          <div class="size-10 rounded-xl bg-cyan-400/10 border border-cyan-400/20 flex items-center justify-center text-cyan-400 shrink-0">
+            <Sparkles class="size-5" />
+          </div>
+          <div>
+            <h3 class="text-sm font-bold text-white flex items-center gap-2">
+              <span>¿Cómo cargar nuevo streaming a la tienda?</span>
+            </h3>
+            <p class="text-xs text-slate-300 mt-0.5">
+              <span class="text-cyan-300 font-semibold">1. Crear Plataforma:</span> Registra la marca (Netflix, Disney+, Max) con su portada.
+              <span class="text-purple-300 font-semibold ml-1 sm:ml-2">2. Cargar Cuenta:</span> Ingresa credenciales, define pantallas y precio de venta.
+            </p>
+          </div>
+        </div>
+
+        <div class="flex items-center gap-2.5 shrink-0 self-stretch md:self-auto">
+          <!-- Botón Paso 1 -->
           <button
             type="button"
-            class="inline-flex items-center gap-1.5 rounded-xl border border-cyan-400/30 bg-cyan-400/10 hover:bg-cyan-400/20 text-cyan-300 text-xs font-bold px-3.5 py-2 transition-all cursor-pointer shadow-sm"
+            class="flex-1 md:flex-none inline-flex items-center justify-center gap-1.5 rounded-xl border border-cyan-400/30 bg-cyan-400/10 hover:bg-cyan-400/20 text-cyan-300 text-xs font-bold px-3.5 py-2 transition-all cursor-pointer shadow-sm"
             @click="abrirPaso1"
           >
             <Film class="size-3.5" />
             <span>+ Paso 1: Nueva Plataforma</span>
           </button>
 
-          <!-- Botón Paso 2: Cargar Cuenta -->
+          <!-- Botón Paso 2 -->
           <button
             type="button"
-            class="btn-primary text-xs py-2 px-4 gap-1.5 font-bold shadow-lg shadow-cyan-500/20 cursor-pointer"
+            class="flex-1 md:flex-none btn-primary text-xs py-2 px-4 gap-1.5 font-bold shadow-lg shadow-cyan-500/20 cursor-pointer"
             @click="() => abrirPaso2()"
           >
             <Plus class="size-4" />
             <span>+ Paso 2: Cargar Cuenta</span>
           </button>
         </div>
-      </header>
+      </div>
 
       <!-- Feedback de Tarea Cron -->
       <div
         v-if="cronMessage"
-        class="flex items-center gap-3 rounded-xl border border-emerald-500/40 bg-emerald-950/40 p-4 text-xs font-semibold text-emerald-300 animate-fade-in"
+        class="flex items-center gap-3 rounded-xl border border-emerald-500/40 bg-emerald-950/40 p-3.5 text-xs font-semibold text-emerald-300 animate-fade-in"
       >
         <CheckCircle2 class="size-5 text-emerald-400 shrink-0" />
         <p>{{ cronMessage }}</p>
       </div>
 
       <!-- Alerta de Error -->
-      <AppAlert v-if="error" variant="error" title="Error en el dashboard">
+      <AppAlert v-if="error" variant="error" title="Atención">
         <p>{{ error }}</p>
       </AppAlert>
 
       <!-- Estado de Carga -->
-      <AppLoader v-if="loading && cuentas.length === 0" label="Sincronizando inventario y ventas..." />
+      <AppLoader v-if="loading && cuentas.length === 0" label="Cargando panel de inventario..." />
 
       <!-- Contenido Principal -->
-      <div v-else class="space-y-6">
-        <!-- 1. Tarjetas Ejecutivas de Rendimiento -->
+      <div v-else class="space-y-5">
+        <!-- 1. Tarjetas Resumen de Métricas (Super Claras) -->
         <AdminSummaryCards :resumen="resumen" />
 
-        <!-- 2. Pestañas de Navegación Profesional -->
-        <div role="tablist" class="flex border-b border-white/10 gap-1 overflow-x-auto scrollbar-none">
-          <!-- Tab 1: Inventario de Cuentas -->
+        <!-- 2. Pestañas de Navegación Clara -->
+        <div role="tablist" class="flex border-b border-white/10 gap-2 overflow-x-auto scrollbar-none">
+          <!-- Tab 1: Inventario -->
           <button
             type="button"
             role="tab"
@@ -302,7 +322,27 @@ onMounted(() => {
             </span>
           </button>
 
-          <!-- Tab 2: Servicios y Clientes -->
+          <!-- Tab 2: Plataformas & Catálogo -->
+          <button
+            type="button"
+            role="tab"
+            :aria-selected="activeTab === 'plataformas'"
+            class="flex items-center gap-2 border-b-2 px-4 py-2.5 text-xs sm:text-sm font-semibold transition-colors cursor-pointer focus:outline-none shrink-0"
+            :class="[
+              activeTab === 'plataformas'
+                ? 'border-cyan-400 text-white'
+                : 'border-transparent text-slate-400 hover:text-slate-200'
+            ]"
+            @click="setTab('plataformas')"
+          >
+            <Film class="size-4" />
+            <span>Plataformas Creadas (Paso 1)</span>
+            <span class="rounded bg-white/10 px-1.5 py-0.2 text-[10px] font-mono text-slate-300">
+              {{ plataformas.length }}
+            </span>
+          </button>
+
+          <!-- Tab 3: Servicios a Clientes -->
           <button
             type="button"
             role="tab"
@@ -322,7 +362,7 @@ onMounted(() => {
             </span>
           </button>
 
-          <!-- Tab 3: Registro de Ventas -->
+          <!-- Tab 4: Ventas -->
           <button
             type="button"
             role="tab"
@@ -330,7 +370,7 @@ onMounted(() => {
             class="flex items-center gap-2 border-b-2 px-4 py-2.5 text-xs sm:text-sm font-semibold transition-colors cursor-pointer focus:outline-none shrink-0"
             :class="[
               activeTab === 'ventas'
-                ? 'border-emerald-400 text-white'
+                ? 'border-cyan-400 text-white'
                 : 'border-transparent text-slate-400 hover:text-slate-200'
             ]"
             @click="setTab('ventas')"
@@ -339,26 +379,6 @@ onMounted(() => {
             <span>Registro de Ventas</span>
             <span class="rounded bg-white/10 px-1.5 py-0.2 text-[10px] font-mono text-slate-300">
               {{ compras.length }}
-            </span>
-          </button>
-
-          <!-- Tab 4: Catálogo y Plataformas -->
-          <button
-            type="button"
-            role="tab"
-            :aria-selected="activeTab === 'plataformas'"
-            class="flex items-center gap-2 border-b-2 px-4 py-2.5 text-xs sm:text-sm font-semibold transition-colors cursor-pointer focus:outline-none shrink-0"
-            :class="[
-              activeTab === 'plataformas'
-                ? 'border-purple-400 text-white'
-                : 'border-transparent text-slate-400 hover:text-slate-200'
-            ]"
-            @click="setTab('plataformas')"
-          >
-            <Film class="size-4" />
-            <span>Plataformas & Catálogo</span>
-            <span class="rounded bg-white/10 px-1.5 py-0.2 text-[10px] font-mono text-slate-300">
-              {{ plataformas.length }}
             </span>
           </button>
         </div>
@@ -371,26 +391,27 @@ onMounted(() => {
               :cuentas="cuentas"
               :plataformas="plataformas"
               @open-modal="() => abrirPaso2()"
+              @cuenta-eliminada="loadAdminData"
             />
           </div>
 
-          <!-- Tab 2: Servicios a Clientes -->
-          <div v-else-if="activeTab === 'servicios'">
-            <AdminServicesTable :servicios="servicios" />
-          </div>
-
-          <!-- Tab 3: Ventas -->
-          <div v-else-if="activeTab === 'ventas'">
-            <AdminSalesTable :compras="compras" />
-          </div>
-
-          <!-- Tab 4: Plataformas -->
+          <!-- Tab 2: Plataformas -->
           <div v-else-if="activeTab === 'plataformas'">
             <AdminPlatformsOverview
               :plataformas="plataformas"
               :cuentas="cuentas"
               @cargar-cuenta="(plat) => abrirPaso2(plat?.id)"
             />
+          </div>
+
+          <!-- Tab 3: Servicios a Clientes -->
+          <div v-else-if="activeTab === 'servicios'">
+            <AdminServicesTable :servicios="servicios" />
+          </div>
+
+          <!-- Tab 4: Ventas -->
+          <div v-else-if="activeTab === 'ventas'">
+            <AdminSalesTable :compras="compras" />
           </div>
         </div>
       </div>

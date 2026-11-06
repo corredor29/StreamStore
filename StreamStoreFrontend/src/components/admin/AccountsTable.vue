@@ -3,20 +3,17 @@ import { computed, ref } from 'vue'
 import { 
   Check, 
   ChevronDown, 
-  ChevronRight, 
   Copy, 
-  Filter, 
+  Eye, 
   KeyRound, 
   Layers, 
-  Lock, 
-  Mail, 
-  Plus, 
   Search, 
-  Sparkles, 
+  Trash2, 
   Tv, 
   X 
 } from '@lucide/vue'
 import type { CuentaAdmin, Plataforma } from '@/types'
+import { adminService } from '@/services/adminService'
 
 const props = defineProps<{
   cuentas: CuentaAdmin[]
@@ -25,10 +22,12 @@ const props = defineProps<{
 
 const emit = defineEmits<{
   openModal: []
+  cuentaEliminada: []
 }>()
 
 const expandedAccounts = ref<Record<number, boolean>>({})
 const copiedNotice = ref<string | null>(null)
+const deletingId = ref<number | null>(null)
 
 const plataformaFiltro = ref<string>('TODAS')
 const estadoFiltro = ref<string>('TODOS')
@@ -49,6 +48,23 @@ async function copyText(text: string, label: string) {
   } catch (err) {}
 }
 
+async function handleEliminarCuenta(cuenta: CuentaAdmin) {
+  const nombre = cuenta.plataforma?.nombre || `Cuenta #${cuenta.id}`
+  if (!confirm(`¿Estás seguro de eliminar la ${nombre} (ID #${cuenta.id}) del inventario?`)) {
+    return
+  }
+
+  deletingId.value = cuenta.id
+  try {
+    await adminService.eliminarCuenta(cuenta.id)
+    emit('cuentaEliminada')
+  } catch (err: any) {
+    alert(err?.message || 'No se pudo eliminar la cuenta.')
+  } finally {
+    deletingId.value = null
+  }
+}
+
 function getEstadoBadge(estado: CuentaAdmin['estado']) {
   switch (estado) {
     case 'DISPONIBLE':
@@ -56,28 +72,28 @@ function getEstadoBadge(estado: CuentaAdmin['estado']) {
         label: 'Disponible', 
         dot: 'bg-emerald-400',
         text: 'text-emerald-400',
-        bg: 'bg-emerald-500/10'
+        bg: 'bg-emerald-500/10 border-emerald-500/20'
       }
     case 'PARCIAL':
       return { 
-        label: 'Parcial', 
+        label: 'En uso parcial', 
         dot: 'bg-amber-400',
         text: 'text-amber-400',
-        bg: 'bg-amber-500/10'
+        bg: 'bg-amber-500/10 border-amber-500/20'
       }
     case 'VENDIDA':
       return { 
         label: 'Agotada', 
-        dot: 'bg-purple-400',
-        text: 'text-purple-300',
-        bg: 'bg-purple-500/10'
+        dot: 'bg-rose-400',
+        text: 'text-rose-300',
+        bg: 'bg-rose-500/10 border-rose-500/20'
       }
     default:
       return { 
         label: 'Inactiva', 
         dot: 'bg-slate-400',
         text: 'text-slate-400',
-        bg: 'bg-slate-500/10'
+        bg: 'bg-slate-500/10 border-slate-500/20'
       }
   }
 }
@@ -130,33 +146,33 @@ const cuentasFiltradas = computed(() => {
       <span>{{ copiedNotice }}</span>
     </div>
 
-    <!-- Barra de Herramientas Unificada (Estilo Stripe/Linear) -->
-    <div class="rounded-xl border border-white/10 bg-[#0D121F] p-3 flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3">
-      <!-- Izquierda: Buscador Integrado -->
+    <!-- Barra de Herramientas y Filtros -->
+    <div class="rounded-xl border border-white/10 bg-[#0E1322] p-3 flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3 shadow-sm">
+      <!-- Buscador -->
       <div class="relative flex-1 max-w-md">
         <Search class="absolute left-3 top-2.5 size-4 text-slate-400" />
         <input
           v-model="searchQuery"
           type="text"
-          placeholder="Buscar cuenta por correo, plataforma o ID..."
-          class="w-full rounded-lg border border-white/10 bg-[#141B2D] pl-9 pr-8 py-2 text-xs text-white placeholder:text-slate-400 focus:border-cyan-400 focus:outline-none transition-colors"
+          placeholder="Buscar por correo, plataforma o #ID..."
+          class="w-full rounded-lg border border-white/10 bg-[#0B0F19] pl-9 pr-8 py-2 text-xs text-white placeholder:text-slate-500 focus:border-cyan-400 focus:outline-none transition-colors"
         />
         <button
           v-if="searchQuery"
           type="button"
-          class="absolute right-2.5 top-2.5 text-slate-400 hover:text-white"
+          class="absolute right-2.5 top-2.5 text-slate-400 hover:text-white cursor-pointer"
           @click="searchQuery = ''"
         >
           <X class="size-3.5" />
         </button>
       </div>
 
-      <!-- Derecha: Filtros Compactos Dropdown & Contador -->
+      <!-- Filtros Dropdown -->
       <div class="flex flex-wrap items-center gap-2 text-xs">
         <!-- Selector Plataforma -->
         <select
           v-model="plataformaFiltro"
-          class="rounded-lg border border-white/10 bg-[#141B2D] px-3 py-2 text-xs text-slate-200 focus:border-cyan-400 focus:outline-none cursor-pointer"
+          class="rounded-lg border border-white/10 bg-[#0B0F19] px-3 py-2 text-xs text-slate-200 focus:border-cyan-400 focus:outline-none cursor-pointer"
         >
           <option value="TODAS">Todas las plataformas ({{ props.cuentas.length }})</option>
           <option v-for="plat in plataformas" :key="plat.id" :value="plat.slug || plat.nombre">
@@ -167,20 +183,20 @@ const cuentasFiltradas = computed(() => {
         <!-- Selector Estado -->
         <select
           v-model="estadoFiltro"
-          class="rounded-lg border border-white/10 bg-[#141B2D] px-3 py-2 text-xs text-slate-200 focus:border-cyan-400 focus:outline-none cursor-pointer"
+          class="rounded-lg border border-white/10 bg-[#0B0F19] px-3 py-2 text-xs text-slate-200 focus:border-cyan-400 focus:outline-none cursor-pointer"
         >
           <option value="TODOS">Todos los estados</option>
           <option value="DISPONIBLE">Disponibles</option>
-          <option value="PARCIAL">Parciales</option>
+          <option value="PARCIAL">En uso parcial</option>
           <option value="VENDIDA">Agotadas</option>
         </select>
 
         <!-- Selector Orden -->
         <select
           v-model="sortBy"
-          class="rounded-lg border border-white/10 bg-[#141B2D] px-3 py-2 text-xs text-slate-200 focus:border-cyan-400 focus:outline-none cursor-pointer"
+          class="rounded-lg border border-white/10 bg-[#0B0F19] px-3 py-2 text-xs text-slate-200 focus:border-cyan-400 focus:outline-none cursor-pointer"
         >
-          <option value="id-desc">Más recientes</option>
+          <option value="id-desc">Más recientes primero</option>
           <option value="disponibles-desc">Mayor stock libre</option>
           <option value="disponibles-asc">Menor stock libre</option>
           <option value="plataforma">Nombre (A-Z)</option>
@@ -192,29 +208,26 @@ const cuentasFiltradas = computed(() => {
       </div>
     </div>
 
-    <!-- TABLA DE DATOS PROFESIONAL (ALTA DENSIDAD, SIN BLOQUES FLOTANTES REPETITIVOS) -->
-    <div class="rounded-xl border border-white/10 bg-[#0D121F] overflow-hidden shadow-sm">
+    <!-- TABLA DE INVENTARIO CLARA Y DIRECTA -->
+    <div class="rounded-xl border border-white/10 bg-[#0E1322] overflow-hidden shadow-sm">
       <div class="overflow-x-auto">
         <table class="w-full text-left text-xs border-collapse">
-          <!-- Encabezado de la Tabla -->
-          <thead class="bg-[#121829] border-b border-white/10 text-slate-400 uppercase text-[11px] font-semibold tracking-wider">
+          <thead class="bg-[#0B0F19] border-b border-white/10 text-slate-400 uppercase text-[11px] font-semibold tracking-wider">
             <tr>
               <th class="py-3 px-4 w-12 text-center">ID</th>
               <th class="py-3 px-4">Plataforma</th>
               <th class="py-3 px-4">Correo Maestro / Acceso</th>
-              <th class="py-3 px-4 text-center">Perfiles Libres</th>
+              <th class="py-3 px-4 text-center">Pantallas Libres</th>
               <th class="py-3 px-4 text-center">Estado</th>
-              <th class="py-3 px-4 text-right">Acción</th>
+              <th class="py-3 px-4 text-right">Acciones</th>
             </tr>
           </thead>
 
-          <!-- Filas de Cuentas -->
           <tbody class="divide-y divide-white/[0.06]">
             <template v-for="cuenta in cuentasFiltradas" :key="cuenta.id">
-              <!-- Fila Principal de la Cuenta -->
               <tr
-                class="hover:bg-[#141B2E] transition-colors cursor-pointer group"
-                :class="{ 'bg-[#141B2E]': expandedAccounts[cuenta.id] }"
+                class="hover:bg-white/[0.02] transition-colors cursor-pointer group"
+                :class="{ 'bg-white/[0.03]': expandedAccounts[cuenta.id] }"
                 @click="toggleExpand(cuenta.id)"
               >
                 <!-- ID -->
@@ -222,12 +235,19 @@ const cuentasFiltradas = computed(() => {
                   #{{ cuenta.id }}
                 </td>
 
-                <!-- Plataforma con Logo/Pill -->
+                <!-- Plataforma -->
                 <td class="py-3.5 px-4 whitespace-nowrap">
                   <div class="flex items-center gap-2.5">
                     <div
-                      class="size-6 rounded flex items-center justify-center text-[10px] font-bold text-white uppercase shrink-0"
-                      :style="{ backgroundColor: cuenta.plataforma?.color || '#8057FF' }"
+                      v-if="cuenta.plataforma?.coverUrl"
+                      class="size-7 rounded overflow-hidden bg-black shrink-0 border border-white/10"
+                    >
+                      <img :src="cuenta.plataforma.coverUrl" :alt="cuenta.plataforma.nombre" class="w-full h-full object-cover" />
+                    </div>
+                    <div
+                      v-else
+                      class="size-7 rounded flex items-center justify-center text-[10px] font-bold text-white uppercase shrink-0 font-mono"
+                      :style="{ backgroundColor: cuenta.plataforma?.color || '#06b6d4' }"
                     >
                       {{ (cuenta.plataforma?.nombre || 'SS').slice(0, 2) }}
                     </div>
@@ -246,14 +266,14 @@ const cuentasFiltradas = computed(() => {
                     >
                       {{ cuenta.correo }}
                     </span>
-                    <span v-else class="text-amber-400/90 text-xs font-medium">
-                      Asignación post-compra
+                    <span v-else class="inline-flex items-center gap-1 rounded bg-amber-400/10 border border-amber-400/20 text-amber-300 px-2 py-0.5 text-[11px] font-medium">
+                      🔑 Asignación automática post-compra
                     </span>
 
                     <button
                       v-if="cuenta.correo && !cuenta.correo.includes('pendiente')"
                       type="button"
-                      class="text-slate-400 hover:text-white p-1 rounded transition-colors"
+                      class="text-slate-400 hover:text-white p-1 rounded transition-colors cursor-pointer"
                       title="Copiar correo"
                       @click.stop="copyText(cuenta.correo, 'Correo')"
                     >
@@ -262,27 +282,28 @@ const cuentasFiltradas = computed(() => {
                   </div>
                 </td>
 
-                <!-- Capacidad / Perfiles Libres -->
+                <!-- Capacidad / Pantallas -->
                 <td class="py-3.5 px-4 text-center whitespace-nowrap">
-                  <div class="inline-flex items-center gap-2">
-                    <span class="font-mono font-bold text-xs" :class="cuenta.pantallasDisponibles > 0 ? 'text-white' : 'text-slate-400'">
-                      {{ cuenta.pantallasDisponibles }} / {{ cuenta.totalPantallas }}
+                  <div class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg border"
+                    :class="[
+                      cuenta.pantallasDisponibles === 0
+                        ? 'border-rose-500/20 bg-rose-500/10 text-rose-300'
+                        : cuenta.pantallasDisponibles < cuenta.totalPantallas
+                        ? 'border-amber-500/20 bg-amber-500/10 text-amber-300'
+                        : 'border-emerald-500/20 bg-emerald-500/10 text-emerald-300'
+                    ]"
+                  >
+                    <Tv class="size-3" />
+                    <span class="font-mono font-bold text-xs">
+                      {{ cuenta.pantallasDisponibles }} de {{ cuenta.totalPantallas }} libres
                     </span>
-                    <!-- Barra de progreso discreta -->
-                    <div class="w-16 h-1.5 rounded-full bg-slate-700/60 overflow-hidden">
-                      <div
-                        class="h-full rounded-full transition-all"
-                        :class="cuenta.pantallasDisponibles === 0 ? 'bg-purple-500' : cuenta.pantallasDisponibles <= 1 ? 'bg-amber-400' : 'bg-emerald-400'"
-                        :style="{ width: `${(cuenta.pantallasDisponibles / cuenta.totalPantallas) * 100}%` }"
-                      />
-                    </div>
                   </div>
                 </td>
 
-                <!-- Estado (Badge Sobrio, sin neón) -->
+                <!-- Estado -->
                 <td class="py-3.5 px-4 text-center whitespace-nowrap">
                   <span
-                    class="inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-[11px] font-semibold"
+                    class="inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-[11px] font-semibold border"
                     :class="[getEstadoBadge(cuenta.estado).bg, getEstadoBadge(cuenta.estado).text]"
                   >
                     <span class="size-1.5 rounded-full" :class="getEstadoBadge(cuenta.estado).dot" />
@@ -290,35 +311,51 @@ const cuentasFiltradas = computed(() => {
                   </span>
                 </td>
 
-                <!-- Botón Desplegar Perfiles -->
+                <!-- Acciones -->
                 <td class="py-3.5 px-4 text-right whitespace-nowrap">
-                  <button
-                    type="button"
-                    class="inline-flex items-center gap-1 text-slate-300 hover:text-white font-medium text-xs px-2.5 py-1 rounded-md hover:bg-white/5 transition-colors"
-                    @click.stop="toggleExpand(cuenta.id)"
-                  >
-                    <span>{{ expandedAccounts[cuenta.id] ? 'Cerrar' : 'Perfiles' }}</span>
-                    <ChevronDown
-                      class="size-3.5 transition-transform duration-200"
-                      :class="{ 'rotate-180': expandedAccounts[cuenta.id] }"
-                    />
-                  </button>
+                  <div class="flex items-center justify-end gap-1.5">
+                    <!-- Botón Ver Perfiles -->
+                    <button
+                      type="button"
+                      class="inline-flex items-center gap-1 text-slate-300 hover:text-white font-medium text-xs px-2.5 py-1 rounded-md border border-white/10 bg-white/5 hover:bg-white/10 transition-colors cursor-pointer"
+                      @click.stop="toggleExpand(cuenta.id)"
+                    >
+                      <Eye class="size-3" />
+                      <span>{{ expandedAccounts[cuenta.id] ? 'Ocultar' : 'Perfiles' }}</span>
+                      <ChevronDown
+                        class="size-3 transition-transform duration-200"
+                        :class="{ 'rotate-180': expandedAccounts[cuenta.id] }"
+                      />
+                    </button>
+
+                    <!-- Botón Eliminar Cuenta -->
+                    <button
+                      type="button"
+                      class="text-slate-400 hover:text-rose-400 p-1.5 rounded-md hover:bg-rose-500/10 transition-colors cursor-pointer"
+                      title="Eliminar esta cuenta del inventario"
+                      :disabled="deletingId === cuenta.id"
+                      @click.stop="handleEliminarCuenta(cuenta)"
+                    >
+                      <Trash2 class="size-3.5" :class="{ 'animate-pulse text-rose-400': deletingId === cuenta.id }" />
+                    </button>
+                  </div>
                 </td>
               </tr>
 
-              <!-- Desglose de Perfiles en Fila Acordeón Expandida -->
-              <tr v-if="expandedAccounts[cuenta.id]" class="bg-[#090D17]">
+              <!-- Desglose de Perfiles en Fila Expandida -->
+              <tr v-if="expandedAccounts[cuenta.id]" class="bg-[#0B0F19]">
                 <td colspan="6" class="p-4 sm:p-5 border-t border-b border-white/[0.08]">
                   <div class="space-y-3">
                     <div class="flex items-center justify-between text-xs">
-                      <span class="font-bold uppercase tracking-wider text-slate-400 text-[11px]">
-                        Perfiles Configurados en Cuenta #{{ cuenta.id }} ({{ cuenta.plataforma?.nombre }})
+                      <span class="font-bold text-white text-xs flex items-center gap-1.5">
+                        <KeyRound class="size-3.5 text-cyan-400" />
+                        <span>Perfiles Configurados en Cuenta #{{ cuenta.id }} ({{ cuenta.plataforma?.nombre }})</span>
                       </span>
                       <button
                         v-if="cuenta.correo"
                         type="button"
-                        class="text-cyan-400 hover:text-cyan-300 text-xs font-semibold flex items-center gap-1"
-                        @click="copyText(`Servicio: ${cuenta.plataforma?.nombre}\nEmail: ${cuenta.correo}\nPerfiles: ${cuenta.totalPantallas}`, 'Ficha')"
+                        class="text-cyan-400 hover:text-cyan-300 text-xs font-semibold flex items-center gap-1 cursor-pointer"
+                        @click="copyText(`Plataforma: ${cuenta.plataforma?.nombre}\nCorreo: ${cuenta.correo}\nPerfiles Totales: ${cuenta.totalPantallas}`, 'Datos de Cuenta')"
                       >
                         <Copy class="size-3" />
                         <span>Copiar Ficha Completa</span>
@@ -333,7 +370,7 @@ const cuentasFiltradas = computed(() => {
                         class="rounded-lg border p-2.5 text-xs flex flex-col justify-between gap-1.5"
                         :class="[
                           p.estado === 'DISPONIBLE'
-                            ? 'border-white/10 bg-[#111726]'
+                            ? 'border-white/10 bg-[#0E1322]'
                             : 'border-purple-500/30 bg-purple-950/20'
                         ]"
                       >
@@ -345,7 +382,7 @@ const cuentasFiltradas = computed(() => {
                             class="text-[10px] font-semibold"
                             :class="p.estado === 'DISPONIBLE' ? 'text-emerald-400' : 'text-purple-300'"
                           >
-                            {{ p.estado === 'DISPONIBLE' ? 'Libre' : 'Ocupada' }}
+                            {{ p.estado === 'DISPONIBLE' ? 'Libre' : 'Asignada' }}
                           </span>
                         </div>
 
@@ -358,7 +395,7 @@ const cuentasFiltradas = computed(() => {
                           <button
                             v-if="p.pin"
                             type="button"
-                            class="text-slate-400 hover:text-white p-0.5"
+                            class="text-slate-400 hover:text-white p-0.5 cursor-pointer"
                             title="Copiar PIN"
                             @click="copyText(p.pin, `PIN Pantalla #${p.numero}`)"
                           >
@@ -378,12 +415,12 @@ const cuentasFiltradas = computed(() => {
       <!-- Estado Vacío -->
       <div v-if="cuentasFiltradas.length === 0" class="p-12 text-center text-slate-400 space-y-2">
         <Layers class="size-8 mx-auto text-slate-600" />
-        <p class="text-sm font-semibold text-white">No se encontraron cuentas con los filtros actuales</p>
-        <p class="text-xs">Prueba restableciendo los filtros de búsqueda.</p>
+        <p class="text-sm font-semibold text-white">No hay cuentas que coincidan con los filtros</p>
+        <p class="text-xs">Prueba restableciendo los filtros o busca con otro término.</p>
         <div class="pt-2">
           <button
             type="button"
-            class="text-xs text-cyan-400 hover:underline"
+            class="text-xs text-cyan-400 hover:underline cursor-pointer"
             @click="plataformaFiltro = 'TODAS'; estadoFiltro = 'TODOS'; searchQuery = ''"
           >
             Restablecer todos los filtros
