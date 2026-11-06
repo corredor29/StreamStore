@@ -19,21 +19,38 @@ const maxSeleccionable = computed(() => Math.min(props.producto.stock, 5))
 
 const platformColor = computed(() => props.producto.plataforma?.color || '#8057FF')
 
-// Foto cinemática de fondo según plataforma
-const posterPhoto = computed(() => {
+// Detectar si la plataforma cuenta con una tarjeta gráfica en la carpeta targetyas
+const isTargetyaCard = computed(() => {
   const slug = (props.producto.plataforma?.slug || props.producto.plataforma?.nombre || '').toLowerCase()
+  return (
+    slug.includes('disney') ||
+    slug.includes('dp') ||
+    slug.includes('max') ||
+    slug.includes('hbo') ||
+    slug.includes('prime') ||
+    slug.includes('amazon') ||
+    slug.includes('crunchyroll') ||
+    slug.includes('anime') ||
+    slug.includes('spotify') ||
+    slug.includes('musica')
+  )
+})
+
+// Ruta del recurso visual: tarjeta de targetyas o foto de referencia
+const tarjetaCover = computed(() => {
+  const slug = (props.producto.plataforma?.slug || props.producto.plataforma?.nombre || '').toLowerCase()
+  if (slug.includes('disney') || slug.includes('dp')) return '/targetyas/disneycard.png'
+  if (slug.includes('max') || slug.includes('hbo')) return '/targetyas/HBO_Max.webp'
+  if (slug.includes('prime') || slug.includes('amazon')) return '/targetyas/prime_video.avif'
+  if (slug.includes('crunchyroll') || slug.includes('anime')) return '/targetyas/Crunchyroll.webp'
+  if (slug.includes('spotify') || slug.includes('musica')) return '/targetyas/spotify_premiun.webp'
   if (slug.includes('netflix') || slug.includes('nf')) return '/watching_netflix.jpg'
-  if (slug.includes('disney') || slug.includes('dp')) return '/watching_disney.jpg'
-  if (slug.includes('max') || slug.includes('hbo')) return '/watching_max.jpg'
-  if (slug.includes('prime') || slug.includes('amazon')) return '/watching_prime.jpg'
   if (slug.includes('paramount') || slug.includes('paramont')) return '/hero_cinema_wall.jpg'
-  if (slug.includes('crunchyroll') || slug.includes('anime')) return '/hero_cinema_wall.jpg'
-  if (slug.includes('spotify') || slug.includes('musica')) return '/hbo_max_mosaic_bg.jpg'
   if (slug.includes('apple') || slug.includes('appletv')) return '/watching_prime.jpg'
   return '/hero_cinema_wall.jpg'
 })
 
-// Filtro de iluminación para que logos transparentes resalten en el fondo fotográfico
+// Filtro de iluminación para logos sobre fondos oscuros
 const logoFilter = computed(() => {
   const slug = (props.producto.plataforma?.slug || '').toLowerCase()
   if (slug.includes('max')) return 'brightness(0) invert(1) drop-shadow(0 4px 16px rgba(123,47,247,0.9)) drop-shadow(0 0 8px rgba(255,255,255,0.7))'
@@ -46,8 +63,8 @@ const logoFilter = computed(() => {
 
 const tipoBadge = computed(() => {
   return props.producto.tipo === 'CUENTA_COMPLETA'
-    ? { label: 'Cuenta Completa', icon: Users, cls: 'bg-black/60 text-brand-300 border-brand-500/30' }
-    : { label: '1 Pantalla (PIN)', icon: Tv, cls: 'bg-black/60 text-cyan-300 border-cyan-500/30' }
+    ? { label: 'Cuenta Completa', icon: Users, cls: 'bg-black/70 text-brand-300 border-brand-500/40' }
+    : { label: '1 Pantalla (PIN)', icon: Tv, cls: 'bg-black/70 text-cyan-300 border-cyan-500/40' }
 })
 
 function onAgregar() {
@@ -68,25 +85,39 @@ function onAgregar() {
     :class="{ 'opacity-70 grayscale-[20%]': isAgotado }"
     :aria-labelledby="`product-title-${producto.id}`"
   >
-    <!-- TOP: FOTO CINEMÁTICA REAL DE FONDO CON LOGO OFICIAL FLOTANTE -->
+    <!-- TOP: TARJETA VISUAL DE PRESENTACIÓN (CARPETA TARGETYAS) -->
     <RouterLink
       :to="`/producto/${producto.id}`"
-      class="relative h-48 sm:h-52 w-full overflow-hidden block select-none cursor-pointer"
+      class="relative h-48 sm:h-52 w-full overflow-hidden block select-none cursor-pointer bg-neutral-950 flex items-center justify-center group"
     >
-      <!-- Foto de fondo cinemática (gente viendo TV o póster de cine) -->
-      <div
-        class="absolute inset-0 bg-cover bg-center transition-transform duration-700 ease-out group-hover:scale-105"
-        :style="{ backgroundImage: `url('${posterPhoto}')` }"
+      <!-- Si es una tarjeta gráfica de la carpeta targetyas (Disney, Max, Prime, Crunchyroll, Spotify) -->
+      <img
+        v-if="isTargetyaCard"
+        :src="tarjetaCover"
+        :alt="producto.nombre"
+        class="h-full w-full object-cover transition-transform duration-500 ease-out group-hover:scale-105"
       />
 
-      <!-- Capas de degradado para profundidad y legibilidad del texto/logo -->
-      <div class="absolute inset-0 bg-gradient-to-t from-neutral-900 via-neutral-900/40 to-black/70 pointer-events-none" />
-
-      <!-- Halo de color de plataforma -->
-      <div
-        class="absolute -top-10 -right-10 size-40 rounded-full blur-3xl opacity-40 pointer-events-none"
-        :style="{ backgroundColor: platformColor }"
-      />
+      <!-- Si es foto cinemática con logo flotante (ej. Netflix) -->
+      <template v-else>
+        <div
+          class="absolute inset-0 bg-cover bg-center transition-transform duration-700 ease-out group-hover:scale-105"
+          :style="{ backgroundImage: `url('${tarjetaCover}')` }"
+        />
+        <div class="absolute inset-0 bg-gradient-to-t from-neutral-900 via-neutral-900/40 to-black/70 pointer-events-none" />
+        <div class="absolute inset-0 flex items-center justify-center p-6 z-10">
+          <img
+            v-if="producto.plataforma?.logoUrl"
+            :src="producto.plataforma.logoUrl"
+            :alt="producto.plataforma?.nombre"
+            class="max-h-16 sm:max-h-20 max-w-[80%] object-contain transition-transform duration-300 group-hover:scale-110"
+            :style="{ filter: logoFilter }"
+          />
+          <span v-else class="font-display text-2xl font-black text-white tracking-tight drop-shadow-lg">
+            {{ producto.plataforma?.nombre }}
+          </span>
+        </div>
+      </template>
 
       <!-- Acento superior fino de color neón -->
       <div
@@ -97,7 +128,7 @@ function onAgregar() {
       <!-- Badges superiores flotantes: Modalidad y Duración -->
       <div class="absolute top-3 left-3 z-10">
         <span
-          class="inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-[10px] font-mono font-bold uppercase tracking-wider backdrop-blur-md"
+          class="inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-[10px] font-mono font-bold uppercase tracking-wider backdrop-blur-md shadow-md"
           :class="tipoBadge.cls"
         >
           <component :is="tipoBadge.icon" class="size-3" aria-hidden="true" />
@@ -106,23 +137,9 @@ function onAgregar() {
       </div>
 
       <div class="absolute top-3 right-3 z-10">
-        <span class="inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-[10px] font-mono font-bold text-slate-200 bg-black/60 border border-white/15 backdrop-blur-md">
+        <span class="inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-[10px] font-mono font-bold text-slate-200 bg-black/70 border border-white/20 backdrop-blur-md shadow-md">
           <Clock class="size-3 text-cyan-300" />
           {{ producto.duracionDias }}d
-        </span>
-      </div>
-
-      <!-- LOGO OFICIAL CENTRADO SOBRE LA FOTO CINEMÁTICA -->
-      <div class="absolute inset-0 flex items-center justify-center p-6 z-10">
-        <img
-          v-if="producto.plataforma?.logoUrl"
-          :src="producto.plataforma.logoUrl"
-          :alt="producto.plataforma?.nombre"
-          class="max-h-16 sm:max-h-20 max-w-[80%] object-contain transition-transform duration-300 group-hover:scale-110"
-          :style="{ filter: logoFilter }"
-        />
-        <span v-else class="font-display text-2xl font-black text-white tracking-tight drop-shadow-lg">
-          {{ producto.plataforma?.nombre }}
         </span>
       </div>
     </RouterLink>
@@ -170,7 +187,7 @@ function onAgregar() {
             </div>
           </div>
 
-          <!-- Selector de cantidad si hay más de 1 -->
+          <!-- Selector de cantidad -->
           <div v-if="!isAgotado && maxSeleccionable > 1" class="w-16">
             <label :for="`qty-${producto.id}`" class="sr-only">Cantidad</label>
             <select
