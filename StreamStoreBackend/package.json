@@ -10,8 +10,7 @@
         "type-check": "tsc --noEmit",
         "migrate": "tsx src/database/migrate.ts",
         "db:reset": "tsx src/database/seed.ts",
-        "seed": "tsx src/database/seed.ts",
-        "migrate": "tsx src/database/migrate.ts"
+        "seed": "tsx src/database/seed.ts"
     },
     "dependencies": {
         "bcrypt": "^6.0.0",
