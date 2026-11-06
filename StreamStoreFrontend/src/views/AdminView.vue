@@ -279,23 +279,23 @@ onMounted(() => {
         <AdminSummaryCards :resumen="resumen" />
 
         <!-- 2. Pestañas de Navegación Profesional -->
-        <div role="tablist" class="flex border-b border-line/70 gap-2 overflow-x-auto scrollbar-none pt-2">
+        <div role="tablist" class="flex border-b border-white/10 gap-1 overflow-x-auto scrollbar-none">
           <!-- Tab 1: Inventario de Cuentas -->
           <button
             type="button"
             role="tab"
             :aria-selected="activeTab === 'inventario'"
-            class="flex items-center gap-2 border-b-2 px-4 py-3 text-xs sm:text-sm font-bold transition-all cursor-pointer focus:outline-none shrink-0"
+            class="flex items-center gap-2 border-b-2 px-4 py-2.5 text-xs sm:text-sm font-semibold transition-colors cursor-pointer focus:outline-none shrink-0"
             :class="[
               activeTab === 'inventario'
-                ? 'border-brand-400 text-brand-300'
-                : 'border-transparent text-muted hover:text-fg'
+                ? 'border-cyan-400 text-white'
+                : 'border-transparent text-slate-400 hover:text-slate-200'
             ]"
             @click="setTab('inventario')"
           >
             <Tv class="size-4" />
-            <span>Inventario Cuentas</span>
-            <span class="rounded-full bg-surface-2 px-2 py-0.5 text-[11px] font-mono text-muted">
+            <span>Inventario de Cuentas</span>
+            <span class="rounded bg-white/10 px-1.5 py-0.2 text-[10px] font-mono text-slate-300">
               {{ cuentas.length }}
             </span>
           </button>
@@ -305,17 +305,17 @@ onMounted(() => {
             type="button"
             role="tab"
             :aria-selected="activeTab === 'combos'"
-            class="flex items-center gap-2 border-b-2 px-4 py-3 text-xs sm:text-sm font-bold transition-all cursor-pointer focus:outline-none shrink-0"
+            class="flex items-center gap-2 border-b-2 px-4 py-2.5 text-xs sm:text-sm font-semibold transition-colors cursor-pointer focus:outline-none shrink-0"
             :class="[
               activeTab === 'combos'
-                ? 'border-rose-400 text-rose-300'
-                : 'border-transparent text-muted hover:text-fg'
+                ? 'border-rose-400 text-white'
+                : 'border-transparent text-slate-400 hover:text-slate-200'
             ]"
             @click="setTab('combos')"
           >
             <Flame class="size-4 text-rose-400" />
             <span>Promociones & Combos</span>
-            <span class="rounded-full bg-rose-500/15 border border-rose-500/30 text-rose-300 px-2 py-0.5 text-[11px] font-mono font-bold">
+            <span class="rounded bg-rose-500/20 text-rose-300 px-1.5 py-0.2 text-[10px] font-mono font-bold">
               {{ combos.length }}
             </span>
           </button>
@@ -325,17 +325,17 @@ onMounted(() => {
             type="button"
             role="tab"
             :aria-selected="activeTab === 'servicios'"
-            class="flex items-center gap-2 border-b-2 px-4 py-3 text-xs sm:text-sm font-bold transition-all cursor-pointer focus:outline-none shrink-0"
+            class="flex items-center gap-2 border-b-2 px-4 py-2.5 text-xs sm:text-sm font-semibold transition-colors cursor-pointer focus:outline-none shrink-0"
             :class="[
               activeTab === 'servicios'
-                ? 'border-cyan-400 text-cyan-300'
-                : 'border-transparent text-muted hover:text-fg'
+                ? 'border-cyan-400 text-white'
+                : 'border-transparent text-slate-400 hover:text-slate-200'
             ]"
             @click="setTab('servicios')"
           >
             <Users class="size-4" />
             <span>Servicios de Clientes</span>
-            <span class="rounded-full bg-cyan-950/60 border border-cyan-500/30 text-cyan-300 px-2 py-0.5 text-[11px] font-mono">
+            <span class="rounded bg-white/10 px-1.5 py-0.2 text-[10px] font-mono text-slate-300">
               {{ servicios.length }}
             </span>
           </button>
@@ -345,17 +345,17 @@ onMounted(() => {
             type="button"
             role="tab"
             :aria-selected="activeTab === 'ventas'"
-            class="flex items-center gap-2 border-b-2 px-4 py-3 text-xs sm:text-sm font-bold transition-all cursor-pointer focus:outline-none shrink-0"
+            class="flex items-center gap-2 border-b-2 px-4 py-2.5 text-xs sm:text-sm font-semibold transition-colors cursor-pointer focus:outline-none shrink-0"
             :class="[
               activeTab === 'ventas'
-                ? 'border-emerald-400 text-emerald-300'
-                : 'border-transparent text-muted hover:text-fg'
+                ? 'border-emerald-400 text-white'
+                : 'border-transparent text-slate-400 hover:text-slate-200'
             ]"
             @click="setTab('ventas')"
           >
             <Receipt class="size-4" />
             <span>Registro de Ventas</span>
-            <span class="rounded-full bg-surface-2 px-2 py-0.5 text-[11px] font-mono text-muted">
+            <span class="rounded bg-white/10 px-1.5 py-0.2 text-[10px] font-mono text-slate-300">
               {{ compras.length }}
             </span>
           </button>
@@ -365,17 +365,17 @@ onMounted(() => {
             type="button"
             role="tab"
             :aria-selected="activeTab === 'plataformas'"
-            class="flex items-center gap-2 border-b-2 px-4 py-3 text-xs sm:text-sm font-bold transition-all cursor-pointer focus:outline-none shrink-0"
+            class="flex items-center gap-2 border-b-2 px-4 py-2.5 text-xs sm:text-sm font-semibold transition-colors cursor-pointer focus:outline-none shrink-0"
             :class="[
               activeTab === 'plataformas'
-                ? 'border-purple-400 text-purple-300'
-                : 'border-transparent text-muted hover:text-fg'
+                ? 'border-purple-400 text-white'
+                : 'border-transparent text-slate-400 hover:text-slate-200'
             ]"
             @click="setTab('plataformas')"
           >
             <Film class="size-4" />
             <span>Plataformas & Catálogo</span>
-            <span class="rounded-full bg-surface-2 px-2 py-0.5 text-[11px] font-mono text-muted">
+            <span class="rounded bg-white/10 px-1.5 py-0.2 text-[10px] font-mono text-slate-300">
               {{ plataformas.length }}
             </span>
           </button>

@@ -2,6 +2,7 @@
 import { computed, ref } from 'vue'
 import { 
   AlertTriangle, 
+  Check, 
   CheckCircle2, 
   Clock, 
   Copy, 
@@ -10,6 +11,7 @@ import {
   KeyRound, 
   Mail, 
   Search, 
+  Tv, 
   Users, 
   X, 
   XCircle 
@@ -43,13 +45,29 @@ async function copyText(text: string, label: string) {
 function getEstadoBadge(estado: Servicio['estado']) {
   switch (estado) {
     case 'ACTIVO':
-      return { label: 'Activo', cls: 'bg-emerald-500/15 text-emerald-400 border border-emerald-500/30', icon: CheckCircle2 }
+      return { 
+        label: 'Activo', 
+        dot: 'bg-emerald-400', 
+        cls: 'bg-emerald-500/10 text-emerald-400' 
+      }
     case 'POR_VENCER':
-      return { label: 'Por Vencer', cls: 'bg-amber-500/20 text-amber-400 border border-amber-500/30', icon: AlertTriangle }
+      return { 
+        label: 'Por Vencer', 
+        dot: 'bg-amber-400', 
+        cls: 'bg-amber-500/10 text-amber-400' 
+      }
     case 'VENCIDO':
-      return { label: 'Vencido', cls: 'bg-red-500/15 text-red-400 border border-red-500/30', icon: XCircle }
+      return { 
+        label: 'Vencido', 
+        dot: 'bg-red-400', 
+        cls: 'bg-red-500/10 text-red-400' 
+      }
     default:
-      return { label: estado, cls: 'bg-surface-2 text-muted border border-line', icon: Clock }
+      return { 
+        label: estado, 
+        dot: 'bg-slate-400', 
+        cls: 'bg-slate-500/10 text-slate-400' 
+      }
   }
 }
 
@@ -79,228 +97,189 @@ const conteos = computed(() => {
 </script>
 
 <template>
-  <div class="space-y-4">
-    <!-- Notificación Copiado -->
+  <div class="space-y-3">
+    <!-- Toast Copiado -->
     <div
       v-if="copiedNotice"
-      class="fixed bottom-6 right-6 z-50 flex items-center gap-2 rounded-xl border border-emerald-500/40 bg-[#0B1528] px-4 py-2.5 text-xs font-bold text-emerald-300 shadow-xl"
+      class="fixed bottom-6 right-6 z-50 flex items-center gap-2 rounded-lg border border-white/15 bg-[#141B2D] px-3.5 py-2 text-xs font-semibold text-white shadow-xl shadow-black/80"
     >
-      <CheckCircle2 class="size-4 text-emerald-400" />
+      <Check class="size-4 text-emerald-400" />
       <span>{{ copiedNotice }}</span>
     </div>
 
-    <!-- Mini Banner de Resumen de Servicios -->
-    <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
-      <div class="rounded-xl border border-line/70 bg-surface/60 p-3.5 flex items-center justify-between">
-        <div>
-          <span class="text-[10px] uppercase font-bold text-muted">Suscripciones Activas</span>
-          <p class="font-display text-lg font-black text-emerald-400 mt-0.5">
-            {{ conteos.activos }}
-          </p>
-        </div>
-        <div class="size-8 rounded-lg bg-emerald-500/15 flex items-center justify-center text-emerald-400">
-          <CheckCircle2 class="size-4" />
-        </div>
-      </div>
-
-      <div class="rounded-xl border border-line/70 bg-surface/60 p-3.5 flex items-center justify-between">
-        <div>
-          <span class="text-[10px] uppercase font-bold text-muted">Próximas a Vencer (&le; 3 días)</span>
-          <p class="font-display text-lg font-black text-amber-400 mt-0.5">
-            {{ conteos.porVencer }}
-          </p>
-        </div>
-        <div class="size-8 rounded-lg bg-amber-500/15 flex items-center justify-center text-amber-400">
-          <AlertTriangle class="size-4" />
-        </div>
-      </div>
-
-      <div class="rounded-xl border border-line/70 bg-surface/60 p-3.5 flex items-center justify-between">
-        <div>
-          <span class="text-[10px] uppercase font-bold text-muted">Cuentas Vencidas</span>
-          <p class="font-display text-lg font-black text-red-400 mt-0.5">
-            {{ conteos.vencidos }}
-          </p>
-        </div>
-        <div class="size-8 rounded-lg bg-red-500/15 flex items-center justify-center text-red-400">
-          <XCircle class="size-4" />
-        </div>
-      </div>
-    </div>
-
-    <!-- Barra de Filtros -->
-    <div class="rounded-2xl border border-line/80 bg-surface/80 backdrop-blur p-4 flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3 shadow-md">
-      <!-- Pastillas de Estado -->
-      <div class="flex items-center gap-1.5 overflow-x-auto">
-        <button
-          type="button"
-          class="px-2.5 py-1 rounded-lg text-xs font-semibold cursor-pointer transition-colors"
-          :class="estadoFiltro === 'TODOS' ? 'bg-surface-2 text-fg font-bold' : 'text-muted hover:text-fg'"
-          @click="estadoFiltro = 'TODOS'"
-        >
-          Todas ({{ conteos.total }})
-        </button>
-        <button
-          type="button"
-          class="px-2.5 py-1 rounded-lg text-xs font-semibold cursor-pointer text-emerald-400 transition-colors"
-          :class="estadoFiltro === 'ACTIVO' ? 'bg-emerald-500/20 font-bold border border-emerald-500/30' : 'hover:bg-surface-2/60'"
-          @click="estadoFiltro = 'ACTIVO'"
-        >
-          Activas ({{ conteos.activos }})
-        </button>
-        <button
-          type="button"
-          class="px-2.5 py-1 rounded-lg text-xs font-semibold cursor-pointer text-amber-400 transition-colors"
-          :class="estadoFiltro === 'POR_VENCER' ? 'bg-amber-500/20 font-bold border border-amber-500/30' : 'hover:bg-surface-2/60'"
-          @click="estadoFiltro = 'POR_VENCER'"
-        >
-          Por vencer ({{ conteos.porVencer }})
-        </button>
-        <button
-          type="button"
-          class="px-2.5 py-1 rounded-lg text-xs font-semibold cursor-pointer text-red-400 transition-colors"
-          :class="estadoFiltro === 'VENCIDO' ? 'bg-red-500/20 font-bold border border-red-500/30' : 'hover:bg-surface-2/60'"
-          @click="estadoFiltro = 'VENCIDO'"
-        >
-          Vencidas ({{ conteos.vencidos }})
-        </button>
-      </div>
-
+    <!-- Barra de Herramientas y Filtros -->
+    <div class="rounded-xl border border-white/10 bg-[#0D121F] p-3 flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3">
       <!-- Buscador -->
-      <div class="relative sm:w-64">
+      <div class="relative flex-1 max-w-md">
+        <Search class="absolute left-3 top-2.5 size-4 text-slate-400" />
         <input
           v-model="searchQuery"
           type="text"
-          placeholder="Buscar cliente, correo o servicio..."
-          class="w-full rounded-xl border border-line bg-surface-2 pl-8 pr-7 py-1.5 text-xs text-fg placeholder:text-muted/60 focus:border-brand-400 focus:outline-none"
+          placeholder="Buscar por cliente, correo o servicio..."
+          class="w-full rounded-lg border border-white/10 bg-[#141B2D] pl-9 pr-8 py-2 text-xs text-white placeholder:text-slate-400 focus:border-cyan-400 focus:outline-none transition-colors"
         />
-        <Search class="absolute left-2.5 top-2 size-3.5 text-muted" />
         <button
           v-if="searchQuery"
           type="button"
-          class="absolute right-2 top-2 text-muted hover:text-fg"
+          class="absolute right-2.5 top-2.5 text-slate-400 hover:text-white"
           @click="searchQuery = ''"
         >
           <X class="size-3.5" />
         </button>
       </div>
-    </div>
 
-    <!-- Lista de Servicios Asignados a Clientes -->
-    <div v-if="serviciosFiltrados.length > 0" class="space-y-3">
-      <div
-        v-for="s in serviciosFiltrados"
-        :key="s.id"
-        class="rounded-2xl border border-line/70 bg-[#12172D] p-4 sm:p-5 transition-all hover:border-brand-500/40 space-y-3"
-      >
-        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-          <div class="flex items-center gap-3">
-            <div
-              class="size-10 rounded-xl flex items-center justify-center font-display font-black text-xs text-white shrink-0 shadow-sm"
-              :style="{ backgroundColor: s.plataforma?.color || '#8057FF' }"
-            >
-              {{ (s.plataforma?.nombre || 'SS').slice(0, 3) }}
-            </div>
-            <div>
-              <div class="flex items-center gap-2">
-                <span class="font-display font-bold text-fg text-sm">
-                  {{ s.plataforma?.nombre }}
-                </span>
-                <span class="rounded bg-surface-2 px-1.5 py-0.2 font-mono text-[10px] text-muted border border-line/60">
-                  {{ s.tipo === 'CUENTA_COMPLETA' ? 'Cuenta Completa' : '1 Pantalla' }}
-                </span>
-                <span
-                  class="rounded-full px-2 py-0.5 text-[9px] font-black uppercase tracking-wider"
-                  :class="getEstadoBadge(s.estado).cls"
-                >
-                  {{ getEstadoBadge(s.estado).label }}
-                </span>
-              </div>
-              <p class="text-xs text-muted mt-0.5">
-                Perfil: <strong class="text-fg">{{ s.perfil || 'Principal' }}</strong>
-                <span v-if="s.pin" class="ml-2">· PIN: <strong class="font-mono text-fg">{{ s.pin }}</strong></span>
-              </p>
-            </div>
-          </div>
+      <!-- Pastillas de Estado -->
+      <div class="flex items-center gap-2 text-xs">
+        <select
+          v-model="estadoFiltro"
+          class="rounded-lg border border-white/10 bg-[#141B2D] px-3 py-2 text-xs text-slate-200 focus:border-cyan-400 focus:outline-none cursor-pointer"
+        >
+          <option value="TODOS">Todos los servicios ({{ conteos.total }})</option>
+          <option value="ACTIVO">Activos ({{ conteos.activos }})</option>
+          <option value="POR_VENCER">Por vencer ({{ conteos.porVencer }})</option>
+          <option value="VENCIDO">Vencidos ({{ conteos.vencidos }})</option>
+        </select>
 
-          <div class="flex items-center gap-3 self-end sm:self-auto">
-            <!-- Días Restantes -->
-            <div class="text-right">
-              <span class="text-[10px] uppercase font-bold text-muted block">Vigencia:</span>
-              <span
-                class="font-mono font-bold text-xs"
-                :class="s.diasRestantes <= 0 ? 'text-red-400' : s.diasRestantes <= 3 ? 'text-amber-400' : 'text-emerald-400'"
-              >
-                {{ s.diasRestantes > 0 ? `${s.diasRestantes} días restantes` : 'Expiró' }}
-              </span>
-            </div>
-
-            <!-- Botón Copiar Entrega WhatsApp / Soporte -->
-            <button
-              type="button"
-              class="inline-flex items-center gap-1.5 rounded-xl border border-brand-500/40 bg-brand-500/15 hover:bg-brand-500/25 text-brand-300 px-3 py-1.5 text-xs font-bold transition-colors cursor-pointer"
-              title="Copiar datos de entrega para enviar al cliente"
-              @click="copyText(`*STREAMSTORE - DATOS DE TU SUSCRIPCIÓN*\n\n📺 *Servicio:* ${s.plataforma?.nombre}\n👤 *Perfil:* ${s.perfil || 'Principal'}\n🔑 *PIN:* ${s.pin || 'Sin PIN'}\n📧 *Correo:* ${s.correoAcceso}\n🔒 *Clave:* ${s.passwordAcceso}\n📅 *Vence:* ${formatDate(s.fechaVencimiento)}\n\n¡Gracias por tu compra!`, 'Ficha de entrega')"
-            >
-              <Copy class="size-3" />
-              <span>Copiar Entrega</span>
-            </button>
-          </div>
-        </div>
-
-        <!-- Credenciales de Entrega -->
-        <div class="rounded-xl border border-line/60 bg-[#0C1022] p-3 grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
-          <div class="flex items-center justify-between">
-            <span class="text-muted flex items-center gap-1.5 text-[11px]">
-              <Mail class="size-3.5 text-brand-300" /> Correo entrega:
-            </span>
-            <div class="flex items-center gap-1 font-mono font-semibold text-fg">
-              <span>{{ s.correoAcceso }}</span>
-              <button
-                type="button"
-                class="text-muted hover:text-brand-300 p-0.5"
-                @click="copyText(s.correoAcceso, 'Correo')"
-              >
-                <Copy class="size-3" />
-              </button>
-            </div>
-          </div>
-
-          <div class="flex items-center justify-between">
-            <span class="text-muted flex items-center gap-1.5 text-[11px]">
-              <KeyRound class="size-3.5 text-brand-300" /> Contraseña:
-            </span>
-            <div class="flex items-center gap-1.5 font-mono font-semibold text-fg">
-              <span>{{ revealedPasswords[s.id] ? s.passwordAcceso : '••••••••••••' }}</span>
-              <button
-                type="button"
-                class="text-muted hover:text-brand-300 p-0.5"
-                @click="togglePassword(s.id)"
-              >
-                <EyeOff v-if="revealedPasswords[s.id]" class="size-3.5" />
-                <Eye v-else class="size-3.5" />
-              </button>
-              <button
-                type="button"
-                class="text-muted hover:text-brand-300 p-0.5"
-                @click="copyText(s.passwordAcceso, 'Contraseña')"
-              >
-                <Copy class="size-3" />
-              </button>
-            </div>
-          </div>
-        </div>
+        <span class="text-slate-400 font-mono text-[11px] hidden sm:inline">
+          {{ serviciosFiltrados.length }} suscripciones
+        </span>
       </div>
     </div>
 
-    <!-- Estado Vacío -->
-    <div
-      v-else
-      class="rounded-2xl border border-line/80 bg-surface/40 p-10 text-center space-y-2 text-muted"
-    >
-      <Users class="size-8 mx-auto text-muted/60" />
-      <p class="text-sm font-semibold text-fg">No hay suscripciones entregadas con estos filtros</p>
-      <p class="text-xs">Los servicios aparecerán automáticamente cuando los clientes realicen compras.</p>
+    <!-- TABLA DE SUSCRIPCIONES Y ENTREGAS A CLIENTES -->
+    <div class="rounded-xl border border-white/10 bg-[#0D121F] overflow-hidden shadow-sm">
+      <div class="overflow-x-auto">
+        <table class="w-full text-left text-xs border-collapse">
+          <thead class="bg-[#121829] border-b border-white/10 text-slate-400 uppercase text-[11px] font-semibold tracking-wider">
+            <tr>
+              <th class="py-3 px-4 w-12 text-center">ID</th>
+              <th class="py-3 px-4">Plataforma</th>
+              <th class="py-3 px-4">Credenciales Asignadas</th>
+              <th class="py-3 px-4">Perfil & PIN</th>
+              <th class="py-3 px-4">Vencimiento</th>
+              <th class="py-3 px-4 text-center">Estado</th>
+              <th class="py-3 px-4 text-right">Ficha</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-white/[0.06]">
+            <tr
+              v-for="s in serviciosFiltrados"
+              :key="s.id"
+              class="hover:bg-[#141B2E] transition-colors"
+            >
+              <!-- ID -->
+              <td class="py-3.5 px-4 text-center font-mono text-slate-400 text-xs font-semibold whitespace-nowrap">
+                #{{ s.id }}
+              </td>
+
+              <!-- Plataforma -->
+              <td class="py-3.5 px-4 whitespace-nowrap">
+                <div class="flex items-center gap-2">
+                  <div
+                    class="size-6 rounded flex items-center justify-center text-[10px] font-bold text-white uppercase shrink-0"
+                    :style="{ backgroundColor: s.plataforma?.color || '#8057FF' }"
+                  >
+                    {{ (s.plataforma?.nombre || 'SS').slice(0, 2) }}
+                  </div>
+                  <div>
+                    <span class="font-semibold text-white">{{ s.plataforma?.nombre }}</span>
+                    <span class="text-[10px] text-slate-400 block font-mono">
+                      {{ s.tipo === 'CUENTA_COMPLETA' ? 'Completa' : '1 Pantalla' }}
+                    </span>
+                  </div>
+                </div>
+              </td>
+
+              <!-- Credenciales (Correo + Password) -->
+              <td class="py-3.5 px-4 whitespace-nowrap">
+                <div class="space-y-1">
+                  <div class="flex items-center gap-1.5 font-mono text-xs">
+                    <span class="text-white">{{ s.correoAcceso }}</span>
+                    <button
+                      type="button"
+                      class="text-slate-400 hover:text-white p-0.5"
+                      title="Copiar correo"
+                      @click="copyText(s.correoAcceso, 'Correo')"
+                    >
+                      <Copy class="size-3" />
+                    </button>
+                  </div>
+                  <div class="flex items-center gap-1.5 font-mono text-[11px] text-slate-400">
+                    <span>{{ revealedPasswords[s.id] ? s.passwordAcceso : '••••••••' }}</span>
+                    <button
+                      type="button"
+                      class="text-slate-400 hover:text-white p-0.5"
+                      @click="togglePassword(s.id)"
+                    >
+                      <EyeOff v-if="revealedPasswords[s.id]" class="size-3" />
+                      <Eye v-else class="size-3" />
+                    </button>
+                    <button
+                      type="button"
+                      class="text-slate-400 hover:text-white p-0.5"
+                      title="Copiar contraseña"
+                      @click="copyText(s.passwordAcceso, 'Contraseña')"
+                    >
+                      <Copy class="size-3" />
+                    </button>
+                  </div>
+                </div>
+              </td>
+
+              <!-- Perfil & PIN -->
+              <td class="py-3.5 px-4 whitespace-nowrap">
+                <span class="font-medium text-white block">{{ s.perfil || 'Principal' }}</span>
+                <span v-if="s.pin" class="font-mono text-[11px] text-slate-400">
+                  PIN: <strong class="text-white">{{ s.pin }}</strong>
+                </span>
+                <span v-else class="text-[10px] text-slate-500">Sin PIN</span>
+              </td>
+
+              <!-- Vencimiento -->
+              <td class="py-3.5 px-4 whitespace-nowrap">
+                <span class="text-slate-300 block text-xs">{{ formatDate(s.fechaVencimiento) }}</span>
+                <span
+                  class="font-mono text-[11px] font-semibold"
+                  :class="s.diasRestantes <= 0 ? 'text-red-400' : s.diasRestantes <= 3 ? 'text-amber-400' : 'text-emerald-400'"
+                >
+                  {{ s.diasRestantes > 0 ? `${s.diasRestantes} días restantes` : 'Expiró' }}
+                </span>
+              </td>
+
+              <!-- Estado -->
+              <td class="py-3.5 px-4 text-center whitespace-nowrap">
+                <span
+                  class="inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-[11px] font-semibold"
+                  :class="getEstadoBadge(s.estado).cls"
+                >
+                  <span class="size-1.5 rounded-full" :class="getEstadoBadge(s.estado).dot" />
+                  {{ getEstadoBadge(s.estado).label }}
+                </span>
+              </td>
+
+              <!-- Copiar Ficha WhatsApp -->
+              <td class="py-3.5 px-4 text-right whitespace-nowrap">
+                <button
+                  type="button"
+                  class="inline-flex items-center gap-1 rounded-md border border-white/10 hover:border-cyan-400/50 bg-[#141B2D] text-slate-200 hover:text-white px-2.5 py-1 text-xs font-semibold transition-colors cursor-pointer"
+                  title="Copiar ficha de entrega para WhatsApp"
+                  @click="copyText(`*STREAMSTORE - DATOS DE TU SUSCRIPCIÓN*\n\n📺 *Servicio:* ${s.plataforma?.nombre}\n👤 *Perfil:* ${s.perfil || 'Principal'}\n🔑 *PIN:* ${s.pin || 'Sin PIN'}\n📧 *Correo:* ${s.correoAcceso}\n🔒 *Clave:* ${s.passwordAcceso}\n📅 *Vence:* ${formatDate(s.fechaVencimiento)}`, 'Ficha WhatsApp')"
+                >
+                  <Copy class="size-3 text-cyan-400" />
+                  <span>WhatsApp</span>
+                </button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Estado Vacío -->
+      <div v-if="serviciosFiltrados.length === 0" class="p-12 text-center text-slate-400 space-y-2">
+        <Users class="size-8 mx-auto text-slate-600" />
+        <p class="text-sm font-semibold text-white">No hay suscripciones entregadas con estos filtros</p>
+        <p class="text-xs">Los registros aparecerán cuando los clientes adquieran planes.</p>
+      </div>
     </div>
   </div>
 </template>
