@@ -147,14 +147,11 @@ async function onSubmit() {
       <!-- Encabezado Paso 1 -->
       <div class="flex items-start justify-between border-b border-white/10 pb-4">
         <div>
-          <span class="inline-flex items-center gap-1.5 rounded bg-cyan-400/10 border border-cyan-400/20 text-cyan-300 text-[10px] font-mono font-bold px-2 py-0.5 uppercase tracking-wider mb-1">
-            PASO 1 DE 2
-          </span>
           <h2 class="font-display text-lg font-bold text-white">
-            Crear Página / Plataforma de Streaming
+            Nueva Plataforma
           </h2>
           <p class="text-xs text-slate-400 mt-0.5">
-            Registra el servicio matriz (ej. Netflix, Disney+, Max) con su nombre y portada oficial.
+            Nombre y portada del servicio (ej. Netflix, Disney+, Max).
           </p>
         </div>
 
@@ -322,7 +319,7 @@ async function onSubmit() {
             :disabled="isSubmitting"
           >
             <span v-if="isSubmitting">Guardando plataforma...</span>
-            <span v-else>Guardar Plataforma (Paso 1)</span>
+            <span v-else>Guardar Plataforma</span>
           </button>
         </div>
       </form>

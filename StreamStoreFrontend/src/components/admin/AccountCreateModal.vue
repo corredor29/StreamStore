@@ -177,7 +177,7 @@ async function onSubmit() {
   serverError.value = null
 
   if (!plataformaId.value) {
-    serverError.value = 'Por favor selecciona la plataforma de streaming creada en el Paso 1.'
+    serverError.value = 'Selecciona una plataforma.'
     return
   }
 
@@ -251,16 +251,11 @@ async function onSubmit() {
       <!-- Encabezado Paso 2 -->
       <div class="flex items-start justify-between border-b border-white/10 pb-4">
         <div>
-          <div class="flex items-center gap-2 mb-1">
-            <span class="inline-flex items-center gap-1.5 rounded bg-cyan-400/10 border border-cyan-400/20 text-cyan-300 text-[10px] font-mono font-bold px-2 py-0.5 uppercase tracking-wider">
-              Paso 2 de 2 • Cargar Cuenta al Catálogo
-            </span>
-          </div>
           <h2 class="font-display text-lg sm:text-xl font-bold text-white tracking-tight">
-            Configurar Cuenta & Perfiles de Streaming
+            Nueva Cuenta
           </h2>
           <p class="text-xs text-slate-400 mt-0.5">
-            Selecciona la plataforma creada, ingresa credenciales maestras, asigna perfiles y define el precio para el catálogo.
+            Plataforma, credenciales, perfiles y precio de venta.
           </p>
         </div>
 
@@ -284,7 +279,7 @@ async function onSubmit() {
           <div class="flex items-center justify-between">
             <label class="text-xs font-semibold text-slate-300 flex items-center gap-1.5">
               <Tv class="size-3.5 text-cyan-400" />
-              <span>Plataforma de Streaming (Paso 1) *</span>
+              <span>Plataforma *</span>
             </label>
             <button
               type="button"
@@ -292,7 +287,7 @@ async function onSubmit() {
               @click="emit('abrirPaso1')"
             >
               <Plus class="size-3" />
-              <span>+ Crear nueva plataforma (Paso 1)</span>
+              <span>Nueva plataforma</span>
             </button>
           </div>
 
@@ -310,7 +305,7 @@ async function onSubmit() {
               @click="emit('abrirPaso1')"
             >
               <Plus class="size-3.5" />
-              <span>Ir al Paso 1: Crear Plataforma</span>
+              <span>Crear plataforma</span>
             </button>
           </div>
 

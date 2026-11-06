@@ -149,6 +149,12 @@ const cuentasPaginadas = computed(() => {
   return cuentasFiltradas.value.slice(start, start + itemsPerPage.value)
 })
 
+// Solo se rellena cuando hay más de una página, para que no cambie la altura al navegar
+const filasRelleno = computed(() => {
+  if (totalPages.value <= 1) return 0
+  return Math.max(0, itemsPerPage.value - cuentasPaginadas.value.length)
+})
+
 // Reiniciar a página 1 cuando los filtros cambien
 watch([plataformaFiltro, estadoFiltro, searchQuery, sortBy], () => {
   currentPage.value = 1
@@ -252,7 +258,7 @@ function irAPagina(pagina: number) {
           <tbody class="divide-y divide-white/[0.06]">
             <template v-for="cuenta in cuentasPaginadas" :key="cuenta.id">
               <tr
-                class="hover:bg-white/[0.03] transition-colors cursor-pointer group"
+                class="h-14 hover:bg-white/[0.03] transition-colors cursor-pointer group"
                 :class="{ 'bg-white/[0.04]': expandedAccounts[cuenta.id] }"
                 @click="toggleExpand(cuenta.id)"
               >
@@ -435,6 +441,16 @@ function irAPagina(pagina: number) {
                 </td>
               </tr>
             </template>
+
+            <!-- Filas de relleno: mantienen la altura fija de la página -->
+            <tr
+              v-for="n in filasRelleno"
+              :key="`relleno-${n}`"
+              class="h-14 pointer-events-none"
+              aria-hidden="true"
+            >
+              <td colspan="6"></td>
+            </tr>
           </tbody>
         </table>
       </div>

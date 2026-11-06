@@ -198,85 +198,57 @@ onMounted(() => {
       <!-- Encabezado Limpio y Directo -->
       <header class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pb-4 border-b border-white/10">
         <div>
-          <div class="flex items-center gap-2">
-            <span class="rounded bg-cyan-400/10 border border-cyan-400/20 px-2 py-0.5 text-[10px] font-mono font-bold text-cyan-300 uppercase tracking-widest">
-              Panel de Control
-            </span>
-            <span class="text-xs text-slate-400 font-mono">StreamStore Oficial</span>
-          </div>
-          <h1 class="mt-1.5 font-display text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
-            Inventario & Gestión de Ventas
+          <h1 class="font-display text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
+            Panel de Administración
           </h1>
-          <p class="mt-0.5 text-xs sm:text-sm text-slate-400">
-            Administra tus marcas de streaming, cuentas maestras en stock y pedidos de clientes.
+          <p class="mt-1 text-xs sm:text-sm text-slate-400">
+            Plataformas, cuentas, clientes y ventas.
           </p>
         </div>
 
-        <!-- Acciones de Herramienta -->
-        <div class="flex items-center gap-2">
+        <!-- Acciones -->
+        <div class="flex flex-wrap items-center gap-2">
           <button
             type="button"
-            class="inline-flex items-center gap-2 rounded-xl border border-white/10 bg-[#0E1322] hover:bg-white/5 text-slate-300 hover:text-white text-xs font-semibold px-3 py-2 transition-all cursor-pointer"
+            class="inline-flex items-center justify-center size-9 rounded-xl border border-white/10 bg-[#0E1322] hover:bg-white/5 text-slate-400 hover:text-white transition-all cursor-pointer"
             :disabled="isCronExecuting"
-            title="Ejecutar cron para verificar y actualizar vencimientos"
+            title="Revisar vencimientos"
             @click="onEjecutarCron"
           >
-            <Clock class="size-3.5 text-amber-400" :class="{ 'animate-spin': isCronExecuting }" />
-            <span>{{ isCronExecuting ? 'Verificando...' : 'Cron Vencimientos' }}</span>
+            <Clock class="size-4" :class="{ 'animate-spin': isCronExecuting }" />
           </button>
 
           <button
             type="button"
-            class="inline-flex items-center gap-2 rounded-xl border border-white/10 bg-[#0E1322] hover:bg-white/5 text-slate-300 hover:text-white text-xs font-semibold px-3 py-2 transition-all cursor-pointer"
+            class="inline-flex items-center justify-center size-9 rounded-xl border border-white/10 bg-[#0E1322] hover:bg-white/5 text-slate-400 hover:text-white transition-all cursor-pointer"
             :disabled="loading"
-            title="Recargar datos del inventario"
+            title="Actualizar datos"
             @click="loadAdminData"
           >
-            <RefreshCw class="size-3.5 text-cyan-400" :class="{ 'animate-spin': loading }" />
-            <span>Actualizar</span>
+            <RefreshCw class="size-4" :class="{ 'animate-spin': loading }" />
           </button>
-        </div>
-      </header>
 
-      <!-- BARRA GUÍA: FLUJO EN 2 PASOS (CLARIDAD ABSOLUTA PARA EL USUARIO) -->
-      <div class="rounded-xl border border-cyan-400/20 bg-gradient-to-r from-cyan-950/40 via-[#0E1322] to-purple-950/30 p-4 flex flex-col md:flex-row items-start md:items-center justify-between gap-4 shadow-sm">
-        <div class="flex items-center gap-3">
-          <div class="size-10 rounded-xl bg-cyan-400/10 border border-cyan-400/20 flex items-center justify-center text-cyan-400 shrink-0">
-            <Sparkles class="size-5" />
-          </div>
-          <div>
-            <h3 class="text-sm font-bold text-white flex items-center gap-2">
-              <span>¿Cómo cargar nuevo streaming a la tienda?</span>
-            </h3>
-            <p class="text-xs text-slate-300 mt-0.5">
-              <span class="text-cyan-300 font-semibold">1. Crear Plataforma:</span> Registra la marca (Netflix, Disney+, Max) con su portada.
-              <span class="text-purple-300 font-semibold ml-1 sm:ml-2">2. Cargar Cuenta:</span> Ingresa credenciales, define pantallas y precio de venta.
-            </p>
-          </div>
-        </div>
+          <span class="hidden sm:block w-px h-6 bg-white/10 mx-1" />
 
-        <div class="flex items-center gap-2.5 shrink-0 self-stretch md:self-auto">
-          <!-- Botón Paso 1 -->
           <button
             type="button"
-            class="flex-1 md:flex-none inline-flex items-center justify-center gap-1.5 rounded-xl border border-cyan-400/30 bg-cyan-400/10 hover:bg-cyan-400/20 text-cyan-300 text-xs font-bold px-3.5 py-2 transition-all cursor-pointer shadow-sm"
+            class="inline-flex items-center gap-1.5 rounded-xl border border-white/10 bg-[#0E1322] hover:bg-white/5 text-slate-200 hover:text-white text-xs font-semibold px-3.5 py-2 transition-all cursor-pointer"
             @click="abrirPaso1"
           >
-            <Film class="size-3.5" />
-            <span>+ Paso 1: Nueva Plataforma</span>
+            <Film class="size-3.5 text-cyan-400" />
+            <span>Nueva Plataforma</span>
           </button>
 
-          <!-- Botón Paso 2 -->
           <button
             type="button"
-            class="flex-1 md:flex-none btn-primary text-xs py-2 px-4 gap-1.5 font-bold shadow-lg shadow-cyan-500/20 cursor-pointer"
+            class="btn-primary inline-flex items-center gap-1.5 text-xs py-2 px-4 font-semibold cursor-pointer"
             @click="() => abrirPaso2()"
           >
             <Plus class="size-4" />
-            <span>+ Paso 2: Cargar Cuenta</span>
+            <span>Nueva Cuenta</span>
           </button>
         </div>
-      </div>
+      </header>
 
       <!-- Feedback de Tarea Cron -->
       <div
@@ -316,7 +288,7 @@ onMounted(() => {
             @click="setTab('inventario')"
           >
             <Tv class="size-4" />
-            <span>Inventario de Cuentas</span>
+            <span>Cuentas</span>
             <span class="rounded bg-white/10 px-1.5 py-0.2 text-[10px] font-mono text-slate-300">
               {{ cuentas.length }}
             </span>
@@ -336,7 +308,7 @@ onMounted(() => {
             @click="setTab('plataformas')"
           >
             <Film class="size-4" />
-            <span>Plataformas Creadas (Paso 1)</span>
+            <span>Plataformas</span>
             <span class="rounded bg-white/10 px-1.5 py-0.2 text-[10px] font-mono text-slate-300">
               {{ plataformas.length }}
             </span>
@@ -356,7 +328,7 @@ onMounted(() => {
             @click="setTab('servicios')"
           >
             <Users class="size-4" />
-            <span>Servicios de Clientes</span>
+            <span>Clientes</span>
             <span class="rounded bg-white/10 px-1.5 py-0.2 text-[10px] font-mono text-slate-300">
               {{ servicios.length }}
             </span>
@@ -376,7 +348,7 @@ onMounted(() => {
             @click="setTab('ventas')"
           >
             <Receipt class="size-4" />
-            <span>Registro de Ventas</span>
+            <span>Ventas</span>
             <span class="rounded bg-white/10 px-1.5 py-0.2 text-[10px] font-mono text-slate-300">
               {{ compras.length }}
             </span>
