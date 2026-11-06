@@ -11,6 +11,8 @@ import { CarritoItem } from "../models/cart/CarritoItem"
 import { Compra } from "../models/orders/Compra"
 import { CompraItem } from "../models/orders/CompraItem"
 import { Servicio } from "../models/orders/Servicio"
+import { Combo } from "../models/promos/Combo"
+import { ComboPlataforma } from "../models/promos/ComboPlataforma"
 
 export const sequelize = new Sequelize({
     dialect: "mysql",
@@ -21,7 +23,7 @@ export const sequelize = new Sequelize({
     password: config.db.password,
     timezone: config.db.timezone,
     logging: false,
-    models: [Usuario, Plataforma, Producto, Cuenta, Pantalla, Carrito, CarritoItem, Compra, CompraItem, Servicio]
+    models: [Usuario, Plataforma, Producto, Cuenta, Pantalla, Carrito, CarritoItem, Compra, CompraItem, Servicio, Combo, ComboPlataforma]
 })
 
 export const withTransaction = <T>(fn: (t: Transaction) => Promise<T>) => sequelize.transaction(fn)

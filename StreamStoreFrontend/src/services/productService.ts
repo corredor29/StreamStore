@@ -2,7 +2,7 @@ import { api, mockDelay, USE_MOCKS } from './api'
 import { mockPlataformas, mockProductos } from '@/mocks/mockData'
 import type { Plataforma, Producto, ProductoFiltros } from '@/types'
 
-function normalizePlataforma(p: any): Plataforma {
+export function normalizePlataforma(p: any): Plataforma {
   const rawSlug = p.slug || p.nombre || 'streaming'
   const slug = rawSlug.toLowerCase().replace(/[^a-z0-9]/g, '-')
   const colors: Record<string, string> = {

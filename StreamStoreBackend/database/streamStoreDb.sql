@@ -3,7 +3,7 @@ CREATE DATABASE IF NOT EXISTS streamStoreDb CHARACTER SET utf8mb4 COLLATE utf8mb
 USE streamStoreDb;
 
 SET FOREIGN_KEY_CHECKS = 0;
-DROP TABLE IF EXISTS servicios, compra_items, compras, carrito_items, carritos, pantallas, cuentas, productos, plataformas, usuarios;
+DROP TABLE IF EXISTS combo_plataformas, combos, servicios, compra_items, compras, carrito_items, carritos, pantallas, cuentas, productos, plataformas, usuarios;
 
 CREATE TABLE usuarios (
   id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
@@ -154,6 +154,32 @@ CREATE TABLE servicios (
   CONSTRAINT fk_serv_producto FOREIGN KEY (producto_id) REFERENCES productos(id),
   CONSTRAINT fk_serv_cuenta FOREIGN KEY (cuenta_id) REFERENCES cuentas(id),
   CONSTRAINT fk_serv_pantalla FOREIGN KEY (pantalla_id) REFERENCES pantallas(id)
+) ENGINE=InnoDB;
+
+-- Combos promocionales: varias plataformas a un precio especial
+CREATE TABLE combos (
+  id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  nombre VARCHAR(120) NOT NULL,
+  descripcion VARCHAR(255) NULL,
+  precio_promo DECIMAL(12,2) NOT NULL,
+  precio_regular DECIMAL(12,2) NOT NULL,
+  pantallas_por_plataforma TINYINT UNSIGNED NOT NULL DEFAULT 1,
+  duracion_dias SMALLINT UNSIGNED NOT NULL DEFAULT 30,
+  etiqueta_promo VARCHAR(40) NOT NULL,
+  activo TINYINT(1) NOT NULL DEFAULT 1,
+  created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  KEY idx_combos_activo (activo)
+) ENGINE=InnoDB;
+
+CREATE TABLE combo_plataformas (
+  combo_id INT UNSIGNED NOT NULL,
+  plataforma_id INT UNSIGNED NOT NULL,
+  created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (combo_id, plataforma_id),
+  CONSTRAINT fk_combo_plat_combo FOREIGN KEY (combo_id) REFERENCES combos(id) ON DELETE CASCADE,
+  CONSTRAINT fk_combo_plat_plataforma FOREIGN KEY (plataforma_id) REFERENCES plataformas(id)
 ) ENGINE=InnoDB;
 
 -- Stock (calculado, no almacenado):

@@ -1,6 +1,7 @@
 import { Router } from "express"
 import { AlertaController } from "../controllers/orders/AlertaController"
 import { CompraController } from "../controllers/orders/CompraController"
+import { ComboController } from "../controllers/promos/ComboController"
 import { CuentaController } from "../controllers/products/CuentaController"
 import { PlataformaController } from "../controllers/products/PlataformaController"
 import { ProductoController } from "../controllers/products/ProductoController"
@@ -14,6 +15,7 @@ import { uploadImagen } from "../middlewares/UploadMiddleware"
 import { listComprasQuerySchema } from "../validators/orders/CompraValidators"
 import { asignarCredencialesSchema, listServiciosQuerySchema } from "../validators/orders/ServicioValidators"
 import { createCuentaSchema, listCuentasQuerySchema } from "../validators/products/CuentaValidators"
+import { createComboSchema, updateComboSchema } from "../validators/promos/ComboValidators"
 import { createPlataformaSchema, updatePlataformaSchema } from "../validators/products/PlataformaValidators"
 import { createProductoSchema, listProductosQuerySchema, updateProductoSchema } from "../validators/products/ProductoValidators"
 
@@ -50,3 +52,9 @@ AdminRoutes.get("/servicios", validateSchema(listServiciosQuerySchema, "query"),
 AdminRoutes.patch("/servicios/:id/credenciales", id, validateSchema(asignarCredencialesSchema), ServicioController.asignarCredenciales)
 AdminRoutes.put("/servicios/:id/credenciales", id, validateSchema(asignarCredencialesSchema), ServicioController.asignarCredenciales)
 AdminRoutes.post("/cron/ejecutar", AlertaController.ejecutar)
+
+AdminRoutes.get("/combos", ComboController.list)
+AdminRoutes.post("/combos", validateSchema(createComboSchema), ComboController.create)
+AdminRoutes.patch("/combos/:id", id, validateSchema(updateComboSchema), ComboController.update)
+AdminRoutes.patch("/combos/:id/toggle", id, ComboController.alternarActivo)
+AdminRoutes.delete("/combos/:id", id, ComboController.delete)

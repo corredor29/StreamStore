@@ -107,7 +107,15 @@ const rutas: [string, string, ReturnType<typeof operacion>][] = [
         body: { email: "cuenta@streamstore-demo.test", password: "Demo-123!", pin: "4321", perfil: "Cliente", notificar: true },
         descripcion: "En servicios de cuenta completa usa `pantallas: [{ numero, pin, perfil }]` en vez de `pin`/`perfil`."
     })],
-    ["post", "/admin/cron/ejecutar", operacion("Admin", "Ejecutar ya la revisión de vencimientos")]
+    ["post", "/admin/cron/ejecutar", operacion("Admin", "Ejecutar ya la revisión de vencimientos")],
+    ["get", "/admin/combos", operacion("Admin", "Combos promocionales con sus plataformas")],
+    ["post", "/admin/combos", operacion("Admin", "Crear combo (mínimo 2 plataformas)", {
+        status: 201,
+        body: { nombre: "Combo Dúo: Netflix + Max", plataforma_ids: [1, 4], precio_promo: 32000, precio_regular: 48000, pantallas_por_plataforma: 1, duracion_dias: 30, etiqueta_promo: "COMBO DÚO 2X1" }
+    })],
+    ["patch", "/admin/combos/{id}", operacion("Admin", "Editar combo", { body: { precio_promo: 30000 } })],
+    ["patch", "/admin/combos/{id}/toggle", operacion("Admin", "Activar o desactivar combo")],
+    ["delete", "/admin/combos/{id}", operacion("Admin", "Eliminar combo")]
 ]
 
 const paths: Record<string, Record<string, unknown>> = {}

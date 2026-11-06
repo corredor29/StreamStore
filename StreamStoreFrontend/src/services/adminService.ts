@@ -3,6 +3,25 @@ import type { ComboPromo, Compra, CrearComboPayload, CrearCuentaPayload, CuentaA
 import { mockPlataformas } from '@/mocks/mockData'
 import { mockComprasRealizadas } from './purchaseService'
 import { mockServiciosEnMemoria } from './accountService'
+import { normalizePlataforma } from './productService'
+
+// El backend responde en snake_case y con DECIMAL como texto
+function normalizeCombo(raw: unknown): ComboPromo {
+  const c = raw as Record<string, any>
+  return {
+    id: Number(c.id),
+    nombre: c.nombre,
+    descripcion: c.descripcion ?? null,
+    plataformas: Array.isArray(c.plataformas) ? c.plataformas.map(normalizePlataforma) : [],
+    precioPromo: Number(c.precio_promo ?? c.precioPromo),
+    precioRegular: Number(c.precio_regular ?? c.precioRegular),
+    pantallasPorPlataforma: Number(c.pantallas_por_plataforma ?? c.pantallasPorPlataforma ?? 1),
+    duracionDias: Number(c.duracion_dias ?? c.duracionDias ?? 30),
+    etiquetaPromo: c.etiqueta_promo ?? c.etiquetaPromo ?? '',
+    activo: Boolean(c.activo),
+    creadoEn: c.created_at ?? c.createdAt ?? c.creadoEn,
+  }
+}
 
 // Combos y Promociones iniciales (ej. Netflix + HBO Max)
 export const mockCombosPromocionales: ComboPromo[] = [
@@ -457,25 +476,31 @@ export const adminService = {
   },
 
   async combos(): Promise<ComboPromo[]> {
-    if (!USE_MOCKS) {
-      try {
-        const response = await api.get<any>('/admin/combos')
-        const raw = response.data
-        const list = Array.isArray(raw) ? raw : Array.isArray(raw?.data) ? raw.data : []
-        if (list.length > 0) return list
-      } catch (e) {
-        // Fallback a mockCombosPromocionales
-      }
-    }
-    return mockDelay([...mockCombosPromocionales], 200)
+    if (USE_MOCKS) return mockDelay([...mockCombosPromocionales], 200)
+    const { data } = await api.get<unknown[]>('/admin/combos')
+    return Array.isArray(data) ? data.map(normalizeCombo) : []
   },
 
   async crearCombo(payload: CrearComboPayload): Promise<ComboPromo> {
+    if (!USE_MOCKS) {
+      const { data } = await api.post<unknown>('/admin/combos', {
+        nombre: payload.nombre,
+        descripcion: payload.descripcion || null,
+        plataforma_ids: payload.plataformaIds,
+        precio_promo: payload.precioPromo,
+        precio_regular: payload.precioRegular,
+        pantallas_por_plataforma: payload.pantallasPorPlataforma,
+        duracion_dias: payload.duracionDias,
+        etiqueta_promo: payload.etiquetaPromo,
+        activo: payload.activo ?? true,
+      })
+      return normalizeCombo(data)
+    }
+
     const plats = (payload.plataformaIds || []).map((id: number) => {
       const found = mockPlataformas.find((p) => p.id === id)
       return found || { id, nombre: `Plataforma #${id}`, slug: `plat-${id}`, color: '#8057FF', activa: true }
     })
-
     const nuevo: ComboPromo = {
       id: Math.floor(100 + Math.random() * 900),
       nombre: payload.nombre,
@@ -489,25 +514,15 @@ export const adminService = {
       activo: payload.activo !== undefined ? payload.activo : true,
       creadoEn: new Date().toISOString(),
     }
-
-    if (!USE_MOCKS) {
-      try {
-        const res = await api.post<any>('/admin/combos', payload)
-        const data = res.data?.data ?? res.data
-        if (data && data.id) {
-          mockCombosPromocionales.unshift(data)
-          return data
-        }
-      } catch (e) {
-        console.warn('Fallo al registrar combo en backend, guardando localmente:', e)
-      }
-    }
-
     mockCombosPromocionales.unshift(nuevo)
     return mockDelay(nuevo, 300)
   },
 
   async toggleCombo(id: number): Promise<boolean> {
+    if (!USE_MOCKS) {
+      const { data } = await api.patch<unknown>(`/admin/combos/${id}/toggle`)
+      return normalizeCombo(data).activo
+    }
     const item = mockCombosPromocionales.find((c) => c.id === id)
     if (item) {
       item.activo = !item.activo
@@ -517,6 +532,10 @@ export const adminService = {
   },
 
   async eliminarCombo(id: number): Promise<boolean> {
+    if (!USE_MOCKS) {
+      await api.delete(`/admin/combos/${id}`)
+      return true
+    }
     const idx = mockCombosPromocionales.findIndex((c) => c.id === id)
     if (idx !== -1) {
       mockCombosPromocionales.splice(idx, 1)
