@@ -576,6 +576,54 @@ function toggleMute() {
   isMuted.value = !isMuted.value
 }
 
+
+// ================= AJUSTES PERSONALIZADOS DE LOGO POR PLATAFORMA =================
+function getHeadlineLogoClass(slug: string) {
+  if (slug === 'max') {
+    return 'h-28 sm:h-40 w-auto max-w-[380px] sm:max-w-[460px] scale-[1.7] origin-left'
+  }
+  if (slug === 'paramount') {
+    return 'h-28 sm:h-42 w-auto max-w-[360px] sm:max-w-[440px] scale-[1.85] origin-left'
+  }
+  if (slug === 'appletv') {
+    return 'h-14 sm:h-20 w-auto max-w-[240px] sm:max-w-[280px] scale-100 origin-left'
+  }
+  if (slug === 'disney') {
+    return 'h-20 sm:h-28 w-auto max-w-[280px] sm:max-w-[340px] scale-110'
+  }
+  return 'h-24 sm:h-36 w-auto max-w-[320px] sm:max-w-[400px] scale-125 origin-left'
+}
+
+function getHeadlineLogoWrapperClass(slug: string) {
+  if (slug === 'disney') {
+    return 'inline-flex items-center justify-center rounded-2xl px-6 py-2.5 bg-gradient-to-r from-[#001740]/90 via-[#032b70]/95 to-[#001740]/90 border border-cyan-400/40 shadow-[0_0_30px_rgba(0,180,255,0.35)] backdrop-blur-xl'
+  }
+  return 'inline-block'
+}
+
+function getCardLogoClass(slug: string) {
+  if (slug === 'max') {
+    return 'h-14 sm:h-16 w-auto max-w-[200px] sm:max-w-[240px] scale-[1.4] origin-right'
+  }
+  if (slug === 'paramount') {
+    return 'h-14 sm:h-16 w-auto max-w-[200px] sm:max-w-[240px] scale-[1.45] origin-right'
+  }
+  if (slug === 'appletv') {
+    return 'h-10 sm:h-12 w-auto max-w-[160px] sm:max-w-[190px] scale-100 origin-right'
+  }
+  if (slug === 'disney') {
+    return 'h-12 sm:h-14 w-auto max-w-[170px] sm:max-w-[200px] scale-105'
+  }
+  return 'h-14 sm:h-16 w-auto max-w-[200px] sm:max-w-[240px] scale-110 origin-right'
+}
+
+function getCardLogoWrapperClass(slug: string) {
+  if (slug === 'disney') {
+    return 'inline-flex items-center justify-center rounded-xl px-3 py-1 bg-[#001740]/90 border border-cyan-400/30 shadow-md'
+  }
+  return ''
+}
+
 function comprarPlataforma(p: ScrollyPlatform) {
   const prodId = modalidadSeleccionada.value === 'CUENTA_COMPLETA' 
     ? p.productoIdCompleta 
