@@ -28,7 +28,7 @@ export const mockCombosPromocionales: ComboPromo[] = [
     descripcion: 'Lo mejor de Disney, Pixar, Marvel y Star Wars junto con Prime Video Series y Envíos.',
     plataformas: [
       { id: 2, nombre: 'Disney+', slug: 'disney', color: '#113CCF', logoUrl: '/disne.png' },
-      { id: 3, nombre: 'Prime Video', slug: 'prime', color: '#00A8E1', logoUrl: '/primevideo.png' },
+      { id: 3, nombre: 'Prime Video', slug: 'prime', color: '#00A8E1', logoUrl: '/primevideo.jpg' },
     ],
     precioPromo: 25000,
     precioRegular: 38000,

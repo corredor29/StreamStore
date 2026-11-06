@@ -5,7 +5,7 @@ import type { Plataforma, Producto } from '@/types'
 export const mockPlataformas: Plataforma[] = [
   { id: 1, nombre: 'Netflix', slug: 'netflix', color: '#E50914', logoUrl: '/netflix.webp', activa: true },
   { id: 2, nombre: 'Disney+', slug: 'disney', color: '#113CCF', logoUrl: '/disne.png', activa: true },
-  { id: 3, nombre: 'Prime Video', slug: 'prime', color: '#00A8E1', logoUrl: '/primevideo.png', activa: true },
+  { id: 3, nombre: 'Prime Video', slug: 'prime', color: '#00A8E1', logoUrl: '/primevideo.jpg', activa: true },
   { id: 4, nombre: 'Max', slug: 'max', color: '#7B2FF7', logoUrl: '/hbomax.png', activa: true },
   { id: 5, nombre: 'Spotify', slug: 'spotify', color: '#1DB954', logoUrl: '/spotify.png', activa: true },
   { id: 6, nombre: 'Crunchyroll', slug: 'crunchyroll', color: '#F47521', logoUrl: '/crunchiroll.png', activa: true },
