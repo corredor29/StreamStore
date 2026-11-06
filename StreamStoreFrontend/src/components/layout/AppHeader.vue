@@ -61,18 +61,16 @@ onUnmounted(() => {
         <!-- Enlaces centrales de navegación -->
         <nav class="hidden md:flex items-center gap-6 text-xs font-bold uppercase tracking-wider text-slate-300">
           <RouterLink
-            v-if="!auth.isAuthenticated"
             to="/"
             class="hover:text-white transition-colors"
             active-class="text-white"
           >
             Inicio
           </RouterLink>
+
           <RouterLink
-            v-else
-            to="/catalogo"
+            to="/#plataformas-showcase"
             class="hover:text-white transition-colors"
-            active-class="text-white"
           >
             Recomendaciones
           </RouterLink>

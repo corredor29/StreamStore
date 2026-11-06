@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, onMounted, ref } from 'vue'
+import { computed, onMounted, ref, watch } from 'vue'
 import { RouterLink } from 'vue-router'
 import { ArrowLeft, Check, CheckCircle2, Clock, ShieldCheck, ShoppingCart, Tv, Users } from '@lucide/vue'
 import AppLoader from '@/components/common/AppLoader.vue'
@@ -68,6 +68,13 @@ function onAgregar() {
 onMounted(() => {
   fetchProducto()
 })
+
+watch(
+  () => props.id,
+  () => {
+    fetchProducto()
+  }
+)
 </script>
 
 <template>

@@ -23,7 +23,7 @@ const routes: RouteRecordRaw[] = [
     children: [
       { path: '', name: 'home', component: () => import('@/views/HomeView.vue'), meta: { title: 'Inicio' } },
       { path: 'catalogo', name: 'catalog', component: () => import('@/views/CatalogView.vue'), meta: { title: 'Catálogo' } },
-      { path: 'productos/:id(\\d+)', name: 'product', component: () => import('@/views/ProductDetailView.vue'), props: (r) => ({ id: Number(r.params.id) }), meta: { title: 'Producto' } },
+      { path: 'producto/:id(\\d+)', alias: 'productos/:id(\\d+)', name: 'product', component: () => import('@/views/ProductDetailView.vue'), props: (r) => ({ id: Number(r.params.id) }), meta: { title: 'Producto' } },
       { path: 'login', name: 'login', component: () => import('@/views/LoginView.vue'), meta: { title: 'Iniciar sesión', guestOnly: true } },
       { path: 'registro', name: 'register', component: () => import('@/views/RegisterView.vue'), meta: { title: 'Crear cuenta', guestOnly: true } },
       { path: 'carrito', name: 'cart', component: () => import('@/views/CartView.vue'), meta: { title: 'Carrito' } },
