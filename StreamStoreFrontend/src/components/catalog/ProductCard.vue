@@ -26,7 +26,7 @@ const presentationImage = computed(() => {
     return '/targetyas/disneycard.png'
   }
   if (slug.includes('netflix') || slug.includes('nf') || name.includes('netflix')) {
-    return '/brand_logos/netflix.webp'
+    return '/targetyas/netflixcard.svg'
   }
   if (slug.includes('max') || slug.includes('hbo') || name.includes('max')) {
     return '/targetyas/HBO_Max.webp'
@@ -61,8 +61,18 @@ const displayTitle = computed(() => {
 
 const tipoBadge = computed(() => {
   return props.producto.tipo === 'CUENTA_COMPLETA'
-    ? { label: 'Cuenta Completa', icon: Users, cls: 'bg-purple-50 text-purple-700 border-purple-200' }
-    : { label: '1 Pantalla (PIN)', icon: Tv, cls: 'bg-cyan-50 text-cyan-800 border-cyan-200' }
+    ? {
+        label: 'Cuenta Completa',
+        icon: Users,
+        cls: 'bg-purple-50 text-purple-700 border-purple-200',
+        overlayCls: 'bg-purple-950/85 text-purple-200 border border-purple-400/50',
+      }
+    : {
+        label: '1 Pantalla (PIN)',
+        icon: Tv,
+        cls: 'bg-cyan-50 text-cyan-800 border-cyan-200',
+        overlayCls: 'bg-cyan-950/85 text-cyan-200 border border-cyan-400/50',
+      }
 })
 
 function onAgregar() {
@@ -83,25 +93,27 @@ function onAgregar() {
     :class="{ 'opacity-60 grayscale-[30%]': isAgotado }"
     :aria-labelledby="`product-title-${producto.id}`"
   >
-    <!-- TOP: PRESENTACIÓN GRÁFICA / LOGO SOBRE FONDO BLANCO (ESTILO LION TECH STORE) -->
+    <!-- TOP: PORTADA DE BORDE A BORDE (LLENA TODA LA CABECERA SIN ESPACIOS EN BLANCO) -->
     <RouterLink
       :to="`/producto/${producto.id}`"
-      class="relative h-48 sm:h-52 w-full overflow-hidden block select-none cursor-pointer bg-white flex items-center justify-center p-6 border-b border-slate-100 group"
+      class="relative h-44 sm:h-48 w-full overflow-hidden block select-none cursor-pointer bg-slate-950 group"
     >
-      <!-- Logo o Tarjeta Oficial de la Plataforma -->
+      <!-- Tarjeta gráfica oficial ocupando el 100% del contenedor -->
       <img
         :src="presentationImage"
         :alt="producto.nombre"
-        class="transition-transform duration-300 ease-out group-hover:scale-105 select-none"
-        :class="isWideGraphic ? 'max-h-24 sm:max-h-28 max-w-[85%] object-contain' : 'max-h-20 sm:max-h-24 max-w-[75%] object-contain'"
+        class="h-full w-full object-cover transition-transform duration-500 ease-out group-hover:scale-105 select-none"
         loading="lazy"
       />
 
-      <!-- Badges superiores flotantes: Modalidad y Duración -->
+      <!-- Sutil gradiente oscuro para legibilidad óptima de badges -->
+      <div class="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-black/30 pointer-events-none" />
+
+      <!-- Badges superiores flotantes con efecto glassmorphism -->
       <div class="absolute top-2.5 left-2.5 z-10">
         <span
-          class="inline-flex items-center gap-1 rounded-md border px-2 py-0.5 text-[10px] font-mono font-bold uppercase tracking-wider shadow-xs"
-          :class="tipoBadge.cls"
+          class="inline-flex items-center gap-1 rounded-md px-2.5 py-1 text-[10px] font-mono font-bold uppercase tracking-wider shadow-md backdrop-blur-md"
+          :class="tipoBadge.overlayCls"
         >
           <component :is="tipoBadge.icon" class="size-3" aria-hidden="true" />
           {{ tipoBadge.label }}
@@ -109,8 +121,8 @@ function onAgregar() {
       </div>
 
       <div class="absolute top-2.5 right-2.5 z-10">
-        <span class="inline-flex items-center gap-1 rounded-md px-2 py-0.5 text-[10px] font-mono font-bold text-slate-600 bg-slate-100 border border-slate-200 shadow-xs">
-          <Clock class="size-3 text-slate-500" />
+        <span class="inline-flex items-center gap-1 rounded-md px-2.5 py-1 text-[10px] font-mono font-bold text-white bg-black/60 border border-white/20 shadow-md backdrop-blur-md">
+          <Clock class="size-3 text-cyan-300" />
           {{ producto.duracionDias }}d
         </span>
       </div>
