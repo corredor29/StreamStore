@@ -1,5 +1,9 @@
 <script setup lang="ts">
+import { computed } from 'vue'
 import { RouterLink } from 'vue-router'
+import { useAuthStore } from '@/stores/auth'
+
+const auth = useAuthStore()
 
 withDefaults(
   defineProps<{
@@ -11,13 +15,19 @@ withDefaults(
     size: 'md',
   }
 )
+
+// Si la sesión está iniciada, el logo redirige a /catalogo.
+// Solo devuelve a la landing page (/) cuando NO hay sesión iniciada.
+const destinationRoute = computed(() => {
+  return auth.isAuthenticated ? '/catalogo' : '/'
+})
 </script>
 
 <template>
   <RouterLink
-    to="/"
+    :to="destinationRoute"
     class="group inline-flex items-center gap-2.5 rounded-lg focus-visible:outline-none"
-    aria-label="Ir al inicio de StreamStore"
+    :aria-label="auth.isAuthenticated ? 'Ir al catálogo de StreamStore' : 'Ir al inicio de StreamStore'"
   >
     <!-- Logotipo Oficial StreamStore (Icono transparente sin cuadro tosco) -->
     <div

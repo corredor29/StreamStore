@@ -62,7 +62,20 @@ const statusConfig = computed(() => {
 })
 
 const platformColor = computed(() => props.servicio.plataforma?.color || '#8057FF')
-const platformLogo = computed(() => props.servicio.plataforma?.logoUrl || null)
+const platformLogo = computed(() => {
+  const plat = props.servicio.plataforma
+  const slug = (plat?.slug || plat?.nombre || '').toLowerCase()
+
+  if (slug.includes('max') || slug.includes('hbo')) return '/targetyas/HBO_Max.webp'
+  if (slug.includes('disney') || slug.includes('dp')) return '/targetyas/disneycard.png'
+  if (slug.includes('prime') || slug.includes('amazon')) return '/targetyas/prime_video.avif'
+  if (slug.includes('crunchyroll') || slug.includes('anime')) return '/targetyas/Crunchyroll.webp'
+  if (slug.includes('spotify') || slug.includes('musica')) return '/targetyas/spotify_premiun.webp'
+  if (slug.includes('netflix') || slug.includes('nf')) return '/brand_logos/netflix.webp'
+  if (slug.includes('paramount') || slug.includes('paramont')) return '/brand_logos/paramont.png'
+  if (slug.includes('apple') || slug.includes('appletv')) return '/brand_logos/appletv.webp'
+  return plat?.logoUrl || '/streamstore_icon.png'
+})
 
 async function copyToClipboard(text: string, fieldName: string) {
   try {

@@ -22,12 +22,12 @@ function normalizeServicio(s: any): Servicio {
     slug.includes('crunch') ? '#F47521' : '#8057FF'
   )
   const platLogo = (
-    slug.includes('net') ? '/netflix.webp' :
-    slug.includes('dis') ? '/disne.png' :
-    slug.includes('max') ? '/hbomax.png' :
-    slug.includes('prime') ? '/primevideo.png' :
-    slug.includes('spot') ? '/spotify.png' :
-    slug.includes('crunch') ? '/crunchiroll.png' : null
+    slug.includes('net') ? '/brand_logos/netflix.webp' :
+    slug.includes('dis') ? '/targetyas/disneycard.png' :
+    slug.includes('max') || slug.includes('hbo') ? '/targetyas/HBO_Max.webp' :
+    slug.includes('prime') ? '/targetyas/prime_video.avif' :
+    slug.includes('spot') ? '/targetyas/spotify_premiun.webp' :
+    slug.includes('crunch') ? '/targetyas/Crunchyroll.webp' : '/streamstore_icon.png'
   )
 
   const creds = s.credenciales
@@ -60,7 +60,7 @@ export const mockServiciosIniciales: Servicio[] = [
   {
     id: 101,
     compraId: 5001,
-    plataforma: { id: 1, nombre: 'Netflix', slug: 'netflix', color: '#E50914', logoUrl: '/netflix.webp' },
+    plataforma: { id: 1, nombre: 'Netflix', slug: 'netflix', color: '#E50914', logoUrl: '/brand_logos/netflix.webp' },
     tipo: 'CUENTA_COMPLETA',
     correoAcceso: 'familia.netflix.demo@streamstore.net',
     passwordAcceso: 'StreamNet#2026',
@@ -74,7 +74,7 @@ export const mockServiciosIniciales: Servicio[] = [
   {
     id: 102,
     compraId: 5002,
-    plataforma: { id: 2, nombre: 'Disney+', slug: 'disney', color: '#113CCF', logoUrl: '/disne.png' },
+    plataforma: { id: 2, nombre: 'Disney+', slug: 'disney', color: '#113CCF', logoUrl: '/targetyas/disneycard.png' },
     tipo: 'PANTALLA',
     correoAcceso: 'disney.vip.demo@streamstore.net',
     passwordAcceso: 'Mickey#Play99',
@@ -88,7 +88,7 @@ export const mockServiciosIniciales: Servicio[] = [
   {
     id: 103,
     compraId: 5003,
-    plataforma: { id: 4, nombre: 'Max', slug: 'max', color: '#7B2FF7', logoUrl: '/hbomax.png' },
+    plataforma: { id: 4, nombre: 'Max', slug: 'max', color: '#7B2FF7', logoUrl: '/targetyas/HBO_Max.webp' },
     tipo: 'CUENTA_COMPLETA',
     correoAcceso: 'max.plus.demo@streamstore.net',
     passwordAcceso: 'MaxHboSecure!88',
