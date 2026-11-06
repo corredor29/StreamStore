@@ -79,17 +79,18 @@ async function onSubmit() {
 
 <template>
   <div class="relative min-h-screen w-full flex flex-col justify-between bg-black text-white overflow-hidden">
-    <!-- FONDO CINEMATOGRÁFICO AMBIENTAL -->
+    <!-- FONDO CINEMATOGRÁFICO DE STREAMING -->
     <div
-      class="absolute inset-0 bg-cover bg-center transition-all duration-1000 scale-105 pointer-events-none opacity-40"
-      style="background-image: url('/hbo_max_mosaic_bg.jpg');"
+      class="absolute inset-0 bg-cover bg-center transition-all duration-1000 scale-100 pointer-events-none opacity-60"
+      style="background-image: url('/login_cinema_bg.jpg');"
     >
-      <div class="absolute inset-0 bg-gradient-to-t from-black via-black/80 to-black/95" />
-      <div class="absolute inset-0 bg-[radial-gradient(ellipse_at_center,transparent_10%,rgba(0,0,0,0.85)_75%)]" />
+      <div class="absolute inset-0 bg-gradient-to-t from-black via-black/60 to-black/80" />
+      <div class="absolute inset-0 bg-[radial-gradient(ellipse_at_center,transparent_20%,rgba(0,0,0,0.8)_80%)]" />
     </div>
 
-    <div class="pointer-events-none absolute -top-40 right-1/4 size-[500px] rounded-full bg-brand-600/15 blur-[140px]" />
-    <div class="pointer-events-none absolute -bottom-40 left-1/4 size-[500px] rounded-full bg-cyan-600/15 blur-[140px]" />
+    <!-- Haces de Luz Cinemáticos -->
+    <div class="pointer-events-none absolute -top-40 right-1/4 size-[500px] rounded-full bg-brand-600/20 blur-[150px]" />
+    <div class="pointer-events-none absolute -bottom-40 left-1/4 size-[500px] rounded-full bg-cyan-600/20 blur-[150px]" />
 
     <!-- CABECERA MINIMALISTA -->
     <header class="relative z-20 flex items-center justify-between px-6 py-6 sm:px-12">
@@ -111,21 +112,21 @@ async function onSubmit() {
 
       <RouterLink
         to="/login"
-        class="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/5 px-4 py-2 text-xs font-semibold text-neutral-300 backdrop-blur hover:bg-white/10 hover:text-white transition-all"
+        class="inline-flex items-center gap-2 rounded-full border border-white/20 bg-black/50 px-4 py-2 text-xs font-semibold text-neutral-200 backdrop-blur-md hover:bg-white/10 hover:text-white transition-all shadow-md"
       >
-        <ArrowLeft class="size-3.5" />
+        <ArrowLeft class="size-3.5 text-cyan-400" />
         <span>Ya tengo cuenta</span>
       </RouterLink>
     </header>
 
     <!-- FORMULARIO CENTRAL -->
     <main class="relative z-20 my-auto flex flex-col items-center justify-center px-4 py-8 sm:px-6">
-      <div class="w-full max-w-[480px] rounded-3xl border border-white/10 bg-black/75 p-8 sm:p-11 shadow-[0_25px_60px_rgba(0,0,0,0.95)] backdrop-blur-2xl">
+      <div class="w-full max-w-[480px] rounded-3xl border border-white/15 bg-black/80 p-8 sm:p-11 shadow-[0_25px_70px_rgba(0,0,0,0.95)] backdrop-blur-xl">
         <div>
           <h1 class="font-display text-3xl sm:text-4xl font-black text-white tracking-tight">
             Crear cuenta
           </h1>
-          <p class="mt-2 text-xs sm:text-sm text-neutral-400 font-light">
+          <p class="mt-2 text-xs sm:text-sm text-neutral-300 font-light">
             Regístrate para comprar pantallas y cuentas con entrega inmediata.
           </p>
         </div>

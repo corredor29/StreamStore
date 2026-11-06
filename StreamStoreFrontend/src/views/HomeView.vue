@@ -26,6 +26,7 @@ export interface ScrollyPlatform {
   tag: string
   slug: string
   logo?: string
+  logoFilter?: string
   color: string
   bgImage: string
   badge: string
@@ -46,6 +47,7 @@ const scrollyPlatforms: ScrollyPlatform[] = [
     tag: 'NETFLIX · 4K ULTRA HD',
     slug: 'netflix',
     logo: '/netflix.webp',
+    logoFilter: 'drop-shadow(0 4px 16px rgba(229,9,20,0.6))',
     color: '#E50914',
     bgImage: '/watching_netflix.jpg',
     badge: '🔥 MÁS VENDIDO',
@@ -70,6 +72,7 @@ const scrollyPlatforms: ScrollyPlatform[] = [
     tag: 'DISNEY+ · FAMILIAR & MARVEL',
     slug: 'disney',
     logo: '/disne.png',
+    logoFilter: 'brightness(0) invert(1) drop-shadow(0 4px 18px rgba(17,60,207,0.9)) drop-shadow(0 0 8px rgba(255,255,255,0.8))',
     color: '#113CCF',
     bgImage: '/watching_disney.jpg',
     badge: '⭐ TOP FAMILIAR',
@@ -94,6 +97,7 @@ const scrollyPlatforms: ScrollyPlatform[] = [
     tag: 'MAX · HBO ORIGINALS & WARNER',
     slug: 'max',
     logo: '/hbomax.png',
+    logoFilter: 'brightness(0) invert(1) drop-shadow(0 4px 18px rgba(123,47,247,0.9)) drop-shadow(0 0 8px rgba(255,255,255,0.8))',
     color: '#7B2FF7',
     bgImage: '/watching_max.jpg',
     badge: '🏆 SERIES EMMY',
@@ -118,6 +122,7 @@ const scrollyPlatforms: ScrollyPlatform[] = [
     tag: 'PRIME VIDEO · ORIGINALS & DEPORTES',
     slug: 'prime',
     logo: '/primevideo.png',
+    logoFilter: 'brightness(0) invert(1) drop-shadow(0 4px 18px rgba(0,168,225,0.9)) drop-shadow(0 0 8px rgba(255,255,255,0.8))',
     color: '#00A8E1',
     bgImage: '/watching_prime.jpg',
     badge: '🎬 ORIGINALS & CINE',
@@ -142,6 +147,7 @@ const scrollyPlatforms: ScrollyPlatform[] = [
     tag: 'PARAMOUNT+ · BLOCKBUSTERS & SHOWTIME',
     slug: 'paramount',
     logo: '/paramont.webp',
+    logoFilter: 'brightness(0) invert(1) drop-shadow(0 4px 18px rgba(0,100,255,0.9)) drop-shadow(0 0 8px rgba(255,255,255,0.8))',
     color: '#0064FF',
     bgImage: '/hero_cinema_wall.jpg',
     badge: '🚀 BLOCKBUSTERS 4K',
@@ -166,6 +172,7 @@ const scrollyPlatforms: ScrollyPlatform[] = [
     tag: 'CRUNCHYROLL · ANIME EN SIMULCAST',
     slug: 'crunchyroll',
     logo: '/crunchiroll.png',
+    logoFilter: 'drop-shadow(0 4px 18px rgba(244,117,33,0.85)) drop-shadow(0 0 6px rgba(255,255,255,0.6))',
     color: '#F47521',
     bgImage: '/hero_cinema_wall.jpg',
     badge: '⚡ SIMULCAST JAPÓN',
@@ -190,6 +197,7 @@ const scrollyPlatforms: ScrollyPlatform[] = [
     tag: 'SPOTIFY · MÚSICA & AUDIO HI-FI',
     slug: 'spotify',
     logo: '/spotify.png',
+    logoFilter: 'drop-shadow(0 4px 18px rgba(29,185,84,0.85)) drop-shadow(0 0 6px rgba(255,255,255,0.6))',
     color: '#1DB954',
     bgImage: '/hbo_max_mosaic_bg.jpg',
     badge: '🎧 AUDIO SIN ANUNCIOS',
@@ -214,6 +222,7 @@ const scrollyPlatforms: ScrollyPlatform[] = [
     tag: 'APPLE TV+ · APPLE ORIGINALS',
     slug: 'appletv',
     logo: '/appletv.webp',
+    logoFilter: 'brightness(0) invert(1) drop-shadow(0 4px 18px rgba(255,255,255,0.9)) drop-shadow(0 0 8px rgba(255,255,255,0.7))',
     color: '#E2E8F0',
     bgImage: '/watching_prime.jpg',
     badge: '🌟 CALIDAD OSCAR & EMMY',
@@ -461,6 +470,13 @@ function getBgParallax(idx: number, bgImage: string) {
     backgroundImage: `url('${bgImage}')`,
     transform: `translate3d(0, ${panY.toFixed(1)}px, 0) scale(${zoom.toFixed(3)})`,
     willChange: 'transform',
+  }
+}
+
+function scrollToPlatform(slug: string) {
+  const el = document.getElementById(`plataforma-${slug}`)
+  if (el) {
+    el.scrollIntoView({ behavior: 'smooth', block: 'center' })
   }
 }
 
@@ -764,6 +780,40 @@ const formatCOP = (val: number) => {
 
     <!-- ================= 3. CAPÍTULOS SCROLLYTELLING POR PLATAFORMA ================= -->
     <div id="plataformas-showcase" class="space-y-0 bg-black relative">
+
+      <!-- ================= DOCK FLOTANTE LATERAL (HIPERVÍNCULOS A CANALES) ================= -->
+      <aside 
+        class="fixed right-2.5 sm:right-5 top-1/2 -translate-y-1/2 z-40 flex flex-col gap-2 p-1.5 sm:p-2 rounded-2xl border border-white/20 bg-black/85 backdrop-blur-2xl shadow-[0_0_35px_rgba(0,0,0,0.9)] transition-all duration-300"
+      >
+        <button
+          v-for="(sp, idx) in scrollyPlatforms"
+          :key="'dock-' + sp.slug"
+          type="button"
+          class="size-10 sm:size-12 rounded-xl flex items-center justify-center p-2 transition-all duration-300 cursor-pointer relative group border"
+          :class="activeIndex === idx ? 'bg-white/20 scale-110 shadow-xl border-white/40' : 'border-transparent hover:bg-white/10 opacity-70 hover:opacity-100'"
+          :style="activeIndex === idx ? { boxShadow: `0 0 18px ${sp.color}` } : {}"
+          :title="sp.nombre"
+          @click="scrollToPlatform(sp.slug)"
+        >
+          <img
+            v-if="sp.logo"
+            :src="sp.logo"
+            :alt="sp.nombre"
+            class="max-h-full max-w-full object-contain"
+            :style="{ filter: sp.logoFilter }"
+          />
+          <span v-else class="text-[10px] font-black" :style="{ color: sp.color }">
+            {{ sp.slug.substring(0, 3).toUpperCase() }}
+          </span>
+
+          <!-- Tooltip flotante a la izquierda -->
+          <span class="absolute right-full mr-3 px-3 py-1.5 rounded-xl bg-black/95 border border-white/20 text-xs font-bold text-white whitespace-nowrap opacity-0 group-hover:opacity-100 transition-all pointer-events-none shadow-2xl flex items-center gap-1.5">
+            <span class="size-2 rounded-full" :style="{ backgroundColor: sp.color }" />
+            {{ sp.nombre }}
+          </span>
+        </button>
+      </aside>
+
       <!-- SECCIONES DE PLATAFORMAS (SCROLLYTELLING) -->
       <div
         v-for="(sp, idx) in scrollyPlatforms"
@@ -810,7 +860,8 @@ const formatCOP = (val: number) => {
                     <img 
                       :src="sp.logo" 
                       :alt="sp.nombre" 
-                      class="h-12 sm:h-16 w-auto max-w-[220px] object-contain filter drop-shadow-[0_10px_30px_rgba(0,0,0,0.95)]" 
+                      class="h-14 sm:h-20 w-auto max-w-[240px] object-contain transition-transform duration-300"
+                      :style="{ filter: sp.logoFilter }"
                     />
                   </div>
 
@@ -868,11 +919,12 @@ const formatCOP = (val: number) => {
                       </div>
 
                       <!-- Logotipo Oficial Libre, Nítido y Prominente (Sin caja ni marco) -->
-                      <div v-if="sp.logo" class="h-10 sm:h-12 flex items-center shrink-0">
+                      <div v-if="sp.logo" class="h-11 sm:h-13 flex items-center shrink-0">
                         <img 
                           :src="sp.logo" 
                           :alt="sp.nombre" 
-                          class="h-9 sm:h-11 w-auto max-w-[150px] object-contain filter drop-shadow-[0_4px_16px_rgba(0,0,0,0.85)] transition-transform duration-300 group-hover:scale-105"
+                          class="h-10 sm:h-12 w-auto max-w-[160px] object-contain transition-transform duration-300 group-hover:scale-105"
+                          :style="{ filter: sp.logoFilter }"
                         />
                       </div>
                     </div>
@@ -939,11 +991,12 @@ const formatCOP = (val: number) => {
                       </div>
 
                       <!-- Logotipo Oficial Libre, Nítido y Prominente (Sin caja ni marco) -->
-                      <div v-if="sp.logo" class="h-10 sm:h-12 flex items-center shrink-0">
+                      <div v-if="sp.logo" class="h-11 sm:h-13 flex items-center shrink-0">
                         <img 
                           :src="sp.logo" 
                           :alt="sp.nombre" 
-                          class="h-9 sm:h-11 w-auto max-w-[150px] object-contain filter drop-shadow-[0_4px_16px_rgba(0,0,0,0.85)] transition-transform duration-300 group-hover:scale-105"
+                          class="h-10 sm:h-12 w-auto max-w-[160px] object-contain transition-transform duration-300 group-hover:scale-105"
+                          :style="{ filter: sp.logoFilter }"
                         />
                       </div>
                     </div>
@@ -993,7 +1046,8 @@ const formatCOP = (val: number) => {
                     <img 
                       :src="sp.logo" 
                       :alt="sp.nombre" 
-                      class="h-12 sm:h-16 w-auto max-w-[220px] object-contain filter drop-shadow-[0_10px_30px_rgba(0,0,0,0.95)]" 
+                      class="h-14 sm:h-20 w-auto max-w-[240px] object-contain transition-transform duration-300"
+                      :style="{ filter: sp.logoFilter }"
                     />
                   </div>
 

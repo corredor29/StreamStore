@@ -96,21 +96,21 @@ async function onSubmit() {
 
 <template>
   <div class="relative min-h-screen w-full flex flex-col justify-between bg-black text-white overflow-hidden">
-    <!-- ================= FONDO CINEMATOGRÁFICO AMBIENTAL ================= -->
+    <!-- ================= FONDO CINEMATOGRÁFICO REALISTA DE STREAMING ================= -->
     <div
-      class="absolute inset-0 bg-cover bg-center transition-all duration-1000 scale-105 pointer-events-none opacity-40"
-      style="background-image: url('/hbo_max_mosaic_bg.jpg');"
+      class="absolute inset-0 bg-cover bg-center transition-all duration-1000 scale-100 pointer-events-none opacity-60"
+      style="background-image: url('/login_cinema_bg.jpg');"
     >
-      <!-- Viñeta Gradual Estilo Cine / HBO Max -->
-      <div class="absolute inset-0 bg-gradient-to-t from-black via-black/80 to-black/95" />
-      <div class="absolute inset-0 bg-[radial-gradient(ellipse_at_center,transparent_10%,rgba(0,0,0,0.85)_75%)]" />
+      <!-- Viñeta Gradual Estilo Sala de Cine / HBO Max (Transparente al centro para apreciar la escena) -->
+      <div class="absolute inset-0 bg-gradient-to-t from-black via-black/60 to-black/80" />
+      <div class="absolute inset-0 bg-[radial-gradient(ellipse_at_center,transparent_20%,rgba(0,0,0,0.8)_80%)]" />
     </div>
 
-    <!-- Haces de Luz Suaves de Fondo -->
-    <div class="pointer-events-none absolute -top-40 left-1/4 size-[500px] rounded-full bg-brand-600/15 blur-[140px]" />
-    <div class="pointer-events-none absolute -bottom-40 right-1/4 size-[500px] rounded-full bg-cyan-600/15 blur-[140px]" />
+    <!-- Haces de Luz Neón Ambientales Suaves -->
+    <div class="pointer-events-none absolute -top-40 left-1/4 size-[500px] rounded-full bg-brand-600/20 blur-[150px]" />
+    <div class="pointer-events-none absolute -bottom-40 right-1/4 size-[500px] rounded-full bg-cyan-600/20 blur-[150px]" />
 
-    <!-- ================= CABECERA MINIMALISTA (LOGO EXTERIOR) ================= -->
+    <!-- ================= CABECERA MINIMALISTA OFICIAL ================= -->
     <header class="relative z-20 flex items-center justify-between px-6 py-6 sm:px-12">
       <RouterLink
         to="/"
@@ -130,24 +130,24 @@ async function onSubmit() {
 
       <RouterLink
         to="/catalogo"
-        class="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/5 px-4 py-2 text-xs font-semibold text-neutral-300 backdrop-blur hover:bg-white/10 hover:text-white transition-all"
+        class="inline-flex items-center gap-2 rounded-full border border-white/20 bg-black/50 px-4 py-2 text-xs font-semibold text-neutral-200 backdrop-blur-md hover:bg-white/10 hover:text-white transition-all shadow-md"
       >
-        <ArrowLeft class="size-3.5" />
+        <ArrowLeft class="size-3.5 text-cyan-400" />
         <span class="hidden sm:inline">Explorar catálogo</span>
         <span class="sm:hidden">Catálogo</span>
       </RouterLink>
     </header>
 
-    <!-- ================= CONTENEDOR CENTRAL: FORMULARIO LIMPIO ================= -->
+    <!-- ================= CONTENEDOR CENTRAL: FORMULARIO CENTRADO Y LIMPIO ================= -->
     <main class="relative z-20 my-auto flex flex-col items-center justify-center px-4 py-8 sm:px-6">
-      <div class="w-full max-w-[460px] rounded-3xl border border-white/10 bg-black/75 p-8 sm:p-11 shadow-[0_25px_60px_rgba(0,0,0,0.95)] backdrop-blur-2xl">
+      <div class="w-full max-w-[450px] rounded-3xl border border-white/15 bg-black/80 p-8 sm:p-11 shadow-[0_25px_70px_rgba(0,0,0,0.95)] backdrop-blur-xl">
         
-        <!-- Título Principal Limpio -->
+        <!-- Título Principal -->
         <div>
           <h1 class="font-display text-3xl sm:text-4xl font-black text-white tracking-tight">
             Iniciar sesión
           </h1>
-          <p class="mt-2 text-xs sm:text-sm text-neutral-400 font-light">
+          <p class="mt-2 text-xs sm:text-sm text-neutral-300 font-light">
             Ingresa tus datos para acceder a tus pantallas y suscripciones.
           </p>
         </div>
@@ -233,7 +233,7 @@ async function onSubmit() {
             </p>
           </div>
 
-          <!-- Opciones adicionales: Recordarme -->
+          <!-- Opciones adicionales: Recordarme & Acceso Demo -->
           <div class="flex items-center justify-between text-xs text-neutral-400 pt-1">
             <label class="flex items-center gap-2 cursor-pointer select-none">
               <input
@@ -244,14 +244,14 @@ async function onSubmit() {
               <span>Recordar mi sesión</span>
             </label>
 
-            <!-- Acceso rápido Demo sutil -->
+            <!-- Acceso rápido Demo -->
             <button
               type="button"
-              class="inline-flex items-center gap-1 text-[11px] font-mono text-cyan-400/90 hover:text-cyan-300 transition-colors"
+              class="inline-flex items-center gap-1 text-[11px] font-mono text-cyan-400 hover:text-cyan-300 transition-colors"
               @click="showDemoQuickAccess = !showDemoQuickAccess"
             >
               <Sparkles class="size-3" />
-              <span>{{ showDemoQuickAccess ? 'Cerrar demos' : 'Accesos Demo' }}</span>
+              <span>{{ showDemoQuickAccess ? 'Ocultar demos' : 'Accesos Demo' }}</span>
             </button>
           </div>
 

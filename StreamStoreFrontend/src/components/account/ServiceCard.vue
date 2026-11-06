@@ -102,7 +102,7 @@ function copyAllCredentials() {
 
 <template>
   <article
-    class="relative flex flex-col justify-between overflow-hidden rounded-2xl border border-white/10 bg-neutral-900/80 backdrop-blur-xl p-5 shadow-xl transition-all duration-300 hover:border-white/25 hover:shadow-2xl"
+    class="relative flex flex-col justify-between overflow-hidden rounded-2xl border border-white/10 bg-neutral-900/90 backdrop-blur-xl p-5 shadow-xl transition-all duration-300 hover:border-white/25 hover:shadow-2xl"
     :class="[
       isVencido ? 'border-rose-500/30 opacity-80' :
       isPorVencer ? 'border-amber-500/50 shadow-amber-500/5' :
@@ -118,23 +118,29 @@ function copyAllCredentials() {
     />
 
     <div class="space-y-4 pt-1">
-      <!-- Encabezado con Logo Oficial de la Plataforma -->
+      <!-- Encabezado con Logo Oficial de la Plataforma en Contenedor Blanco de Alto Contraste -->
       <div class="flex items-start justify-between gap-3">
-        <div>
-          <span class="text-[11px] font-mono uppercase tracking-wider text-slate-400 font-semibold block">
-            {{ servicio.tipo === 'CUENTA_COMPLETA' ? 'Cuenta Completa' : 'Pantalla Individual (PIN)' }}
-          </span>
-          <div class="mt-1 flex items-center gap-2.5">
+        <div class="flex items-center gap-3.5">
+          <!-- Contenedor blanco para el logo oficial (garantiza máxima visibilidad para Max, Disney, Netflix) -->
+          <div class="h-14 w-28 shrink-0 bg-white rounded-xl p-2 shadow-sm border border-slate-200/60 flex items-center justify-center overflow-hidden">
             <img
               v-if="platformLogo"
               :src="platformLogo"
               :alt="servicio.plataforma?.nombre"
-              class="h-7 max-w-[120px] object-contain drop-shadow"
+              class="max-h-10 max-w-full object-contain"
             />
+            <span v-else class="font-display text-xs font-black text-slate-900 uppercase">
+              {{ servicio.plataforma?.nombre || 'STREAMING' }}
+            </span>
+          </div>
+
+          <div>
+            <span class="text-[10px] font-mono uppercase tracking-wider text-cyan-300 font-bold block">
+              {{ servicio.tipo === 'CUENTA_COMPLETA' ? 'Cuenta Completa' : 'Pantalla Individual (PIN)' }}
+            </span>
             <h3
-              v-else
               :id="`service-title-${servicio.id}`"
-              class="font-display text-lg font-black text-white"
+              class="font-display text-base sm:text-lg font-black text-white mt-0.5 tracking-tight"
             >
               {{ servicio.plataforma?.nombre || 'Servicio Streaming' }}
             </h3>
