@@ -154,6 +154,11 @@ Auth: `Authorization: Bearer <token>` (o cookie httpOnly `token`).
 | GET | /api/admin/compras?estado=&desde=&hasta= | admin | ventas con filtros |
 | GET | /api/admin/resumen | admin | totales de ventas (hoy/mes/histórico) y stock por plataforma |
 | POST | /api/admin/cron/ejecutar | admin | ejecuta la revisión de vencimientos ya |
+| GET | /api/admin/combos | admin | combos promocionales con sus plataformas |
+| POST | /api/admin/combos | admin | crea un combo (mínimo 2 plataformas, precio promo ≤ regular) |
+| PATCH | /api/admin/combos/:id | admin | edita un combo |
+| PATCH | /api/admin/combos/:id/toggle | admin | activa o desactiva un combo |
+| DELETE | /api/admin/combos/:id | admin | elimina un combo |
 
 ### Rutas extra
 

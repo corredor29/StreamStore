@@ -122,14 +122,21 @@ async function loadAdminData() {
 }
 
 async function handleToggleCombo(id: number) {
-  await adminService.toggleCombo(id)
-  combos.value = await adminService.combos()
+  try {
+    await adminService.toggleCombo(id)
+    combos.value = await adminService.combos()
+  } catch (e) {
+    error.value = (e as { message?: string }).message ?? 'No se pudo actualizar el combo.'
+  }
 }
 
 async function handleEliminarCombo(id: number) {
-  if (confirm('¿Deseas eliminar esta promoción?')) {
+  if (!confirm('¿Deseas eliminar esta promoción?')) return
+  try {
     await adminService.eliminarCombo(id)
     combos.value = await adminService.combos()
+  } catch (e) {
+    error.value = (e as { message?: string }).message ?? 'No se pudo eliminar el combo.'
   }
 }
 
