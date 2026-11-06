@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 80" width="320" height="80" fill="none">
+  <!-- Ojo / Isotipo Crunchyroll naranja -->
+  <g transform="translate(10, 12)">
+    <circle cx="28" cy="28" r="26" fill="#F47521"/>
+    <!-- Pupila interna curva blanca -->
+    <circle cx="33" cy="25" r="14" fill="#000000"/>
+    <circle cx="35" cy="23" r="11" fill="#FFFFFF"/>
+    <path d="M 24 38 C 30 46 45 42 50 32 C 45 48 24 50 14 36 Z" fill="#F47521"/>
+  </g>
+  <!-- Texto crunchyroll -->
+  <text x="75" y="55" font-family="'Arial Black', Montserrat, sans-serif" font-weight="900" font-size="34" fill="#FFFFFF" letter-spacing="-0.5">
+    crunchy<tspan fill="#F47521">roll</tspan>
+  </text>
+</svg>

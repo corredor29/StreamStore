@@ -71,7 +71,7 @@ const scrollyPlatforms: ScrollyPlatform[] = [
     nombre: 'Disney+ Total Family',
     tag: 'DISNEY+ · FAMILIAR & MARVEL',
     slug: 'disney',
-    logo: '/disne.png',
+    logo: '/brand_svgs/disney.svg',
     logoFilter: 'drop-shadow(0 4px 20px rgba(17,60,207,0.8)) drop-shadow(0 0 10px rgba(255,255,255,0.4))',
     color: '#113CCF',
     bgImage: '/watching_disney.jpg',
@@ -96,7 +96,7 @@ const scrollyPlatforms: ScrollyPlatform[] = [
     nombre: 'Max (HBO) 4K Ultra',
     tag: 'MAX · HBO ORIGINALS & WARNER',
     slug: 'max',
-    logo: '/hbomax.png',
+    logo: '/brand_svgs/max.svg',
     logoFilter: 'drop-shadow(0 4px 20px rgba(123,47,247,0.85)) drop-shadow(0 0 10px rgba(255,255,255,0.4))',
     color: '#7B2FF7',
     bgImage: '/watching_max.jpg',
@@ -121,7 +121,7 @@ const scrollyPlatforms: ScrollyPlatform[] = [
     nombre: 'Amazon Prime Video',
     tag: 'PRIME VIDEO · ORIGINALS & DEPORTES',
     slug: 'prime',
-    logo: '/primevideo.jpg',
+    logo: '/brand_svgs/prime.svg',
     logoFilter: 'drop-shadow(0 4px 20px rgba(0,168,225,0.85)) drop-shadow(0 0 10px rgba(255,255,255,0.4))',
     color: '#00A8E1',
     bgImage: '/watching_prime.jpg',
@@ -146,7 +146,7 @@ const scrollyPlatforms: ScrollyPlatform[] = [
     nombre: 'Paramount+ Premium',
     tag: 'PARAMOUNT+ · BLOCKBUSTERS & SHOWTIME',
     slug: 'paramount',
-    logo: '/paramont.png',
+    logo: '/brand_svgs/paramount.svg',
     logoFilter: 'drop-shadow(0 4px 20px rgba(0,100,255,0.85)) drop-shadow(0 0 10px rgba(255,255,255,0.4))',
     color: '#0064FF',
     bgImage: '/hero_cinema_wall.jpg',
@@ -171,7 +171,7 @@ const scrollyPlatforms: ScrollyPlatform[] = [
     nombre: 'Crunchyroll Mega Fan',
     tag: 'CRUNCHYROLL · ANIME EN SIMULCAST',
     slug: 'crunchyroll',
-    logo: '/crunchiroll.png',
+    logo: '/brand_svgs/crunchyroll.svg',
     logoFilter: 'drop-shadow(0 4px 20px rgba(244,117,33,0.85)) drop-shadow(0 0 10px rgba(255,255,255,0.4))',
     color: '#F47521',
     bgImage: '/hero_cinema_wall.jpg',
@@ -196,7 +196,7 @@ const scrollyPlatforms: ScrollyPlatform[] = [
     nombre: 'Spotify Premium Individual',
     tag: 'SPOTIFY · MÚSICA & AUDIO HI-FI',
     slug: 'spotify',
-    logo: '/spotify.png',
+    logo: '/brand_svgs/spotify.svg',
     logoFilter: 'drop-shadow(0 4px 20px rgba(29,185,84,0.85)) drop-shadow(0 0 10px rgba(255,255,255,0.4))',
     color: '#1DB954',
     bgImage: '/hbo_max_mosaic_bg.jpg',
@@ -221,7 +221,7 @@ const scrollyPlatforms: ScrollyPlatform[] = [
     nombre: 'Apple TV+ Original',
     tag: 'APPLE TV+ · APPLE ORIGINALS',
     slug: 'appletv',
-    logo: '/appletv.webp',
+    logo: '/brand_svgs/appletv.svg',
     logoFilter: 'drop-shadow(0 4px 20px rgba(255,255,255,0.6)) drop-shadow(0 0 10px rgba(255,255,255,0.3))',
     color: '#E2E8F0',
     bgImage: '/watching_prime.jpg',
@@ -934,7 +934,7 @@ const formatCOP = (val: number) => {
                     <img 
                       :src="sp.logo" 
                       :alt="sp.nombre" 
-                      class="h-14 sm:h-20 w-auto max-w-[260px] sm:max-w-[320px] object-contain transition-transform duration-300"
+                      class="h-16 sm:h-24 w-auto max-w-[280px] sm:max-w-[360px] object-contain transition-transform duration-300 drop-shadow-2xl"
                       :style="{ filter: sp.logoFilter }"
                     />
                   </div>
@@ -1120,7 +1120,7 @@ const formatCOP = (val: number) => {
                     <img 
                       :src="sp.logo" 
                       :alt="sp.nombre" 
-                      class="h-14 sm:h-20 w-auto max-w-[260px] sm:max-w-[320px] object-contain transition-transform duration-300"
+                      class="h-16 sm:h-24 w-auto max-w-[280px] sm:max-w-[360px] object-contain transition-transform duration-300 drop-shadow-2xl"
                       :style="{ filter: sp.logoFilter }"
                     />
                   </div>
