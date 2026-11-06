@@ -99,8 +99,9 @@ export const mockComprasRealizadas: Compra[] = [...mockComprasIniciales]
 export const purchaseService = {
   /** Crea una compra PENDIENTE a partir del carrito del usuario. */
   async crear(items?: CarritoItem[]): Promise<Compra> {
+    const itemsList = items || []
+
     if (USE_MOCKS) {
-      const itemsList = items || []
       const total = itemsList.reduce((acc, i) => acc + i.subtotal, 0)
       const nuevaCompra: Compra = {
         id: Math.floor(100000 + Math.random() * 900000),
@@ -121,9 +122,35 @@ export const purchaseService = {
       return mockDelay(nuevaCompra, 400)
     }
 
-    const { data } = await api.post<any>('/compras', { items })
-    const raw = data?.data || data
-    return normalizeCompra(raw)
+    // Backend real MySQL:
+    // 1. Sincronizar los ítems del carrito local en el backend para poblar la tabla 'carrito_items'
+    if (itemsList.length > 0) {
+      try {
+        await api.delete('/carrito').catch(() => {})
+        for (const it of itemsList) {
+          const prodId = it.productoId || it.producto?.id
+          if (prodId) {
+            await api.post('/carrito', {
+              producto_id: Number(prodId),
+              cantidad: Number(it.cantidad || 1),
+            })
+          }
+        }
+      } catch (syncErr: any) {
+        console.warn('Aviso sincronizando carrito previo a compra:', syncErr?.response?.data || syncErr?.message)
+      }
+    }
+
+    // 2. Crear la orden de compra pendiente
+    try {
+      const { data } = await api.post<any>('/compras', { metodo_pago: 'simulado' })
+      const raw = data?.data || data
+      return normalizeCompra(raw)
+    } catch (err: any) {
+      const backendMsg = err?.response?.data?.message || err?.message || 'Error al crear la orden de compra.'
+      console.error('Error al crear orden en backend:', backendMsg)
+      throw new Error(backendMsg)
+    }
   },
 
   /**
@@ -157,12 +184,28 @@ export const purchaseService = {
       }, 700)
     }
 
-    const { data } = await api.post<any>(`/compras/${compraId}/pagar`, payload)
-    const raw = data?.data || data
-    return {
-      compra: raw.compra ? normalizeCompra(raw.compra) : undefined as any,
-      aprobado: true,
-      mensaje: data?.message || 'Pago procesado exitosamente',
+    try {
+      const metodoLimpio = payload.metodo ? String(payload.metodo).toLowerCase() : 'simulado'
+      const metodoValido = ['tarjeta', 'nequi', 'pse', 'simulado'].includes(metodoLimpio) ? metodoLimpio : 'simulado'
+
+      const { data } = await api.post<any>(`/compras/${compraId}/pagar`, {
+        metodo_pago: metodoValido,
+      })
+      const raw = data?.data || data
+      const compraNormalizada = normalizeCompra(raw.compra || raw)
+
+      // Sincronizar en el servicio de cuenta del cliente
+      accountService.activarServiciosDeCompra(compraNormalizada)
+
+      return {
+        compra: compraNormalizada,
+        aprobado: true,
+        mensaje: data?.message || 'Pago aprobado exitosamente.',
+      }
+    } catch (err: any) {
+      const backendMsg = err?.response?.data?.message || err?.message || 'Error al procesar el pago.'
+      console.error('Error en pago en backend:', backendMsg)
+      throw new Error(backendMsg)
     }
   },
 
