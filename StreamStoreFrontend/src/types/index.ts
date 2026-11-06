@@ -43,7 +43,7 @@ export type TipoProducto = 'CUENTA_COMPLETA' | 'PANTALLA'
 export interface Producto {
   id: number
   plataformaId: number
-  plataforma?: Pick<Plataforma, 'id' | 'nombre' | 'slug' | 'color' | 'logoUrl'>
+  plataforma?: Pick<Plataforma, 'id' | 'nombre' | 'slug' | 'color' | 'logoUrl' | 'coverUrl'>
   nombre: string
   tipo: TipoProducto
   duracionDias: number
