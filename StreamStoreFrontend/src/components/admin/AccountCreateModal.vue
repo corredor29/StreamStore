@@ -1,21 +1,19 @@
 <script setup lang="ts">
-import { computed, reactive, ref, watch } from 'vue'
+import { computed, ref, watch } from 'vue'
 import { 
   Check, 
   Coins, 
+  Eye, 
+  EyeOff, 
   Flame, 
-  Image as ImageIcon, 
   KeyRound, 
   Layers, 
   Lock, 
   Mail, 
   Minus, 
-  PackagePlus, 
   Plus, 
   Sparkles, 
-  Trash2, 
   Tv, 
-  Upload, 
   X 
 } from '@lucide/vue'
 import type { CrearComboPayload, CrearCuentaPayload, Plataforma } from '@/types'
@@ -27,57 +25,65 @@ const props = withDefaults(
   defineProps<{
     plataformas: Plataforma[]
     isOpen: boolean
-    initialMode?: 'cuenta' | 'combo'
+    initialPlataformaId?: number | null
   }>(),
   {
-    initialMode: 'cuenta',
+    initialPlataformaId: null,
   }
 )
 
 const emit = defineEmits<{
   close: []
   created: []
-  comboCreated: []
+  abrirPaso1: []
 }>()
 
-// Modo del Modal: Cuenta Individual vs Combo / Promoción
-const modalMode = ref<'cuenta' | 'combo'>('cuenta')
-
-// ========== ESTADO PARA MODO CUENTA ==========
-const nombrePlataforma = ref('')
+// Plataforma seleccionada del Paso 1
 const plataformaId = ref<number | null>(null)
+const searchPlataforma = ref('')
+
+// Credenciales Maestras
 const correoMaestro = ref('')
 const claveMaestra = ref('')
+const mostrarClave = ref(false)
+
+// Configuración de Venta y Catálogo
+const precioCatalogo = ref<number>(35000)
+const duracionDias = ref<number>(30)
+
+// Configuración de Pantallas / Perfiles
 const totalPantallas = ref<number>(4)
 const pantallasList = ref<Array<{ numero: number; perfil: string; pin: string }>>([
-  { numero: 1, perfil: 'Perfil 1 (Principal)', pin: '' },
+  { numero: 1, perfil: 'Perfil 1', pin: '' },
   { numero: 2, perfil: 'Perfil 2', pin: '' },
   { numero: 3, perfil: 'Perfil 3', pin: '' },
   { numero: 4, perfil: 'Perfil 4', pin: '' },
 ])
 
-const coverPreview = ref<string | null>(null)
-const selectedCoverFile = ref<File | null>(null)
-const coverInputMode = ref<'upload' | 'url'>('upload')
-const coverUrlInput = ref('')
-const showSuggestions = ref(false)
-const isDragging = ref(false)
-const fileInputRef = ref<HTMLInputElement | null>(null)
-
-// ========== ESTADO PARA MODO COMBO / PROMOCIÓN ==========
+// Modo Combo integrado (desplegable)
+const esCombo = ref(false)
+const comboPlataformasSeleccionadas = ref<number[]>([])
 const comboNombre = ref('')
-const comboPlataformasSeleccionadas = ref<number[]>([1, 4]) // Default: Netflix (1) + Max (4)
 const comboPrecioPromo = ref<number>(32000)
 const comboPrecioRegular = ref<number>(48000)
-const comboPantallasPorPlat = ref<number>(1)
-const comboDuracion = ref<number>(30)
-const comboEtiqueta = ref<string>('COMBO DÚO 2X1')
+const comboEtiqueta = ref('COMBO 2X1')
 const comboDescripcion = ref('')
 
 const isSubmitting = ref(false)
 const serverError = ref<string | null>(null)
 
-// Ajuste dinámico de la lista de pantallas al cambiar totalPantallas
+// Filtrar plataformas para el selector
+const plataformasFiltradas = computed(() => {
+  const q = searchPlataforma.value.trim().toLowerCase()
+  if (!q) return props.plataformas
+  return props.plataformas.filter((p) => p.nombre.toLowerCase().includes(q))
+})
+
+const plataformaActual = computed(() => {
+  return props.plataformas.find((p) => p.id === plataformaId.value) || null
+})
+
+// Ajuste dinámico de pantallas
 function adjustScreens(count: number) {
   const newCount = Math.max(1, Math.min(10, count))
   totalPantallas.value = newCount
@@ -97,162 +103,137 @@ function adjustScreens(count: number) {
   pantallasList.value = current
 }
 
-// Sugerencias de plataformas
-const plataformasSugeridas = computed(() => {
-  const query = nombrePlataforma.value.trim().toLowerCase()
-  if (!query) return props.plataformas.slice(0, 6)
-  return props.plataformas.filter((p) => p.nombre.toLowerCase().includes(query))
-})
-
-const plataformaExistente = computed(() => {
-  const query = nombrePlataforma.value.trim().toLowerCase()
-  if (!query) return null
-  return props.plataformas.find((p) => p.nombre.toLowerCase() === query) || null
-})
-
-function onNombreInput() {
-  showSuggestions.value = true
-  const match = props.plataformas.find(
-    (p) => p.nombre.toLowerCase() === nombrePlataforma.value.trim().toLowerCase()
-  )
-  if (match) {
-    plataformaId.value = match.id
-    if (!coverPreview.value && match.coverUrl) {
-      coverPreview.value = match.coverUrl
-    }
+// Alternar plataforma en el combo
+function toggleComboPlat(id: number) {
+  const idx = comboPlataformasSeleccionadas.value.indexOf(id)
+  if (idx !== -1) {
+    comboPlataformasSeleccionadas.value.splice(idx, 1)
   } else {
-    plataformaId.value = null
+    comboPlataformasSeleccionadas.value.push(id)
+  }
+  autoGenerarNombreCombo()
+}
+
+function autoGenerarNombreCombo() {
+  const platPrincipal = plataformaActual.value?.nombre || 'Plataforma'
+  const otras = comboPlataformasSeleccionadas.value
+    .map((id) => props.plataformas.find((p) => p.id === id)?.nombre)
+    .filter(Boolean) as string[]
+
+  const todos = [platPrincipal, ...otras]
+  if (todos.length > 1) {
+    comboNombre.value = `Combo ${todos.length === 2 ? 'Dúo' : todos.length === 3 ? 'Trío' : 'Especial'}: ${todos.join(' + ')}`
   }
 }
 
-function selectSugerencia(plat: Plataforma) {
-  nombrePlataforma.value = plat.nombre
-  plataformaId.value = plat.id
-  showSuggestions.value = false
-  if (plat.coverUrl && !coverPreview.value) {
-    coverPreview.value = plat.coverUrl
-  }
-}
-
-// Portadas
-function handleFileChange(event: Event) {
-  const target = event.target as HTMLInputElement
-  const file = target.files?.[0]
-  if (file) {
-    selectedCoverFile.value = file
-    const reader = new FileReader()
-    reader.onload = (e) => {
-      coverPreview.value = (e.target?.result as string) || null
-    }
-    reader.readAsDataURL(file)
-  }
-}
-
-function removeCover() {
-  coverPreview.value = null
-  selectedCoverFile.value = null
-  coverUrlInput.value = ''
-  if (fileInputRef.value) fileInputRef.value.value = ''
-}
-
-// Reset al abrir
+// Reset al abrir el modal
 watch(
   () => props.isOpen,
   (open) => {
     if (open) {
-      modalMode.value = props.initialMode || 'cuenta'
       serverError.value = null
-      if (modalMode.value === 'cuenta') {
-        nombrePlataforma.value = ''
-        plataformaId.value = null
-        correoMaestro.value = ''
-        claveMaestra.value = ''
-        adjustScreens(4)
-      } else {
-        comboNombre.value = 'Combo Dúo: Netflix + Max HBO'
-        comboPlataformasSeleccionadas.value = [1, 4]
-        comboPrecioPromo.value = 32000
-        comboPrecioRegular.value = 48000
-        comboEtiqueta.value = 'COMBO DÚO 2X1'
+      searchPlataforma.value = ''
+      correoMaestro.value = ''
+      claveMaestra.value = ''
+      precioCatalogo.value = 35000
+      duracionDias.value = 30
+      adjustScreens(4)
+      esCombo.value = false
+      comboPlataformasSeleccionadas.value = []
+      comboNombre.value = ''
+      comboPrecioPromo.value = 32000
+      comboPrecioRegular.value = 48000
+      comboEtiqueta.value = 'COMBO 2X1'
+      comboDescripcion.value = ''
+
+      if (props.initialPlataformaId) {
+        plataformaId.value = props.initialPlataformaId
+      } else if (props.plataformas.length > 0 && !plataformaId.value) {
+        plataformaId.value = props.plataformas[0].id
       }
     }
   }
 )
 
-// Alternar selección de plataformas en modo Combo
-function togglePlataformaCombo(id: number) {
-  const idx = comboPlataformasSeleccionadas.value.indexOf(id)
-  if (idx !== -1) {
-    if (comboPlataformasSeleccionadas.value.length > 1) {
-      comboPlataformasSeleccionadas.value.splice(idx, 1)
-    }
-  } else {
-    comboPlataformasSeleccionadas.value.push(id)
+watch(
+  () => props.initialPlataformaId,
+  (newId) => {
+    if (newId) plataformaId.value = newId
   }
-  // Auto-actualizar nombre del combo si es por defecto
-  const nombres = comboPlataformasSeleccionadas.value
-    .map((pid) => props.plataformas.find((p) => p.id === pid)?.nombre || '')
-    .filter(Boolean)
-  comboNombre.value = `Combo ${nombres.length === 2 ? 'Dúo' : nombres.length === 3 ? 'Trío' : 'Especial'}: ${nombres.join(' + ')}`
-}
+)
 
-// Guardar
+watch(esCombo, (activo) => {
+  if (activo) {
+    // Si activa combo y no hay plataformas secundarias seleccionadas, pre-seleccionar la primera diferente
+    if (comboPlataformasSeleccionadas.value.length === 0) {
+      const otra = props.plataformas.find((p) => p.id !== plataformaId.value)
+      if (otra) comboPlataformasSeleccionadas.value.push(otra.id)
+    }
+    autoGenerarNombreCombo()
+  }
+})
+
 async function onSubmit() {
   serverError.value = null
+
+  if (!plataformaId.value) {
+    serverError.value = 'Por favor selecciona la plataforma de streaming creada en el Paso 1.'
+    return
+  }
+
+  if (esCombo.value && comboPlataformasSeleccionadas.value.length === 0) {
+    serverError.value = 'Activaste el Modo Combo: debes seleccionar al menos una plataforma secundaria para armar el paquete.'
+    return
+  }
+
   isSubmitting.value = true
 
   try {
-    if (modalMode.value === 'cuenta') {
-      const nombreLimpio = nombrePlataforma.value.trim()
-      if (!nombreLimpio) {
-        serverError.value = 'Por favor escribe el nombre de la plataforma (ej. Netflix, Disney+, Max).'
-        isSubmitting.value = false
-        return
-      }
+    const platObj = plataformaActual.value
+    const payload: CrearCuentaPayload = {
+      plataformaId: plataformaId.value,
+      nombrePlataforma: platObj?.nombre || 'Plataforma',
+      correo: correoMaestro.value.trim() || undefined,
+      password: claveMaestra.value.trim() || undefined,
+      precio: Number(precioCatalogo.value) || 35000,
+      duracionDias: Number(duracionDias.value) || 30,
+      totalPantallas: totalPantallas.value,
+      pantallas: pantallasList.value.map((p) => ({
+        perfil: p.perfil.trim() || `Perfil ${p.numero}`,
+        pin: p.pin.trim() || undefined,
+      })),
+      esCombo: esCombo.value,
+      comboPlataformaIds: esCombo.value ? comboPlataformasSeleccionadas.value : undefined,
+      comboNombre: esCombo.value ? comboNombre.value.trim() : undefined,
+      comboPrecio: esCombo.value ? Number(comboPrecioPromo.value) : undefined,
+    }
 
-      const payload: CrearCuentaPayload = {
-        plataformaId: plataformaId.value || undefined,
-        nombrePlataforma: nombreLimpio,
-        coverUrl: coverPreview.value || undefined,
-        coverFile: selectedCoverFile.value || undefined,
-        correo: correoMaestro.value.trim() || undefined,
-        password: claveMaestra.value.trim() || undefined,
-        totalPantallas: totalPantallas.value,
-        pantallas: pantallasList.value.map((p) => ({
-          perfil: p.perfil.trim() || `Perfil ${p.numero}`,
-          pin: p.pin.trim() || undefined,
-        })),
-      }
+    // 1. Guardar la cuenta de streaming
+    await adminService.crearCuenta(payload)
 
-      await adminService.crearCuenta(payload)
-      emit('created')
-      emit('close')
-    } else {
-      // Guardar Combo / Promoción
-      if (comboPlataformasSeleccionadas.value.length < 2) {
-        serverError.value = 'Selecciona al menos 2 plataformas para armar un combo promocional.'
-        isSubmitting.value = false
-        return
-      }
-
+    // 2. Si se activó combo, asegurar registro en la entidad de combos
+    if (esCombo.value) {
+      const comboIds = Array.from(new Set([plataformaId.value, ...comboPlataformasSeleccionadas.value]))
       const comboPayload: CrearComboPayload = {
-        nombre: comboNombre.value.trim() || 'Combo Multi-Streaming',
-        descripcion: comboDescripcion.value.trim() || 'Paquete combinado de plataformas digitales con entrega de perfiles.',
-        plataformaIds: comboPlataformasSeleccionadas.value,
-        precioPromo: Number(comboPrecioPromo.value) || 29900,
-        precioRegular: Number(comboPrecioRegular.value) || 45000,
-        pantallasPorPlataforma: Number(comboPantallasPorPlat.value) || 1,
-        duracionDias: Number(comboDuracion.value) || 30,
-        etiquetaPromo: comboEtiqueta.value.trim() || 'OFERTA ESPECIAL',
+        nombre: comboNombre.value.trim() || `Combo ${platObj?.nombre || 'Especial'}`,
+        descripcion: comboDescripcion.value.trim() || `Paquete multi-servicio que incluye perfiles de streaming con entrega rápida.`,
+        plataformaIds: comboIds,
+        precioPromo: Number(comboPrecioPromo.value) || 32000,
+        precioRegular: Number(comboPrecioRegular.value) || 48000,
+        pantallasPorPlataforma: 1,
+        duracionDias: Number(duracionDias.value) || 30,
+        etiquetaPromo: comboEtiqueta.value.trim() || 'COMBO OFERTA',
         activo: true,
       }
-
-      await adminService.crearCombo(comboPayload)
-      emit('comboCreated')
-      emit('close')
+      await adminService.crearCombo(comboPayload).catch((err) => {
+        console.warn('Aviso: no se pudo registrar el combo secundario:', err)
+      })
     }
+
+    emit('created')
+    emit('close')
   } catch (err: any) {
-    serverError.value = err?.message || 'Error al guardar los datos en el inventario.'
+    serverError.value = err?.message || 'Error al registrar la cuenta en el catálogo.'
   } finally {
     isSubmitting.value = false
   }
@@ -262,195 +243,257 @@ async function onSubmit() {
 <template>
   <div
     v-if="isOpen"
-    class="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/80 backdrop-blur-sm select-none animate-fade-in"
+    class="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/80 backdrop-blur-sm select-none"
     role="dialog"
     aria-modal="true"
-    @click.self="showSuggestions = false"
   >
-    <div class="w-full max-w-2xl max-h-[92vh] overflow-y-auto rounded-2xl border border-line/80 bg-[#0E1324] p-5 sm:p-7 shadow-2xl space-y-5">
-      <!-- Encabezado con Switch de Modo (Cuenta vs Promoción) -->
-      <div class="flex items-start justify-between border-b border-line/60 pb-4">
+    <div class="w-full max-w-2xl max-h-[92vh] overflow-y-auto rounded-xl border border-white/10 bg-[#0E1322] p-5 sm:p-7 shadow-2xl space-y-6">
+      <!-- Encabezado Paso 2 -->
+      <div class="flex items-start justify-between border-b border-white/10 pb-4">
         <div>
           <div class="flex items-center gap-2 mb-1">
-            <span class="rounded bg-brand-500/15 border border-brand-500/30 px-2 py-0.2 text-[10px] font-black text-brand-300 uppercase">
-              {{ modalMode === 'cuenta' ? 'Inventario Maestro' : 'Promociones & Ofertas' }}
+            <span class="inline-flex items-center gap-1.5 rounded bg-cyan-400/10 border border-cyan-400/20 text-cyan-300 text-[10px] font-mono font-bold px-2 py-0.5 uppercase tracking-wider">
+              Paso 2 de 2 • Cargar Cuenta al Catálogo
             </span>
           </div>
-          <h2 class="font-display text-lg sm:text-xl font-black text-fg">
-            {{ modalMode === 'cuenta' ? 'Cargar Nueva Cuenta de Streaming' : 'Crear Combo o Promoción Multi-Servicio' }}
+          <h2 class="font-display text-lg sm:text-xl font-bold text-white tracking-tight">
+            Configurar Cuenta & Perfiles de Streaming
           </h2>
-          <p class="text-xs text-muted mt-0.5">
-            {{ modalMode === 'cuenta' ? 'Registra una cuenta matriz y define la cantidad exacta de perfiles y pines.' : 'Arma promociones cruzadas (ej. Netflix + Max) para vender como paquete.' }}
+          <p class="text-xs text-slate-400 mt-0.5">
+            Selecciona la plataforma creada, ingresa credenciales maestras, asigna perfiles y define el precio para el catálogo.
           </p>
         </div>
 
         <button
           type="button"
-          class="text-muted hover:text-fg p-1.5 rounded-lg hover:bg-surface-2 transition-colors cursor-pointer"
+          class="text-slate-400 hover:text-white p-1.5 rounded-lg hover:bg-white/5 transition-colors cursor-pointer"
           @click="emit('close')"
         >
           <X class="size-5" />
         </button>
       </div>
 
-      <!-- Selector de Modo: [ Cuenta Individual ] vs [ Combo / Promoción ] -->
-      <div class="grid grid-cols-2 gap-2 p-1 rounded-xl bg-surface-2 border border-line/60">
-        <button
-          type="button"
-          class="flex items-center justify-center gap-2 py-2 rounded-lg text-xs font-bold transition-all cursor-pointer"
-          :class="[
-            modalMode === 'cuenta'
-              ? 'bg-brand-500 text-white shadow-md'
-              : 'text-muted hover:text-fg'
-          ]"
-          @click="modalMode = 'cuenta'"
-        >
-          <Tv class="size-3.5" />
-          <span>Cuenta Individual (1 Servicio)</span>
-        </button>
-
-        <button
-          type="button"
-          class="flex items-center justify-center gap-2 py-2 rounded-lg text-xs font-bold transition-all cursor-pointer"
-          :class="[
-            modalMode === 'combo'
-              ? 'bg-gradient-to-r from-rose-500 to-amber-500 text-white shadow-md'
-              : 'text-muted hover:text-fg'
-          ]"
-          @click="modalMode = 'combo'"
-        >
-          <Flame class="size-3.5" />
-          <span>Combo / Promoción (ej. Netflix + Max)</span>
-        </button>
-      </div>
-
       <!-- Alerta de Error -->
-      <AppAlert v-if="serverError" variant="error" title="Atención" class="my-2">
+      <AppAlert v-if="serverError" variant="error" title="Atención">
         <p>{{ serverError }}</p>
       </AppAlert>
 
-      <!-- ============================================================== -->
-      <!-- FORMULARIO 1: CUENTA INDIVIDUAL (CON CANTIDAD DE PANTALLAS)     -->
-      <!-- ============================================================== -->
-      <form v-if="modalMode === 'cuenta'" class="space-y-5" @submit.prevent="onSubmit">
-        <!-- Plataforma -->
-        <div class="relative space-y-1.5">
-          <label class="text-xs font-bold text-fg flex items-center justify-between">
-            <span>Plataforma de Streaming *</span>
-            <span v-if="plataformaExistente" class="text-[11px] font-mono text-emerald-400 flex items-center gap-1">
-              <Check class="size-3" /> Plataforma registrada
-            </span>
-          </label>
-          <div class="relative">
-            <input
-              v-model="nombrePlataforma"
-              type="text"
-              autocomplete="off"
-              placeholder="Escribe o selecciona (ej. Netflix, Disney+, Max, Prime...)"
-              class="field-input pl-9 text-xs"
-              @input="onNombreInput"
-              @focus="showSuggestions = true"
-            />
-            <Tv class="absolute left-3 top-2.5 size-4 text-muted" />
+      <form class="space-y-6" @submit.prevent="onSubmit">
+        <!-- SECCIÓN 1: SELECCIONAR PLATAFORMA EXISTENTE (PASO 1) -->
+        <div class="space-y-2.5">
+          <div class="flex items-center justify-between">
+            <label class="text-xs font-semibold text-slate-300 flex items-center gap-1.5">
+              <Tv class="size-3.5 text-cyan-400" />
+              <span>Plataforma de Streaming (Paso 1) *</span>
+            </label>
+            <button
+              type="button"
+              class="text-[11px] font-semibold text-cyan-400 hover:text-cyan-300 transition-colors flex items-center gap-1 cursor-pointer"
+              @click="emit('abrirPaso1')"
+            >
+              <Plus class="size-3" />
+              <span>+ Crear nueva plataforma (Paso 1)</span>
+            </button>
           </div>
 
-          <!-- Sugerencias rápidas -->
+          <!-- Si no hay plataformas registradas -->
           <div
-            v-if="showSuggestions && plataformasSugeridas.length > 0"
-            class="absolute top-full left-0 right-0 z-30 mt-1 max-h-48 overflow-y-auto rounded-xl border border-line bg-[#151B32] shadow-2xl divide-y divide-line/40"
+            v-if="plataformas.length === 0"
+            class="rounded-xl border border-dashed border-white/15 bg-white/5 p-4 text-center space-y-2"
           >
+            <p class="text-xs text-slate-300">
+              No hay plataformas creadas todavía. Crea una plataforma primero para poder cargar cuentas.
+            </p>
             <button
-              v-for="plat in plataformasSugeridas"
-              :key="plat.id"
               type="button"
-              class="w-full flex items-center justify-between px-3 py-2 text-left text-xs hover:bg-surface-2 transition-colors cursor-pointer"
-              @click="selectSugerencia(plat)"
+              class="btn-primary text-xs py-1.5 px-3 inline-flex items-center gap-1 cursor-pointer"
+              @click="emit('abrirPaso1')"
             >
-              <span class="font-semibold text-fg">{{ plat.nombre }}</span>
-              <span class="text-[10px] text-muted">Seleccionar ↵</span>
+              <Plus class="size-3.5" />
+              <span>Ir al Paso 1: Crear Plataforma</span>
             </button>
+          </div>
+
+          <!-- Cuadrícula de Selección de Plataforma -->
+          <div v-else class="space-y-2">
+            <!-- Barra de búsqueda rápida si hay más de 4 plataformas -->
+            <input
+              v-if="plataformas.length > 4"
+              v-model="searchPlataforma"
+              type="text"
+              placeholder="Buscar entre plataformas registradas..."
+              class="w-full rounded-lg border border-white/10 bg-[#0B0F19] px-3 py-1.5 text-xs text-white placeholder-slate-500 focus:border-cyan-400 focus:outline-none"
+            />
+
+            <div class="grid grid-cols-2 sm:grid-cols-3 gap-2.5 max-h-44 overflow-y-auto pr-1">
+              <button
+                v-for="plat in plataformasFiltradas"
+                :key="plat.id"
+                type="button"
+                class="flex items-center gap-2.5 p-2 rounded-lg border text-left text-xs transition-all cursor-pointer"
+                :class="[
+                  plataformaId === plat.id
+                    ? 'border-cyan-400 bg-cyan-400/10 text-white shadow-sm'
+                    : 'border-white/10 bg-[#0B0F19] text-slate-300 hover:border-white/20 hover:text-white'
+                ]"
+                @click="plataformaId = plat.id"
+              >
+                <!-- Avatar o Logo -->
+                <div
+                  v-if="plat.coverUrl"
+                  class="size-7 rounded overflow-hidden bg-black shrink-0 border border-white/10"
+                >
+                  <img :src="plat.coverUrl" :alt="plat.nombre" class="w-full h-full object-cover" />
+                </div>
+                <div
+                  v-else
+                  class="size-7 rounded flex items-center justify-center font-mono font-bold text-[10px] text-white shrink-0"
+                  :style="{ backgroundColor: plat.color || '#06b6d4' }"
+                >
+                  {{ plat.nombre.slice(0, 2).toUpperCase() }}
+                </div>
+
+                <div class="truncate flex-1">
+                  <span class="font-semibold block truncate">{{ plat.nombre }}</span>
+                  <span class="text-[10px] text-slate-500 block">ID: #{{ plat.id }}</span>
+                </div>
+
+                <Check v-if="plataformaId === plat.id" class="size-4 text-cyan-400 shrink-0" />
+              </button>
+            </div>
           </div>
         </div>
 
-        <!-- Credenciales Maestras Opcionales -->
-        <div class="rounded-xl border border-line/60 bg-[#0A0E1A] p-3.5 space-y-3">
+        <!-- SECCIÓN 2: CREDENCIALES DE ACCESO MAESTRO -->
+        <div class="rounded-xl border border-white/10 bg-[#0B0F19] p-4 space-y-3">
           <div class="flex items-center justify-between">
-            <span class="text-xs font-bold text-fg flex items-center gap-1.5">
-              <Lock class="size-3.5 text-brand-300" />
-              Credenciales de Acceso Maestro (Opcionales)
+            <span class="text-xs font-semibold text-white flex items-center gap-1.5">
+              <Lock class="size-3.5 text-cyan-400" />
+              <span>Credenciales Maestras de la Cuenta</span>
             </span>
-            <span class="text-[10px] text-muted">Se pueden asignar ahora o después</span>
+            <span class="text-[10px] text-slate-500 font-mono">Solo visible por el administrador</span>
           </div>
 
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
-              <label class="text-[11px] text-muted block mb-1">Correo de la cuenta</label>
-              <input
-                v-model="correoMaestro"
-                type="email"
-                placeholder="ej. netflix.cuenta@streamstore.net"
-                class="field-input text-xs py-1.5"
-              />
+              <label class="text-[11px] text-slate-400 block mb-1">Correo de la cuenta</label>
+              <div class="relative">
+                <input
+                  v-model="correoMaestro"
+                  type="email"
+                  placeholder="ej. netflix.cuenta@streamstore.net"
+                  class="w-full rounded-lg border border-white/10 bg-[#0E1322] pl-8 pr-3 py-1.5 text-xs text-white placeholder-slate-500 focus:border-cyan-400 focus:outline-none"
+                />
+                <Mail class="absolute left-2.5 top-2 size-3.5 text-slate-500" />
+              </div>
             </div>
+
             <div>
-              <label class="text-[11px] text-muted block mb-1">Contraseña maestra</label>
-              <input
-                v-model="claveMaestra"
-                type="text"
-                placeholder="ej. Pass#2026"
-                class="field-input text-xs py-1.5"
-              />
+              <label class="text-[11px] text-slate-400 block mb-1">Contraseña maestra</label>
+              <div class="relative">
+                <input
+                  v-model="claveMaestra"
+                  :type="mostrarClave ? 'text' : 'password'"
+                  placeholder="ej. Pass#2026"
+                  class="w-full rounded-lg border border-white/10 bg-[#0E1322] pl-8 pr-8 py-1.5 text-xs text-white placeholder-slate-500 focus:border-cyan-400 focus:outline-none font-mono"
+                />
+                <Lock class="absolute left-2.5 top-2 size-3.5 text-slate-500" />
+                <button
+                  type="button"
+                  class="absolute right-2.5 top-2 text-slate-400 hover:text-white cursor-pointer"
+                  @click="mostrarClave = !mostrarClave"
+                >
+                  <EyeOff v-if="mostrarClave" class="size-3.5" />
+                  <Eye v-else class="size-3.5" />
+                </button>
+              </div>
             </div>
           </div>
         </div>
 
-        <!-- CONTROL DE CANTIDAD DE PANTALLAS (STEPPER PERSONALIZABLE) -->
-        <div class="space-y-3 border-t border-line/60 pt-4">
+        <!-- SECCIÓN 3: VALOR EN CATÁLOGO Y DURACIÓN -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div>
+            <label class="text-xs font-semibold text-slate-300 block mb-1.5 flex items-center justify-between">
+              <span>Valor en Catálogo (COP $) *</span>
+              <span class="text-[10px] font-mono text-cyan-400">{{ formatPrice(precioCatalogo) }}</span>
+            </label>
+            <div class="relative">
+              <input
+                v-model.number="precioCatalogo"
+                type="number"
+                step="500"
+                min="1000"
+                class="w-full rounded-lg border border-white/10 bg-[#0B0F19] pl-8 pr-3 py-1.5 text-xs font-mono font-semibold text-white focus:border-cyan-400 focus:outline-none"
+              />
+              <Coins class="absolute left-2.5 top-2 size-3.5 text-slate-500" />
+            </div>
+          </div>
+
+          <div>
+            <label class="text-xs font-semibold text-slate-300 block mb-1.5">
+              Duración del Servicio
+            </label>
+            <select
+              v-model.number="duracionDias"
+              class="w-full rounded-lg border border-white/10 bg-[#0B0F19] px-3 py-1.5 text-xs text-white focus:border-cyan-400 focus:outline-none cursor-pointer"
+            >
+              <option :value="30">30 días (1 mes de vigencia)</option>
+              <option :value="60">60 días (2 meses de vigencia)</option>
+              <option :value="90">90 días (3 meses de vigencia)</option>
+              <option :value="180">180 días (6 meses de vigencia)</option>
+              <option :value="365">365 días (1 año completo)</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- SECCIÓN 4: CANTIDAD DE PANTALLAS / PERFILES Y PINES -->
+        <div class="space-y-3 border-t border-white/10 pt-4">
           <div class="flex items-center justify-between">
             <div>
-              <label class="text-xs font-bold text-fg block">
-                Cantidad de Pantallas / Perfiles
+              <label class="text-xs font-semibold text-white block">
+                Cantidad de Pantallas / Perfiles Simultáneos
               </label>
-              <p class="text-[11px] text-muted">
-                Configura cuántos perfiles simultáneos tendrá esta cuenta.
+              <p class="text-[11px] text-slate-400">
+                Define cuántos perfiles individuales se generarán para esta cuenta.
               </p>
             </div>
 
             <!-- Stepper interactivo [-] [ 4 ] [+] -->
-            <div class="flex items-center gap-2 bg-surface-2 p-1 rounded-xl border border-line">
+            <div class="flex items-center gap-1.5 bg-[#0B0F19] p-1 rounded-lg border border-white/10">
               <button
                 type="button"
-                class="size-7 rounded-lg bg-surface flex items-center justify-center text-fg hover:bg-surface-2 transition-colors cursor-pointer disabled:opacity-40"
+                class="size-6 rounded bg-white/5 flex items-center justify-center text-slate-300 hover:text-white hover:bg-white/10 transition-colors cursor-pointer disabled:opacity-30"
                 :disabled="totalPantallas <= 1"
                 @click="adjustScreens(totalPantallas - 1)"
               >
-                <Minus class="size-3.5" />
+                <Minus class="size-3" />
               </button>
-              <span class="font-mono text-sm font-black px-2 text-fg w-8 text-center">
+              <span class="font-mono text-xs font-bold px-2 text-white min-w-6 text-center">
                 {{ totalPantallas }}
               </span>
               <button
                 type="button"
-                class="size-7 rounded-lg bg-surface flex items-center justify-center text-fg hover:bg-surface-2 transition-colors cursor-pointer disabled:opacity-40"
+                class="size-6 rounded bg-white/5 flex items-center justify-center text-slate-300 hover:text-white hover:bg-white/10 transition-colors cursor-pointer disabled:opacity-30"
                 :disabled="totalPantallas >= 10"
                 @click="adjustScreens(totalPantallas + 1)"
               >
-                <Plus class="size-3.5" />
+                <Plus class="size-3" />
               </button>
             </div>
           </div>
 
-          <!-- Botones rápidos de preset -->
-          <div class="grid grid-cols-5 gap-1.5">
+          <!-- Botones rápidos de selección de pantalla -->
+          <div class="grid grid-cols-4 gap-2">
             <button
-              v-for="num in [1, 2, 4, 5, 7]"
+              v-for="num in [1, 2, 4, 5]"
               :key="num"
               type="button"
-              class="py-1 rounded-lg text-xs font-mono font-bold border transition-all cursor-pointer"
+              class="py-1 rounded-lg text-xs font-mono font-semibold border transition-all cursor-pointer"
               :class="[
                 totalPantallas === num
-                  ? 'border-brand-400 bg-brand-500/20 text-brand-300'
-                  : 'border-line/60 bg-surface-2/60 text-muted hover:text-fg'
+                  ? 'border-cyan-400 bg-cyan-400/15 text-cyan-300'
+                  : 'border-white/10 bg-[#0B0F19] text-slate-400 hover:border-white/20 hover:text-white'
               ]"
               @click="adjustScreens(num)"
             >
@@ -458,18 +501,18 @@ async function onSubmit() {
             </button>
           </div>
 
-          <!-- Desglose individual de cada pantalla (Nombres y Pines) -->
-          <div class="space-y-2 mt-3 pt-2">
-            <span class="text-[11px] font-bold text-muted uppercase tracking-wider block">
-              Detalle de cada Perfil (Opcional):
+          <!-- Desglose de perfiles y pines -->
+          <div class="space-y-1.5 pt-1">
+            <span class="text-[10px] font-mono font-bold text-slate-400 uppercase tracking-wider block">
+              Configuración de perfiles y pines individuales:
             </span>
-            <div class="space-y-2 max-h-48 overflow-y-auto pr-1">
+            <div class="space-y-1.5 max-h-40 overflow-y-auto pr-1">
               <div
-                v-for="(pantalla, idx) in pantallasList"
+                v-for="pantalla in pantallasList"
                 :key="pantalla.numero"
-                class="rounded-xl border border-line/60 bg-[#0A0E1A] p-2.5 flex items-center gap-2 text-xs"
+                class="rounded-lg border border-white/10 bg-[#0B0F19] p-2 flex items-center gap-2 text-xs"
               >
-                <span class="size-6 rounded-md bg-surface-2 border border-line flex items-center justify-center font-mono font-black text-brand-300 text-[10px] shrink-0">
+                <span class="size-5 rounded bg-white/5 border border-white/10 flex items-center justify-center font-mono font-bold text-cyan-300 text-[10px] shrink-0">
                   #{{ pantalla.numero }}
                 </span>
 
@@ -477,7 +520,7 @@ async function onSubmit() {
                   v-model="pantalla.perfil"
                   type="text"
                   placeholder="Nombre perfil"
-                  class="field-input py-1 px-2.5 text-xs flex-1"
+                  class="rounded border border-white/10 bg-[#0E1322] py-1 px-2 text-xs text-white flex-1 focus:border-cyan-400 focus:outline-none"
                 />
 
                 <div class="relative w-28 shrink-0">
@@ -486,169 +529,152 @@ async function onSubmit() {
                     type="text"
                     maxlength="6"
                     placeholder="PIN (opc.)"
-                    class="field-input py-1 pl-6 pr-2 text-xs font-mono"
+                    class="w-full rounded border border-white/10 bg-[#0E1322] py-1 pl-6 pr-2 text-xs text-white font-mono focus:border-cyan-400 focus:outline-none"
                   />
-                  <KeyRound class="absolute left-2 top-2 size-3 text-muted" />
+                  <KeyRound class="absolute left-1.5 top-1.5 size-3 text-slate-500" />
                 </div>
               </div>
             </div>
           </div>
         </div>
 
-        <!-- Acciones Guardar Cuenta -->
-        <div class="flex items-center justify-end gap-3 border-t border-line/60 pt-4">
-          <button type="button" class="btn-secondary text-xs py-2 px-4 cursor-pointer" @click="emit('close')">
-            Cancelar
-          </button>
-          <button type="submit" class="btn-primary text-xs py-2 px-5 font-bold cursor-pointer" :disabled="isSubmitting">
-            <span v-if="isSubmitting">Guardando...</span>
-            <span v-else>Guardar Cuenta ({{ totalPantallas }} pantallas)</span>
-          </button>
-        </div>
-      </form>
-
-      <!-- ============================================================== -->
-      <!-- FORMULARIO 2: CREAR COMBO / PROMOCIÓN (NETFLIX + HBO MAX, ETC)  -->
-      <!-- ============================================================== -->
-      <form v-else class="space-y-5" @submit.prevent="onSubmit">
-        <!-- Selección de Plataformas que integran el combo -->
-        <div class="space-y-2">
-          <label class="text-xs font-bold text-fg flex items-center justify-between">
-            <span>Plataformas Incluidas en el Combo *</span>
-            <span class="text-[11px] text-muted">
-              {{ comboPlataformasSeleccionadas.length }} plataformas seleccionadas
-            </span>
-          </label>
-
-          <div class="grid grid-cols-2 sm:grid-cols-3 gap-2">
-            <button
-              v-for="plat in plataformas"
-              :key="plat.id"
-              type="button"
-              class="flex items-center gap-2 p-2.5 rounded-xl border text-left text-xs font-bold transition-all cursor-pointer"
-              :class="[
-                comboPlataformasSeleccionadas.includes(plat.id)
-                  ? 'border-rose-500 bg-rose-500/15 text-white shadow-md'
-                  : 'border-line/70 bg-surface-2 text-muted hover:text-fg'
-              ]"
-              @click="togglePlataformaCombo(plat.id)"
-            >
-              <div
-                class="size-5 rounded-md flex items-center justify-center text-[10px] text-white shrink-0 font-mono"
-                :style="{ backgroundColor: plat.color || '#8057FF' }"
-              >
-                {{ plat.nombre.slice(0, 2) }}
+        <!-- SECCIÓN 5: BOTÓN Y DESPLEGABLE DE MODO COMBOS -->
+        <div class="border-t border-white/10 pt-4 space-y-3">
+          <!-- Botón Switch Combos -->
+          <div class="flex items-center justify-between p-3 rounded-xl border border-white/10 bg-[#0B0F19]">
+            <div class="flex items-center gap-2.5">
+              <div class="size-8 rounded-lg bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-400">
+                <Flame class="size-4" />
               </div>
-              <span class="truncate flex-1">{{ plat.nombre }}</span>
-              <Check v-if="comboPlataformasSeleccionadas.includes(plat.id)" class="size-3.5 text-rose-400 shrink-0" />
+              <div>
+                <span class="text-xs font-bold text-white block">Modo Combo Promocional</span>
+                <span class="text-[11px] text-slate-400 block">
+                  Activa para asociar esta cuenta con otras plataformas existentes (ej. Netflix + Max).
+                </span>
+              </div>
+            </div>
+
+            <!-- Toggle Switch -->
+            <button
+              type="button"
+              role="switch"
+              :aria-checked="esCombo"
+              class="relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none"
+              :class="esCombo ? 'bg-cyan-500' : 'bg-slate-700'"
+              @click="esCombo = !esCombo"
+            >
+              <span
+                class="pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out"
+                :class="esCombo ? 'translate-x-5' : 'translate-x-0'"
+              />
             </button>
           </div>
-        </div>
 
-        <!-- Título del Combo y Etiqueta de Oferta -->
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-          <div>
-            <label class="text-xs font-bold text-fg block mb-1">Nombre Comercial de la Promo *</label>
-            <input
-              v-model="comboNombre"
-              type="text"
-              placeholder="ej. Combo Dúo: Netflix + Max HBO"
-              class="field-input text-xs"
-            />
-          </div>
-
-          <div>
-            <label class="text-xs font-bold text-fg block mb-1">Insignia / Badge de la Oferta</label>
-            <input
-              v-model="comboEtiqueta"
-              type="text"
-              placeholder="ej. COMBO DÚO 2X1, -35% OFF, MÁS VENDIDO"
-              class="field-input text-xs"
-            />
-          </div>
-        </div>
-
-        <!-- Precios: Promo vs Regular -->
-        <div class="rounded-xl border border-line/60 bg-[#0A0E1A] p-4 space-y-3">
-          <div class="flex items-center justify-between">
-            <span class="text-xs font-bold text-fg flex items-center gap-1.5">
-              <Coins class="size-3.5 text-emerald-400" />
-              Estructura de Precios del Combo
-            </span>
-            <span
-              v-if="comboPrecioRegular > comboPrecioPromo"
-              class="rounded bg-emerald-500/15 text-emerald-400 px-2 py-0.5 text-[10px] font-mono font-bold"
-            >
-              Ahorro para el cliente: {{ formatPrice(comboPrecioRegular - comboPrecioPromo) }}
-            </span>
-          </div>
-
-          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <!-- Contenido Desplegable cuando 'esCombo' está activo -->
+          <div
+            v-if="esCombo"
+            class="rounded-xl border border-cyan-400/30 bg-cyan-950/20 p-4 space-y-4 animate-fade-in"
+          >
             <div>
-              <label class="text-[11px] text-emerald-400 font-bold block mb-1">Precio Promocional (COP) *</label>
-              <input
-                v-model.number="comboPrecioPromo"
-                type="number"
-                step="500"
-                class="field-input text-xs font-mono font-bold"
-              />
+              <div class="flex items-center gap-1.5 mb-1">
+                <span class="text-xs font-bold text-cyan-300">
+                  Selecciona las cuentas/plataformas que integran el combo
+                </span>
+              </div>
+              <p class="text-[11px] text-slate-400">
+                Marca qué otros servicios se venderán conjuntamente con esta cuenta:
+              </p>
             </div>
-            <div>
-              <label class="text-[11px] text-muted block mb-1">Precio Normal de Referencia (Tachado)</label>
-              <input
-                v-model.number="comboPrecioRegular"
-                type="number"
-                step="500"
-                class="field-input text-xs font-mono"
-              />
+
+            <!-- Listado de plataformas existentes con Checkbox -->
+            <div class="grid grid-cols-2 sm:grid-cols-3 gap-2">
+              <button
+                v-for="plat in plataformas.filter((p) => p.id !== plataformaId)"
+                :key="plat.id"
+                type="button"
+                class="flex items-center gap-2 p-2 rounded-lg border text-left text-xs transition-all cursor-pointer"
+                :class="[
+                  comboPlataformasSeleccionadas.includes(plat.id)
+                    ? 'border-cyan-400 bg-cyan-400/20 text-white font-bold'
+                    : 'border-white/10 bg-[#0E1322] text-slate-400 hover:text-white'
+                ]"
+                @click="toggleComboPlat(plat.id)"
+              >
+                <div
+                  class="size-5 rounded flex items-center justify-center font-mono text-[9px] text-white shrink-0"
+                  :style="{ backgroundColor: plat.color || '#06b6d4' }"
+                >
+                  {{ plat.nombre.slice(0, 2).toUpperCase() }}
+                </div>
+                <span class="truncate flex-1">{{ plat.nombre }}</span>
+                <Check v-if="comboPlataformasSeleccionadas.includes(plat.id)" class="size-3.5 text-cyan-400 shrink-0" />
+              </button>
+            </div>
+
+            <!-- Parámetros del Combo -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2 border-t border-white/10">
+              <div>
+                <label class="text-[11px] font-semibold text-slate-300 block mb-1">Nombre Comercial del Combo</label>
+                <input
+                  v-model="comboNombre"
+                  type="text"
+                  placeholder="ej. Combo Dúo: Netflix + Max"
+                  class="w-full rounded-lg border border-white/10 bg-[#0E1322] px-3 py-1.5 text-xs text-white focus:border-cyan-400 focus:outline-none"
+                />
+              </div>
+
+              <div>
+                <label class="text-[11px] font-semibold text-slate-300 block mb-1">Insignia / Badge de Oferta</label>
+                <input
+                  v-model="comboEtiqueta"
+                  type="text"
+                  placeholder="ej. COMBO 2X1, AHORRA 30%"
+                  class="w-full rounded-lg border border-white/10 bg-[#0E1322] px-3 py-1.5 text-xs text-white focus:border-cyan-400 focus:outline-none"
+                />
+              </div>
+
+              <div>
+                <label class="text-[11px] font-semibold text-cyan-400 block mb-1">Precio Combo Promocional (COP)</label>
+                <input
+                  v-model.number="comboPrecioPromo"
+                  type="number"
+                  step="500"
+                  class="w-full rounded-lg border border-white/10 bg-[#0E1322] px-3 py-1.5 text-xs font-mono font-bold text-white focus:border-cyan-400 focus:outline-none"
+                />
+              </div>
+
+              <div>
+                <label class="text-[11px] font-semibold text-slate-400 block mb-1">Precio de Referencia (Tachado)</label>
+                <input
+                  v-model.number="comboPrecioRegular"
+                  type="number"
+                  step="500"
+                  class="w-full rounded-lg border border-white/10 bg-[#0E1322] px-3 py-1.5 text-xs font-mono text-slate-400 focus:border-cyan-400 focus:outline-none"
+                />
+              </div>
             </div>
           </div>
         </div>
 
-        <!-- Pantallas por Servicio & Duración -->
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-          <div>
-            <label class="text-xs font-bold text-fg block mb-1">Pantallas por cada servicio</label>
-            <select v-model.number="comboPantallasPorPlat" class="field-input text-xs cursor-pointer">
-              <option :value="1">1 Pantalla por cada servicio (Recomendado)</option>
-              <option :value="2">2 Pantallas por cada servicio</option>
-              <option :value="4">Cuenta completa por cada servicio</option>
-            </select>
-          </div>
-
-          <div>
-            <label class="text-xs font-bold text-fg block mb-1">Vigencia del Combo</label>
-            <select v-model.number="comboDuracion" class="field-input text-xs cursor-pointer">
-              <option :value="30">30 días (1 mes)</option>
-              <option :value="60">60 días (2 meses)</option>
-              <option :value="90">90 días (3 meses)</option>
-            </select>
-          </div>
-        </div>
-
-        <!-- Descripción -->
-        <div>
-          <label class="text-xs font-bold text-fg block mb-1">Descripción / Beneficios del Combo</label>
-          <textarea
-            v-model="comboDescripcion"
-            rows="2"
-            placeholder="ej. Acceso simultáneo a Netflix Ultra HD y Max HBO en perfiles privados con PIN."
-            class="field-input text-xs"
-          />
-        </div>
-
-        <!-- Acciones Guardar Combo -->
-        <div class="flex items-center justify-end gap-3 border-t border-line/60 pt-4">
-          <button type="button" class="btn-secondary text-xs py-2 px-4 cursor-pointer" @click="emit('close')">
+        <!-- Acciones del Modal -->
+        <div class="flex items-center justify-end gap-3 border-t border-white/10 pt-4">
+          <button
+            type="button"
+            class="px-4 py-2 rounded-lg border border-white/10 bg-white/5 hover:bg-white/10 text-xs font-semibold text-slate-300 hover:text-white transition-colors cursor-pointer"
+            @click="emit('close')"
+          >
             Cancelar
           </button>
+
           <button
             type="submit"
-            class="inline-flex items-center gap-1.5 rounded-xl bg-gradient-to-r from-rose-500 to-amber-500 hover:from-rose-600 hover:to-amber-600 text-white text-xs font-bold px-5 py-2 shadow-lg shadow-rose-500/25 cursor-pointer"
+            class="btn-primary text-xs py-2 px-5 font-bold cursor-pointer"
             :disabled="isSubmitting"
           >
-            <span v-if="isSubmitting">Publicando combo...</span>
-            <span v-else>Publicar Promoción en Tienda</span>
+            <span v-if="isSubmitting">Cargando al catálogo...</span>
+            <span v-else>
+              {{ esCombo ? 'Guardar Cuenta y Activar Combo' : 'Guardar Cuenta al Catálogo' }}
+            </span>
           </button>
         </div>
       </form>

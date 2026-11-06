@@ -5,7 +5,6 @@ import {
   ChevronRight, 
   ExternalLink, 
   Film,
-  Flame,
   Layers, 
   LogOut, 
   Menu, 
@@ -144,21 +143,6 @@ function onLogout() {
                 <span class="font-medium text-xs sm:text-sm">Inventario de Cuentas</span>
               </div>
               <ChevronRight class="size-3.5 opacity-40 group-hover:opacity-100 transition-opacity" />
-            </RouterLink>
-
-            <RouterLink
-              :to="{ path: '/admin', query: { tab: 'combos' } }"
-              class="side-link flex items-center justify-between group"
-              :class="{ 'side-link-active': activeTab === 'combos' }"
-              @click="isMobileMenuOpen = false"
-            >
-              <div class="flex items-center gap-2.5">
-                <Flame class="size-4 text-rose-400 group-hover:text-rose-300 transition-colors" />
-                <span class="font-medium text-xs sm:text-sm">Promociones y Combos</span>
-              </div>
-              <span class="rounded bg-rose-500/15 border border-rose-500/30 text-rose-300 text-[9px] font-mono font-bold px-1.5 py-0.2">
-                PROMO
-              </span>
             </RouterLink>
 
             <RouterLink

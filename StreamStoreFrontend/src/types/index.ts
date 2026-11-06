@@ -203,6 +203,14 @@ export interface CuentaAdmin {
   pantallas: Pantalla[]
 }
 
+export interface CrearPlataformaPayload {
+  nombre: string
+  coverUrl?: string | null
+  coverFile?: File
+  color?: string
+  maxPantallas?: number
+}
+
 export interface CrearCuentaPayload {
   plataformaId?: number
   nombrePlataforma?: string
@@ -210,8 +218,14 @@ export interface CrearCuentaPayload {
   coverFile?: File
   correo?: string
   password?: string
+  precio?: number
+  duracionDias?: number
   totalPantallas?: number
   pantallas?: Array<{ perfil: string; pin?: string }>
+  esCombo?: boolean
+  comboPlataformaIds?: number[]
+  comboNombre?: string
+  comboPrecio?: number
 }
 
 export interface ResumenAdmin {

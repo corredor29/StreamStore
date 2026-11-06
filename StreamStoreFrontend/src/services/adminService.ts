@@ -1,5 +1,5 @@
 import { api, mockDelay, USE_MOCKS } from './api'
-import type { ComboPromo, Compra, CrearComboPayload, CrearCuentaPayload, CuentaAdmin, ResumenAdmin } from '@/types'
+import type { ComboPromo, Compra, CrearComboPayload, CrearCuentaPayload, CrearPlataformaPayload, CuentaAdmin, Plataforma, ResumenAdmin } from '@/types'
 import { mockPlataformas } from '@/mocks/mockData'
 import { mockComprasRealizadas } from './purchaseService'
 import { mockServiciosEnMemoria } from './accountService'
@@ -233,6 +233,53 @@ export const adminService = {
       }
     }
     return mockDelay([...mockCuentasAdmin], 200)
+  },
+
+  async crearPlataforma(payload: CrearPlataformaPayload): Promise<Plataforma> {
+    let portada = payload.coverUrl || null
+    if (payload.coverFile) {
+      const subida = await this.subirPortada(payload.coverFile)
+      if (subida) portada = subida
+    }
+
+    const slug = payload.nombre.toLowerCase().replace(/[^a-z0-9]/g, '-')
+    const color = payload.color || '#8057FF'
+
+    if (!USE_MOCKS) {
+      try {
+        const res = await api.post<any>('/admin/plataformas', {
+          nombre: payload.nombre,
+          portada_url: portada || undefined,
+          color,
+          max_pantallas: payload.maxPantallas || 4,
+          activo: true,
+        })
+        const data = res.data?.data ?? res.data
+        const nueva: Plataforma = {
+          id: Number(data.id || Math.floor(20 + Math.random() * 80)),
+          nombre: data.nombre || payload.nombre,
+          slug: data.slug || slug,
+          color: data.color || color,
+          coverUrl: data.portada_url || portada,
+          activa: true,
+        }
+        mockPlataformas.push(nueva)
+        return nueva
+      } catch (err) {
+        console.warn('Error al guardar plataforma en backend, agregando a lista integrada:', err)
+      }
+    }
+
+    const nuevaPlat: Plataforma = {
+      id: Math.floor(20 + Math.random() * 80),
+      nombre: payload.nombre,
+      slug,
+      color,
+      coverUrl: portada,
+      activa: true,
+    }
+    mockPlataformas.push(nuevaPlat)
+    return mockDelay(nuevaPlat, 200)
   },
 
   async crearCuenta(payload: CrearCuentaPayload): Promise<CuentaAdmin> {
