@@ -15,50 +15,55 @@ function onLogout() {
 </script>
 
 <template>
-  <div class="flex min-h-dvh flex-col bg-bg text-fg">
+  <div class="flex min-h-dvh flex-col bg-black text-fg selection:bg-brand-500/30 selection:text-white">
     <SkipLink />
     <AppHeader />
+    
     <div class="container-app flex flex-1 flex-col gap-8 py-8 md:flex-row">
       <!-- Barra lateral de navegación del cliente -->
       <aside aria-label="Navegación de usuario" class="md:w-64 md:shrink-0">
-        <div class="card p-4">
+        <div class="rounded-3xl border border-white/10 bg-neutral-900/80 p-5 backdrop-blur-2xl shadow-2xl space-y-6">
           <!-- Datos del usuario conectado -->
-          <div class="flex items-center gap-3 border-b border-line pb-4">
-            <div class="grid size-10 place-items-center rounded-xl bg-brand-500/20 text-brand-300">
-              <User class="size-5" aria-hidden="true" />
+          <div class="flex items-center gap-3.5 border-b border-white/10 pb-5">
+            <div class="grid size-12 place-items-center rounded-2xl bg-gradient-to-tr from-[#8057FF] to-[#06B6D4] text-neutral-950 font-black shadow-lg">
+              <User class="size-6" aria-hidden="true" />
             </div>
             <div class="min-w-0 flex-1">
-              <p class="truncate font-display text-sm font-bold text-fg">
+              <p class="truncate font-display text-sm font-black text-white">
                 {{ auth.usuario?.nombre || 'Usuario' }}
               </p>
-              <p class="truncate text-xs text-muted">
+              <p class="truncate text-[11px] text-slate-400 font-mono">
                 {{ auth.usuario?.email }}
               </p>
+              <span class="inline-flex items-center gap-1 mt-1 px-2 py-0.5 rounded-full text-[10px] font-mono font-bold text-cyan-300 bg-cyan-950/60 border border-cyan-500/30">
+                ● Cliente Activo
+              </span>
             </div>
           </div>
 
           <!-- Enlaces de navegación interna -->
-          <nav class="mt-4 space-y-1">
+          <nav class="space-y-2">
             <RouterLink
               to="/mi-cuenta"
-              class="side-link flex items-center gap-2.5"
-              exact-active-class="side-link-active"
+              class="flex items-center gap-3 rounded-2xl px-3.5 py-3 text-xs font-bold transition-all text-slate-300 hover:text-white hover:bg-white/10 cursor-pointer"
+              exact-active-class="bg-white/15 text-white shadow-md border border-white/20"
             >
-              <Tv class="size-4" aria-hidden="true" />
+              <Tv class="size-4 text-cyan-400" aria-hidden="true" />
               <span>Mis Servicios</span>
             </RouterLink>
 
             <RouterLink
               to="/catalogo"
-              class="side-link flex items-center gap-2.5"
+              class="flex items-center gap-3 rounded-2xl px-3.5 py-3 text-xs font-bold transition-all text-slate-300 hover:text-white hover:bg-white/10 cursor-pointer"
+              active-class="bg-white/15 text-white"
             >
-              <ShoppingBag class="size-4" aria-hidden="true" />
+              <ShoppingBag class="size-4 text-brand-300" aria-hidden="true" />
               <span>Comprar más planes</span>
             </RouterLink>
 
             <button
               type="button"
-              class="side-link flex w-full items-center gap-2.5 text-danger hover:bg-danger/10 hover:text-danger text-left mt-4"
+              class="flex w-full items-center gap-3 rounded-2xl px-3.5 py-3 text-xs font-bold transition-all text-rose-400 hover:bg-rose-500/10 hover:text-rose-300 text-left mt-6 cursor-pointer"
               @click="onLogout"
             >
               <LogOut class="size-4" aria-hidden="true" />

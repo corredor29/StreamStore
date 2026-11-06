@@ -20,15 +20,35 @@ const cart = useCartStore()
 
 const modalidadSeleccionada = ref<TipoProducto>('CUENTA_COMPLETA')
 
+export interface ScrollyPlatform {
+  id: number
+  nombre: string
+  tag: string
+  slug: string
+  logo?: string
+  color: string
+  bgImage: string
+  badge: string
+  headline: string
+  desc: string
+  features: string[]
+  productoIdCompleta: number
+  productoIdPantalla: number
+  precioCompleta: number
+  precioPantalla: number
+  stats: string
+}
 
-const scrollyPlatforms = [
+const scrollyPlatforms: ScrollyPlatform[] = [
   {
     id: 1,
     nombre: 'Netflix Premium 4K',
     tag: 'NETFLIX · 4K ULTRA HD',
     slug: 'netflix',
+    logo: '/netflix.webp',
     color: '#E50914',
     bgImage: '/watching_netflix.jpg',
+    badge: '🔥 MÁS VENDIDO',
     headline: 'El catálogo más grande del mundo en Ultra HD.',
     desc: 'Disfruta de series exclusivas, películas taquilleras y documentales en 4K Ultra HD con audio espacial y perfiles protegidos.',
     features: [
@@ -49,8 +69,10 @@ const scrollyPlatforms = [
     nombre: 'Disney+ Total Family',
     tag: 'DISNEY+ · FAMILIAR & MARVEL',
     slug: 'disney',
+    logo: '/disne.png',
     color: '#113CCF',
     bgImage: '/watching_disney.jpg',
+    badge: '⭐ TOP FAMILIAR',
     headline: 'Tus mundos favoritos juntos en un solo lugar.',
     desc: 'Todo el universo Disney, Pixar, Marvel, Star Wars, National Geographic y deportes en vivo de ESPN con la máxima fidelidad.',
     features: [
@@ -71,8 +93,10 @@ const scrollyPlatforms = [
     nombre: 'Max (HBO) 4K Ultra',
     tag: 'MAX · HBO ORIGINALS & WARNER',
     slug: 'max',
+    logo: '/hbomax.png',
     color: '#7B2FF7',
     bgImage: '/watching_max.jpg',
+    badge: '🏆 SERIES EMMY',
     headline: 'Historias extraordinarias que definen la cultura.',
     desc: 'Desde La Casa del Dragón y The Last of Us hasta los clásicos inmortales de Warner Bros, DC Comics y HBO en 4K Ultra HD.',
     features: [
@@ -82,8 +106,8 @@ const scrollyPlatforms = [
       'Perfiles privados protegidos con código PIN',
       'Reemplazo inmediato garantizado ante fallas'
     ],
-    productoIdCompleta: 5,
-    productoIdPantalla: 6,
+    productoIdCompleta: 7,
+    productoIdPantalla: 8,
     precioCompleta: 28000,
     precioPantalla: 9500,
     stats: 'La casa del cine y televisión de culto'
@@ -93,8 +117,10 @@ const scrollyPlatforms = [
     nombre: 'Amazon Prime Video',
     tag: 'PRIME VIDEO · ORIGINALS & DEPORTES',
     slug: 'prime',
+    logo: '/primevideo.png',
     color: '#00A8E1',
     bgImage: '/watching_prime.jpg',
+    badge: '🎬 ORIGINALS & CINE',
     headline: 'Producciones originales y canales exclusivos.',
     desc: 'Disfruta de producciones icónicas como The Boys, El Señor de los Anillos y eventos deportivos en vivo con reproducción simultánea.',
     features: [
@@ -104,15 +130,109 @@ const scrollyPlatforms = [
       'Soporte técnico preferencial 24/7 vía WhatsApp',
       'Precios transparentes en pesos colombianos'
     ],
-    productoIdCompleta: 7,
-    productoIdPantalla: 8,
+    productoIdCompleta: 5,
+    productoIdPantalla: 6,
     precioCompleta: 25000,
     precioPantalla: 8000,
     stats: 'Calidad 4K sin costo adicional'
+  },
+  {
+    id: 5,
+    nombre: 'Paramount+ Premium',
+    tag: 'PARAMOUNT+ · BLOCKBUSTERS & SHOWTIME',
+    slug: 'paramount',
+    logo: '/paramont.webp',
+    color: '#0064FF',
+    bgImage: '/hero_cinema_wall.jpg',
+    badge: '🚀 BLOCKBUSTERS 4K',
+    headline: 'Montañas de entretenimiento con cine y fútbol en vivo.',
+    desc: 'Estrenos directos de cine de Paramount Pictures, producciones completas de Showtime y transmisiones exclusivas en vivo.',
+    features: [
+      'Estrenos exclusivos de películas Paramount Pictures',
+      'Catálogo completo de series Showtime y MTV',
+      'Transmisiones de fútbol internacional en vivo',
+      'Perfiles familiares con controles parentales',
+      'Activación automatizada al instante'
+    ],
+    productoIdCompleta: 9,
+    productoIdPantalla: 10,
+    precioCompleta: 22000,
+    precioPantalla: 7500,
+    stats: 'Cine de estreno y transmisiones en vivo'
+  },
+  {
+    id: 6,
+    nombre: 'Crunchyroll Mega Fan',
+    tag: 'CRUNCHYROLL · ANIME EN SIMULCAST',
+    slug: 'crunchyroll',
+    logo: '/crunchiroll.png',
+    color: '#F47521',
+    bgImage: '/hero_cinema_wall.jpg',
+    badge: '⚡ SIMULCAST JAPÓN',
+    headline: 'El catálogo definitivo de anime sin anuncios.',
+    desc: 'Episodios estreno en simultáneo una hora después de Japón, doblajes exclusivos al español y la biblioteca de anime más grande del mundo.',
+    features: [
+      'Episodios en simultáneo con Japón en Full HD',
+      'Visualización sin anuncios y modo sin conexión',
+      'Doblajes exclusivos al español latino',
+      'Hasta 4 pantallas simultáneas en Mega Fan',
+      'Soporte técnico y garantía ininterrumpida'
+    ],
+    productoIdCompleta: 11,
+    productoIdPantalla: 12,
+    precioCompleta: 18000,
+    precioPantalla: 6500,
+    stats: 'Más de 1.000 títulos de anime'
+  },
+  {
+    id: 7,
+    nombre: 'Spotify Premium Individual',
+    tag: 'SPOTIFY · MÚSICA & AUDIO HI-FI',
+    slug: 'spotify',
+    logo: '/spotify.png',
+    color: '#1DB954',
+    bgImage: '/hbo_max_mosaic_bg.jpg',
+    badge: '🎧 AUDIO SIN ANUNCIOS',
+    headline: 'Millones de canciones y podcasts sin interrupciones.',
+    desc: 'Reproducción sin anuncios, saltos ilimitados, descargas para modo offline y audio en máxima fidelidad en todos tus dispositivos.',
+    features: [
+      'Audio en máxima fidelidad sin cortes comerciales',
+      'Descargas ilimitadas para escuchar sin internet',
+      'Compatibilidad con parlantes, smart TV y autos',
+      'Listas personalizadas y estrenos semanales',
+      'Garantía total de renovación mensual'
+    ],
+    productoIdCompleta: 13,
+    productoIdPantalla: 14,
+    precioCompleta: 16900,
+    precioPantalla: 6900,
+    stats: 'Más de 100M de canciones disponibles'
+  },
+  {
+    id: 8,
+    nombre: 'Apple TV+ Original',
+    tag: 'APPLE TV+ · APPLE ORIGINALS',
+    slug: 'appletv',
+    logo: '/appletv.webp',
+    color: '#E2E8F0',
+    bgImage: '/watching_prime.jpg',
+    badge: '🌟 CALIDAD OSCAR & EMMY',
+    headline: 'Historias visionarias creadas por las mejores mentes.',
+    desc: 'Producciones galardonadas por la academia, documentales impactantes y series de ciencia ficción en 4K HDR y Dolby Atmos.',
+    features: [
+      'Calidad técnica insuperable en 4K HDR y Dolby Vision',
+      'Audio espacial inmersivo con tecnología Dolby Atmos',
+      'Acceso en app Apple TV para Smart TV y consolas',
+      'Sin anuncios y reproducción multi-dispositivo',
+      'Activación instantánea garantizada 24/7'
+    ],
+    productoIdCompleta: 15,
+    productoIdPantalla: 16,
+    precioCompleta: 19900,
+    precioPantalla: 7500,
+    stats: 'Ganadora de premios Oscar y Emmy'
   }
 ]
-
-
 
 // Estado de la Animación Cinemática Tipo Netflix
 const showNetflixIntro = ref(false)
@@ -198,36 +318,45 @@ function closeCinematicIntro() {
   showNetflixIntro.value = false
 }
 
-// Tracking reactivo del scroll para efecto cinemático de desvanecer y aparecer
+// ================= SCROLLYTELLING CON MÉTRICAS EN TIEMPO REAL =================
 const scrollY = ref(0)
+const activeIndex = ref(0)
+const sectionProgress = ref<number[]>(scrollyPlatforms.map(() => 0.5))
 let scrollTicking = false
+
+function updateScrollMetrics() {
+  if (typeof window === 'undefined') return
+  scrollY.value = window.scrollY
+  const windowHeight = window.innerHeight || 800
+
+  scrollyPlatforms.forEach((sp, idx) => {
+    const el = document.getElementById(`plataforma-${sp.slug}`)
+    if (!el) return
+    const rect = el.getBoundingClientRect()
+    const totalTravel = windowHeight + rect.height
+    const currentTravel = windowHeight - rect.top
+    const rawProgress = currentTravel / totalTravel
+    const clampedProgress = Math.min(1.25, Math.max(-0.25, rawProgress))
+    sectionProgress.value[idx] = clampedProgress
+
+    // Detectar el capítulo activo que domina el centro de la pantalla
+    if (rect.top <= windowHeight * 0.55 && rect.bottom >= windowHeight * 0.40) {
+      activeIndex.value = idx
+    }
+  })
+}
 
 function handleScroll() {
   if (!scrollTicking) {
     window.requestAnimationFrame(() => {
-      scrollY.value = window.scrollY
+      updateScrollMetrics()
       scrollTicking = false
     })
     scrollTicking = true
   }
 }
 
-// Reproducir animación automáticamente al entrar y activar listeners de scroll
-onMounted(() => {
-  if (typeof window !== 'undefined') {
-    scrollY.value = window.scrollY
-    window.addEventListener('scroll', handleScroll, { passive: true })
-  }
-  startCinematicIntro()
-})
-
-onUnmounted(() => {
-  if (typeof window !== 'undefined') {
-    window.removeEventListener('scroll', handleScroll)
-  }
-})
-
-// Computados reactivos para la transición fluida (Desvanecer y Aparecer)
+// Transiciones fluidas del Hero
 const heroContentStyle = computed(() => {
   const p = Math.min(1, Math.max(0, scrollY.value / 320))
   return {
@@ -244,20 +373,119 @@ const heroDarkenStyle = computed(() => {
   }
 })
 
+// ================= ANIMACIÓN DINÁMICA DE ENTRADA Y SALIDA DE LAS TARJETAS =================
+function getCardStyle(idx: number, color: string) {
+  const p = sectionProgress.value[idx] ?? 0.5
+
+  // 1. Fase de Entrada (p: 0.0 a 0.35): Deslizando desde abajo, escalando y ganando nitidez
+  if (p < 0.35) {
+    const t = Math.max(0, Math.min(1, (p - 0.05) / 0.30))
+    const translateY = (1 - t) * 75
+    const scale = 0.88 + t * 0.12
+    const opacity = Math.max(0.05, t)
+    const blur = (1 - t) * 5
+    return {
+      transform: `translate3d(0, ${translateY.toFixed(1)}px, 0) scale(${scale.toFixed(3)})`,
+      opacity: opacity.toFixed(2),
+      filter: blur > 0.4 ? `blur(${blur.toFixed(1)}px)` : 'none',
+      boxShadow: `0 25px 60px -15px ${color}35, 0 0 1px 1px ${color}45`,
+      willChange: 'transform, opacity, filter',
+    }
+  }
+
+  // 2. Fase Activa / Enfocada (p: 0.35 a 0.65): Foco total, halo neón intenso y presencia magnética
+  if (p >= 0.35 && p <= 0.65) {
+    const norm = (p - 0.35) / 0.30
+    const subtleLift = Math.sin(norm * Math.PI) * 8
+    return {
+      transform: `translate3d(0, -${subtleLift.toFixed(1)}px, 0) scale(1)`,
+      opacity: '1',
+      filter: 'none',
+      boxShadow: `0 35px 90px -15px ${color}65, 0 0 3px 2px ${color}95`,
+      willChange: 'transform, opacity, filter',
+    }
+  }
+
+  // 3. Fase de Salida (p: 0.65 a 1.05): Flotando suavemente hacia arriba y desvaneciéndose
+  const t = Math.min(1, Math.max(0, (p - 0.65) / 0.35))
+  const translateY = -t * 65
+  const scale = 1 - t * 0.08
+  const opacity = Math.max(0.1, 1 - t * 0.90)
+  const blur = t * 5
+  return {
+    transform: `translate3d(0, ${translateY.toFixed(1)}px, 0) scale(${scale.toFixed(3)})`,
+    opacity: opacity.toFixed(2),
+    filter: blur > 0.4 ? `blur(${blur.toFixed(1)}px)` : 'none',
+    boxShadow: `0 15px 40px -15px ${color}25, 0 0 1px 1px ${color}30`,
+    willChange: 'transform, opacity, filter',
+  }
+}
+
+// Sincronización de entrada y salida para la columna de información
+function getInfoStyle(idx: number) {
+  const p = sectionProgress.value[idx] ?? 0.5
+
+  if (p < 0.35) {
+    const t = Math.max(0, Math.min(1, (p - 0.05) / 0.30))
+    const translateY = (1 - t) * 45
+    return {
+      transform: `translate3d(0, ${translateY.toFixed(1)}px, 0)`,
+      opacity: Math.max(0.08, t).toFixed(2),
+      willChange: 'transform, opacity',
+    }
+  }
+
+  if (p >= 0.35 && p <= 0.65) {
+    return {
+      transform: 'translate3d(0, 0, 0)',
+      opacity: '1',
+      willChange: 'transform, opacity',
+    }
+  }
+
+  const t = Math.min(1, Math.max(0, (p - 0.65) / 0.35))
+  const translateY = -t * 40
+  return {
+    transform: `translate3d(0, ${translateY.toFixed(1)}px, 0)`,
+    opacity: Math.max(0.12, 1 - t * 0.88).toFixed(2),
+    willChange: 'transform, opacity',
+  }
+}
+
+// Efecto parallax en la imagen de fondo para profundidad cinemática
+function getBgParallax(idx: number, bgImage: string) {
+  const p = sectionProgress.value[idx] ?? 0.5
+  const zoom = 1.02 + Math.min(0.08, Math.max(0, p * 0.08))
+  const panY = (p - 0.5) * 30
+  return {
+    backgroundImage: `url('${bgImage}')`,
+    transform: `translate3d(0, ${panY.toFixed(1)}px, 0) scale(${zoom.toFixed(3)})`,
+    willChange: 'transform',
+  }
+}
+
+onMounted(() => {
+  if (typeof window !== 'undefined') {
+    scrollY.value = window.scrollY
+    window.addEventListener('scroll', handleScroll, { passive: true })
+    window.addEventListener('resize', updateScrollMetrics, { passive: true })
+    setTimeout(updateScrollMetrics, 100)
+  }
+  startCinematicIntro()
+})
+
+onUnmounted(() => {
+  if (typeof window !== 'undefined') {
+    window.removeEventListener('scroll', handleScroll)
+    window.removeEventListener('resize', updateScrollMetrics)
+  }
+})
+
 function toggleMute() {
   isMuted.value = !isMuted.value
 }
 
-function comprarPlataforma(p: {
-  id: number
-  productoIdCompleta: number
-  productoIdPantalla: number
-  nombre: string
-  slug: string
-  color: string
-  precioCompleta: number
-  precioPantalla: number
-}) {
+function comprarPlataforma(p: ScrollyPlatform) {
   const prodId = modalidadSeleccionada.value === 'CUENTA_COMPLETA' 
     ? p.productoIdCompleta 
     : p.productoIdPantalla
@@ -322,7 +550,7 @@ const formatCOP = (val: number) => {
 </script>
 
 <template>
-  <div class="bg-black text-white selection:bg-brand-500/30 selection:text-white pb-24 overflow-x-hidden">
+  <div class="bg-black text-white selection:bg-brand-500/30 selection:text-white pb-24 overflow-x-hidden relative">
     <!-- ================= MODAL / OVERLAY INTRO CINEMÁTICA TIPO NETFLIX ================= -->
     <Teleport to="body">
       <Transition
@@ -359,7 +587,7 @@ const formatCOP = (val: number) => {
             </button>
           </div>
 
-          <!-- Mosaico de fondo animado que se enciende en ondas -->
+          <!-- Mosaico de fondo animado -->
           <div
             class="absolute inset-0 bg-cover bg-center transition-all duration-1000 transform"
             :class="[
@@ -369,11 +597,10 @@ const formatCOP = (val: number) => {
             ]"
             style="background-image: url('/hbo_max_mosaic_bg.jpg');"
           >
-            <!-- Capa de brillo y viñeta cinematográfica -->
             <div class="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-black/80" />
           </div>
 
-          <!-- Revelación Anamórfica del Logotipo StreamStore (Estilo Netflix Ta-Dum) -->
+          <!-- Revelación Anamórfica del Logotipo StreamStore -->
           <div
             class="relative z-20 flex flex-col items-center justify-center text-center transition-all duration-700"
             :class="[
@@ -382,13 +609,11 @@ const formatCOP = (val: number) => {
               introStage === 'mosaic' ? 'opacity-90 scale-100 translate-y-2' : '',
             ]"
           >
-            <!-- Haz de luz horizontal anamórfico tipo cine -->
             <div
               class="absolute h-1 w-[200vw] bg-gradient-to-r from-transparent via-cyan-400 to-transparent blur-sm animate-pulse"
               style="box-shadow: 0 0 40px #8057FF, 0 0 80px #06B6D4;"
             />
 
-            <!-- Imagen del Logotipo Oficial StreamStore con Halo Neón -->
             <div class="relative size-32 sm:size-44 rounded-3xl p-1 bg-gradient-to-tr from-[#8057FF] via-[#06B6D4] to-[#8057FF] shadow-[0_0_80px_rgba(128,87,255,0.7)] animate-bounce duration-1000">
               <img
                 src="/streamstore_logo_official.png"
@@ -397,7 +622,6 @@ const formatCOP = (val: number) => {
               />
             </div>
 
-            <!-- Título de Marca Animado -->
             <h2 class="mt-6 font-display text-4xl sm:text-6xl font-black uppercase tracking-tight text-white drop-shadow-[0_0_30px_rgba(6,182,212,0.8)]">
               Stream<span class="text-cyan-400">Store</span>
             </h2>
@@ -411,30 +635,29 @@ const formatCOP = (val: number) => {
 
     <!-- ================= 1. CINEMATIC WEBSITE HERO (ESTILO HBO MAX) ================= -->
     <section class="relative min-h-screen flex items-center justify-center overflow-hidden bg-black">
-      <!-- FONDO: MOSAICO DE ENTRETENIMIENTO AL ESTILO HBO MAX -->
+      <!-- FONDO: MOSAICO DE ENTRETENIMIENTO CLARO Y VÍVIDO -->
       <div
-        class="absolute inset-0 bg-cover bg-center transition-transform duration-[25000ms] ease-out kenburns-bg opacity-75"
+        class="absolute inset-0 bg-cover bg-center transition-transform duration-[25000ms] ease-out kenburns-bg opacity-85 saturate-[1.15] contrast-[1.05]"
         style="background-image: url('/hbo_max_mosaic_bg.jpg');"
       >
-        <!-- Viñeta Gradual Estilo HBO Max: oscura arriba para el header, respirable al centro y fundido a negro puro abajo -->
-        <div class="absolute inset-0 bg-gradient-to-b from-black/85 via-black/45 via-60% to-black pointer-events-none" />
+        <!-- Viñeta Gradual Estilo Cine: no tapa completamente el mosaico -->
+        <div class="absolute inset-0 bg-gradient-to-b from-black/80 via-black/35 via-50% to-black pointer-events-none" />
         
-        <!-- Radial sutil para concentrar la atención en el centro -->
-        <div class="absolute inset-0 bg-[radial-gradient(circle_at_center,transparent_20%,rgba(0,0,0,0.85)_85%)] pointer-events-none" />
+        <!-- Radial sutil para concentrar la atención en el centro sin oscurecer en exceso -->
+        <div class="absolute inset-0 bg-[radial-gradient(ellipse_at_center,transparent_30%,rgba(0,0,0,0.75)_90%)] pointer-events-none" />
 
-        <!-- Oscurecimiento dinámico a negro absoluto al hacer scroll -->
+        <!-- Oscurecimiento dinámico suave al hacer scroll -->
         <div
           class="absolute inset-0 bg-black pointer-events-none transition-opacity duration-150"
           :style="heroDarkenStyle"
         />
       </div>
 
-      <!-- CONTENIDO CENTRAL DEL HERO (IDÉNTICO A HBO MAX) -->
+      <!-- CONTENIDO CENTRAL DEL HERO -->
       <div
         class="container-app relative z-10 text-center max-w-4xl mx-auto pt-28 sm:pt-40 pb-16 flex flex-col items-center justify-center space-y-6 transition-all duration-150 ease-out will-change-transform"
         :style="heroContentStyle"
       >
-        <!-- Nombre Stream Store con los Colores Oficiales del Logo (Alineado ópticamente con la intro para evitar desnivel) -->
         <div class="flex flex-col items-center justify-center space-y-2 mt-8 sm:mt-14">
           <h1 class="font-display text-5xl sm:text-7xl md:text-8xl lg:text-9xl font-black uppercase tracking-tight select-none leading-none drop-shadow-[0_15px_45px_rgba(0,0,0,0.95)]">
             <span class="text-white drop-shadow-[0_10px_25px_rgba(0,0,0,0.9)]">STREAM</span>
@@ -442,63 +665,60 @@ const formatCOP = (val: number) => {
           </h1>
         </div>
 
-        <!-- Frase de Precios Estilo HBO Max: "Los planes empiezan desde $..." -->
         <p class="text-xl sm:text-2xl md:text-3xl text-white/95 font-medium tracking-tight drop-shadow-[0_4px_16px_rgba(0,0,0,0.9)]">
-          Los planes empiezan desde <strong class="text-white font-black drop-shadow-md">$8.000/mes</strong>
+          Los planes empiezan desde <strong class="text-white font-black drop-shadow-md">$6.500/mes</strong>
         </p>
 
-        <p class="text-sm sm:text-base text-slate-300/90 max-w-xl mx-auto font-sans leading-relaxed drop-shadow">
-          Acceso instantáneo a Netflix, Disney+, Max, Prime Video, Spotify y Crunchyroll en 4K Ultra HD con garantía ininterrumpida.
+        <p class="text-sm sm:text-base text-slate-200 max-w-xl mx-auto font-sans leading-relaxed drop-shadow-md">
+          Acceso instantáneo a Netflix, Disney+, Max, Prime Video, Paramount+, Crunchyroll, Spotify y Apple TV+ con garantía ininterrumpida.
         </p>
 
-        <!-- Botón Principal "Iniciar Sesión" (En vez de "Suscríbete" tal como pidió el usuario) -->
+        <!-- Botones de Acción -->
         <div class="flex flex-col sm:flex-row items-center justify-center gap-4 pt-3 w-full sm:w-auto">
           <RouterLink
             to="/login"
-            class="inline-flex items-center justify-center rounded-full bg-white hover:bg-slate-200 text-neutral-950 font-black text-base px-10 sm:px-14 py-3.5 sm:py-4 shadow-[0_0_35px_rgba(255,255,255,0.35)] hover:shadow-[0_0_50px_rgba(255,255,255,0.6)] transition-all duration-200 hover:scale-105 active:scale-95 w-full sm:w-auto uppercase tracking-wider"
+            class="inline-flex items-center justify-center rounded-full bg-white hover:bg-slate-200 text-neutral-950 font-black text-base px-10 sm:px-14 py-3.5 sm:py-4 shadow-[0_0_35px_rgba(255,255,255,0.4)] hover:shadow-[0_0_55px_rgba(255,255,255,0.7)] transition-all duration-200 hover:scale-105 active:scale-95 w-full sm:w-auto uppercase tracking-wider"
           >
             Iniciar Sesión
           </RouterLink>
 
-          <RouterLink
-            to="/catalogo"
-            class="inline-flex items-center justify-center rounded-full border border-white/35 bg-black/60 hover:bg-white/10 text-white font-bold text-base px-8 sm:px-10 py-3.5 sm:py-4 backdrop-blur-md transition-all duration-200 hover:border-white w-full sm:w-auto"
+          <a
+            href="#plataformas-showcase"
+            class="inline-flex items-center justify-center rounded-full border border-white/35 bg-black/60 hover:bg-white/10 text-white font-bold text-base px-8 sm:px-10 py-3.5 sm:py-4 backdrop-blur-md transition-all duration-200 hover:border-white w-full sm:w-auto cursor-pointer"
           >
-            <span>Explorar Catálogo</span>
+            <span>Ver Canales & Planes</span>
             <ArrowRight class="size-4 ml-2" />
-          </RouterLink>
+          </a>
         </div>
 
-
-
-        <!-- 4 Métricas de Confianza Integradas con Estilo Minimalista Oscuro -->
-        <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-5 pt-8 w-full max-w-3xl border-t border-white/10 mt-6">
-          <div class="rounded-xl border border-white/10 bg-black/60 p-3.5 shadow-lg backdrop-blur-md">
+        <!-- 4 Métricas de Confianza -->
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-5 pt-8 w-full max-w-3xl border-t border-white/15 mt-6">
+          <div class="rounded-xl border border-white/15 bg-black/70 p-3.5 shadow-lg backdrop-blur-md">
             <p class="font-display text-2xl sm:text-3xl font-black text-white tracking-tight">+15K</p>
-            <p class="text-[11px] sm:text-xs text-slate-400 mt-0.5">Clientes Satisfechos</p>
+            <p class="text-[11px] sm:text-xs text-slate-300 mt-0.5">Clientes Satisfechos</p>
           </div>
-          <div class="rounded-xl border border-white/10 bg-black/60 p-3.5 shadow-lg backdrop-blur-md">
+          <div class="rounded-xl border border-white/15 bg-black/70 p-3.5 shadow-lg backdrop-blur-md">
             <p class="font-display text-2xl sm:text-3xl font-black text-emerald-400 tracking-tight">100%</p>
-            <p class="text-[11px] sm:text-xs text-slate-400 mt-0.5">Garantía Activa</p>
+            <p class="text-[11px] sm:text-xs text-slate-300 mt-0.5">Garantía Activa</p>
           </div>
-          <div class="rounded-xl border border-white/10 bg-black/60 p-3.5 shadow-lg backdrop-blur-md">
+          <div class="rounded-xl border border-white/15 bg-black/70 p-3.5 shadow-lg backdrop-blur-md">
             <p class="font-display text-2xl sm:text-3xl font-black text-cyan-300 tracking-tight">24/7</p>
-            <p class="text-[11px] sm:text-xs text-slate-400 mt-0.5">Soporte Inmediato</p>
+            <p class="text-[11px] sm:text-xs text-slate-300 mt-0.5">Soporte Inmediato</p>
           </div>
-          <div class="rounded-xl border border-white/10 bg-black/60 p-3.5 shadow-lg backdrop-blur-md">
+          <div class="rounded-xl border border-white/15 bg-black/70 p-3.5 shadow-lg backdrop-blur-md">
             <p class="font-display text-2xl sm:text-3xl font-black text-purple-300 tracking-tight">&lt; 10s</p>
-            <p class="text-[11px] sm:text-xs text-slate-400 mt-0.5">Entrega Automática</p>
+            <p class="text-[11px] sm:text-xs text-slate-300 mt-0.5">Entrega Automática</p>
           </div>
         </div>
       </div>
     </section>
 
     <!-- ================= 2. CABECERA: ELIGE EL MEJOR PLAN PARA TI ================= -->
-    <section id="planes-intro" class="relative bg-black pt-20 pb-12 text-center overflow-hidden">
+    <section id="planes-intro" class="relative bg-black pt-16 pb-12 text-center overflow-hidden">
       <!-- Resplandor ambiental superior -->
-      <div class="absolute top-0 left-1/2 -translate-x-1/2 w-3/4 max-w-3xl h-32 bg-gradient-to-b from-[#8057FF]/15 via-[#06B6D4]/10 to-transparent blur-3xl pointer-events-none" />
+      <div class="absolute top-0 left-1/2 -translate-x-1/2 w-3/4 max-w-3xl h-32 bg-gradient-to-b from-[#8057FF]/20 via-[#06B6D4]/15 to-transparent blur-3xl pointer-events-none" />
 
-      <div class="container-app relative z-10 max-w-3xl mx-auto space-y-6">
+      <div class="container-app relative z-10 max-w-3xl mx-auto space-y-5">
         <h2 class="font-display text-4xl sm:text-6xl font-black text-white uppercase tracking-tight leading-[1.05] drop-shadow-2xl">
           ELIGE EL MEJOR <br />
           <span class="bg-gradient-to-r from-[#8057FF] via-[#A855F7] to-[#06B6D4] bg-clip-text text-transparent">
@@ -506,8 +726,8 @@ const formatCOP = (val: number) => {
           </span>
         </h2>
 
-        <p class="text-sm sm:text-base text-slate-300/90 font-sans max-w-xl mx-auto leading-relaxed">
-          Recorre cada una de nuestras plataformas oficiales con activación inmediata en 4K Ultra HD y garantía total de 30 días.
+        <p class="text-sm sm:text-base text-slate-200 font-sans max-w-xl mx-auto leading-relaxed drop-shadow">
+          Desliza para recorrer cada plataforma con activación automática en segundos y garantía total de 30 días.
         </p>
 
         <!-- Selector de Modalidad (Cuentas Completas vs Pantallas Individuales) -->
@@ -542,66 +762,70 @@ const formatCOP = (val: number) => {
       </div>
     </section>
 
-    <!-- ================= 3. CAPÍTULOS SCROLLYTELLING POR PLATAFORMA (ALTERNADO IZQ / DER CON OSCURIDAD TOTAL) ================= -->
-    <div id="plataformas-showcase" class="space-y-0 bg-black">
+    <!-- ================= 3. CAPÍTULOS SCROLLYTELLING POR PLATAFORMA ================= -->
+    <div id="plataformas-showcase" class="space-y-0 bg-black relative">
+      <!-- SECCIONES DE PLATAFORMAS (SCROLLYTELLING) -->
       <div
         v-for="(sp, idx) in scrollyPlatforms"
         :key="sp.id"
+        class="relative"
       >
-        <!-- Transición previa a oscuridad total -->
-        <div class="h-20 sm:h-28 bg-gradient-to-b from-black via-black to-black pointer-events-none" />
-
-        <!-- Sección de la Plataforma -->
         <section
           :id="'plataforma-' + sp.slug"
-          class="relative min-h-[90vh] flex items-center justify-center overflow-hidden py-16 sm:py-24 bg-black"
+          class="relative min-h-[95vh] flex items-center justify-center overflow-hidden py-16 sm:py-24 bg-black"
         >
-          <!-- FOTO DE REFERENCIA CINEMÁTICA DE FONDO (PERSONAS DISFRUTANDO EL SERVICIO) -->
+          <!-- FOTO DE REFERENCIA CINEMÁTICA DE FONDO: CLARA, VÍVIDA Y APRECIABLE -->
           <div
-            class="absolute inset-0 bg-cover bg-center transition-transform duration-1000 ease-out opacity-40 scale-100"
-            :style="{ backgroundImage: `url('${sp.bgImage}')` }"
-          >
-            <!-- Viñetas de Fundido a Negro Profundo (Arriba, Abajo y Laterales) -->
-            <div class="absolute inset-0 bg-gradient-to-b from-black via-black/75 to-black pointer-events-none" />
-            <div class="absolute inset-0 bg-gradient-to-r from-black via-transparent to-black pointer-events-none" />
-            <div class="absolute inset-0 bg-[radial-gradient(circle_at_center,transparent_15%,rgba(0,0,0,0.85)_85%)] pointer-events-none" />
+            class="absolute inset-0 bg-cover bg-center transition-transform duration-300 ease-out opacity-85 sm:opacity-90 saturate-[1.12] contrast-[1.06] brightness-[0.92]"
+            :style="getBgParallax(idx, sp.bgImage)"
+          />
 
-            <!-- Resplandor ambiental con el color distintivo de la plataforma -->
-            <div
-              class="absolute top-1/2 -translate-y-1/2 size-[650px] rounded-full blur-[170px] opacity-25 pointer-events-none transition-all duration-700"
-              :class="idx % 2 === 0 ? 'right-10' : 'left-10'"
-              :style="{ backgroundColor: sp.color }"
-            />
-          </div>
+          <!-- VIÑETAS CINEMÁTICAS SUAVES (PROTEGEN EL TEXTO SIN APAGAR LA IMAGEN) -->
+          <!-- 1. Suave degradado vertical para fundir con las secciones superior e inferior -->
+          <div class="absolute inset-0 bg-gradient-to-b from-black/85 via-black/25 via-50% to-black/85 pointer-events-none" />
 
-          <!-- CONTENIDO EN 2 COLUMNAS ALTERNADAS (ZIG-ZAG) -->
+          <!-- 2. Suave radial en las esquinas -->
+          <div class="absolute inset-0 bg-[radial-gradient(ellipse_at_center,transparent_35%,rgba(0,0,0,0.6)_95%)] pointer-events-none" />
+
+          <!-- 3. Halo neón ambiental con el color distintivo de la plataforma iluminando la escena -->
+          <div
+            class="absolute top-1/2 -translate-y-1/2 size-[650px] rounded-full blur-[150px] opacity-40 pointer-events-none transition-all duration-700"
+            :class="idx % 2 === 0 ? 'right-10' : 'left-10'"
+            :style="{ backgroundColor: sp.color }"
+          />
+
+          <!-- CONTENIDO EN 2 COLUMNAS ALTERNADAS (CON ANIMACIÓN DE ENTRADA Y SALIDA) -->
           <div class="container-app relative z-10 w-full">
             <div class="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-14 items-center">
 
-              <!-- ================= CASO 1: ÍNDICE PAR (NETFLIX, MAX) -> INFORMACIÓN A LA IZQUIERDA, TARJETA A LA DERECHA ================= -->
+              <!-- ================= CASO 1: ÍNDICE PAR -> INFORMACIÓN A LA IZQUIERDA, TARJETA A LA DERECHA ================= -->
               <template v-if="idx % 2 === 0">
-                <!-- COLUMNA IZQUIERDA: INFORMACIÓN Y PROPUESTA DE VALOR DE LA PLATAFORMA -->
-                <div class="lg:col-span-6 space-y-6 text-left">
-                  <!-- Tag de la Plataforma -->
-                  <div class="inline-flex items-center gap-2.5 px-3.5 py-1.5 rounded-full border border-white/15 bg-white/5 backdrop-blur-md">
-                    <span class="size-2 rounded-full animate-ping" :style="{ backgroundColor: sp.color }" />
-                    <span class="text-xs font-mono uppercase tracking-[0.2em] font-bold" :style="{ color: sp.color }">
-                      {{ sp.tag }}
-                    </span>
+                <!-- COLUMNA IZQUIERDA: INFORMACIÓN Y PROPUESTA DE VALOR -->
+                <div
+                  class="lg:col-span-6 space-y-6 text-left transition-all duration-300 ease-out"
+                  :style="getInfoStyle(idx)"
+                >
+                  <!-- Logotipo Oficial de Marca Libre y Grande (Sin caja contenedora) -->
+                  <div v-if="sp.logo" class="mb-4">
+                    <img 
+                      :src="sp.logo" 
+                      :alt="sp.nombre" 
+                      class="h-12 sm:h-16 w-auto max-w-[220px] object-contain filter drop-shadow-[0_10px_30px_rgba(0,0,0,0.95)]" 
+                    />
                   </div>
 
                   <!-- Título e Impacto -->
                   <div class="space-y-3">
-                    <h3 class="font-display text-3xl sm:text-5xl font-black text-white uppercase tracking-tight leading-tight drop-shadow-xl">
+                    <h3 class="font-display text-3xl sm:text-5xl lg:text-6xl font-black text-white uppercase tracking-tight leading-tight drop-shadow-[0_10px_30px_rgba(0,0,0,0.95)]">
                       {{ sp.nombre }}
                     </h3>
-                    <p class="text-base sm:text-lg text-cyan-300 font-medium">
+                    <p class="text-base sm:text-xl font-semibold drop-shadow" :style="{ color: sp.color }">
                       {{ sp.headline }}
                     </p>
                   </div>
 
                   <!-- Descripción -->
-                  <p class="text-sm sm:text-base text-slate-300/90 leading-relaxed font-sans max-w-xl">
+                  <p class="text-sm sm:text-base text-slate-100 leading-relaxed font-sans max-w-xl drop-shadow-md">
                     {{ sp.desc }}
                   </p>
 
@@ -610,181 +834,181 @@ const formatCOP = (val: number) => {
                     <div
                       v-for="(feat, fIdx) in sp.features"
                       :key="fIdx"
-                      class="flex items-center gap-3 text-xs sm:text-sm text-slate-200"
+                      class="flex items-center gap-3 text-xs sm:text-sm text-slate-100 drop-shadow"
                     >
-                      <div class="size-5 rounded-full flex items-center justify-center shrink-0" :style="{ backgroundColor: `${sp.color}25` }">
+                      <div class="size-5 rounded-full flex items-center justify-center shrink-0 border border-white/20" :style="{ backgroundColor: `${sp.color}35` }">
                         <CheckCircle2 class="size-3.5" :style="{ color: sp.color }" />
                       </div>
                       <span class="font-medium">{{ feat }}</span>
                     </div>
-                  </div>
-
-                  <!-- Badge de Garantía Oficial -->
-                  <div class="inline-flex items-center gap-3 p-3 rounded-2xl border border-white/10 bg-white/5 backdrop-blur-md mt-4">
-                    <ShieldCheck class="size-5 text-emerald-400 shrink-0" />
-                    <span class="text-xs text-slate-300 font-medium">
-                      Garantía ininterrumpida de 30 días · Reemplazo automático 24/7
-                    </span>
                   </div>
                 </div>
 
                 <!-- COLUMNA DERECHA: TARJETA DE PRECIO Y COMPRA DIRECTA -->
                 <div class="lg:col-span-6 flex justify-center lg:justify-end">
                   <div
-                    class="w-full max-w-lg rounded-3xl border border-white/20 bg-gradient-to-b from-black/90 to-[#0B0E1F]/95 backdrop-blur-2xl p-7 sm:p-9 shadow-2xl relative overflow-hidden transition-all duration-300 hover:scale-[1.02]"
-                    :style="{
-                      boxShadow: `0 25px 70px -15px ${sp.color}35, 0 0 1px 1px ${sp.color}50`
-                    }"
+                    class="w-full max-w-lg rounded-3xl border border-white/25 bg-gradient-to-b from-black/85 via-[#0B0E1F]/90 to-black/95 backdrop-blur-2xl p-7 sm:p-9 shadow-2xl relative overflow-hidden transition-all duration-300 group hover:scale-[1.02]"
+                    :style="getCardStyle(idx, sp.color)"
                   >
-                    <!-- Línea Neón Superior -->
+                    <!-- Línea Neón Superior Resplandeciente -->
                     <div
                       class="absolute top-0 left-0 right-0 h-1.5"
-                      :style="{ backgroundColor: sp.color, boxShadow: `0 0 25px ${sp.color}` }"
+                      :style="{ backgroundColor: sp.color, boxShadow: `0 0 30px ${sp.color}, 0 0 60px ${sp.color}` }"
                     />
 
-                    <!-- Cabecera de Tarjeta -->
-                    <div class="flex items-start justify-between gap-4 mb-6">
+                    <!-- Cabecera de Tarjeta: Logo Oficial Libre y Grande (Sin cuadro) -->
+                    <div class="flex items-center justify-between gap-4 mb-6">
                       <div>
-                        <span class="text-xs font-mono uppercase tracking-wider font-bold" :style="{ color: sp.color }">
+                        <span class="text-xs font-mono uppercase tracking-wider font-black" :style="{ color: sp.color }">
                           {{ modalidadSeleccionada === 'CUENTA_COMPLETA' ? 'PLAN CUENTA COMPLETA' : 'PLAN PANTALLA PRIVADA' }}
                         </span>
-                        <h4 class="font-display text-2xl sm:text-3xl font-black text-white mt-1">
+                        <h4 class="font-display text-2xl sm:text-3xl font-black text-white mt-0.5 drop-shadow">
                           {{ sp.nombre }}
                         </h4>
                       </div>
 
-                      <span class="rounded-full px-3 py-1 text-xs font-bold text-emerald-400 border border-emerald-500/30 bg-emerald-500/10 flex items-center gap-1.5 shrink-0">
-                        <span class="size-1.5 rounded-full bg-emerald-400 animate-pulse" />
-                        Inmediato
-                      </span>
+                      <!-- Logotipo Oficial Libre, Nítido y Prominente (Sin caja ni marco) -->
+                      <div v-if="sp.logo" class="h-10 sm:h-12 flex items-center shrink-0">
+                        <img 
+                          :src="sp.logo" 
+                          :alt="sp.nombre" 
+                          class="h-9 sm:h-11 w-auto max-w-[150px] object-contain filter drop-shadow-[0_4px_16px_rgba(0,0,0,0.85)] transition-transform duration-300 group-hover:scale-105"
+                        />
+                      </div>
                     </div>
 
-                    <!-- Precio Dinámico -->
-                    <div class="p-5 rounded-2xl border border-white/10 bg-white/5 mb-6">
-                      <span class="text-[11px] font-mono uppercase text-slate-400 block mb-1">
+                    <!-- Precio Dinámico con Alto Contraste -->
+                    <div class="p-5 rounded-2xl border border-white/15 bg-white/5 mb-6 backdrop-blur-sm shadow-inner">
+                      <span class="text-[11px] font-mono uppercase text-slate-300 block mb-1 font-bold">
                         {{ modalidadSeleccionada === 'CUENTA_COMPLETA' ? 'Precio Suscripción 30 días' : 'Precio Perfil Individual con PIN' }}
                       </span>
                       <div class="flex items-baseline gap-2">
-                        <span class="font-display text-4xl sm:text-5xl font-black text-white tracking-tight">
+                        <span class="font-display text-4xl sm:text-5xl font-black text-white tracking-tight drop-shadow-md">
                           {{ formatCOP(modalidadSeleccionada === 'CUENTA_COMPLETA' ? sp.precioCompleta : sp.precioPantalla) }}
                         </span>
-                        <span class="text-xs sm:text-sm text-slate-400 font-medium">/ 30 días</span>
+                        <span class="text-xs sm:text-sm text-slate-300 font-medium">/ 30 días</span>
                       </div>
-                      <p class="text-[11px] text-cyan-300/90 mt-1 font-mono">
-                        {{ modalidadSeleccionada === 'CUENTA_COMPLETA' ? 'Acceso total a todos los perfiles' : '1 Pantalla exclusiva protegida con PIN' }}
+                      <p class="text-[11px] text-cyan-300 mt-1 font-mono font-semibold">
+                        {{ modalidadSeleccionada === 'CUENTA_COMPLETA' ? '✔ Acceso total a todos los perfiles de la cuenta' : '✔ 1 Pantalla exclusiva protegida con PIN privado' }}
                       </p>
                     </div>
 
                     <!-- Botón de Compra Directo -->
                     <button
                       type="button"
-                      class="w-full inline-flex items-center justify-center rounded-full text-base font-black py-4 px-8 shadow-xl transition-all duration-200 hover:scale-105 active:scale-95 cursor-pointer gap-2 uppercase tracking-wider text-white"
-                      :style="{ backgroundColor: sp.color, boxShadow: `0 0 35px ${sp.color}50` }"
+                      class="w-full inline-flex items-center justify-center rounded-full text-base font-black py-4 px-8 shadow-2xl transition-all duration-200 hover:scale-[1.03] active:scale-95 cursor-pointer gap-2 uppercase tracking-wider text-white relative overflow-hidden"
+                      :style="{ backgroundColor: sp.color, boxShadow: `0 0 40px ${sp.color}70` }"
                       @click="comprarPlataforma(sp)"
                     >
-                      <span>Comprar Ahora</span>
-                      <ArrowRight class="size-4" />
+                      <span class="relative z-10">Comprar Ahora</span>
+                      <ArrowRight class="size-4 relative z-10 transition-transform group-hover:translate-x-1" />
                     </button>
 
                     <!-- Métodos de Pago y Entrega -->
-                    <div class="mt-4 pt-4 border-t border-white/10 flex items-center justify-between text-[11px] text-slate-400">
-                      <span>⚡ Entrega en &lt; 10s</span>
+                    <div class="mt-4 pt-4 border-t border-white/15 flex items-center justify-between text-[11px] text-slate-300 font-medium">
+                      <span>⚡ Entrega en &lt; 10s · Garantía 30 días</span>
                       <span>💳 Bancolombia · Nequi · Nu</span>
                     </div>
                   </div>
                 </div>
               </template>
 
-              <!-- ================= CASO 2: ÍNDICE IMPAR (DISNEY+, PRIME) -> TARJETA A LA IZQUIERDA, INFORMACIÓN A LA DERECHA ================= -->
+              <!-- ================= CASO 2: ÍNDICE IMPAR -> TARJETA A LA IZQUIERDA, INFORMACIÓN A LA DERECHA ================= -->
               <template v-else>
                 <!-- COLUMNA IZQUIERDA: TARJETA DE PRECIO Y COMPRA DIRECTA -->
                 <div class="lg:col-span-6 flex justify-center lg:justify-start order-2 lg:order-1">
                   <div
-                    class="w-full max-w-lg rounded-3xl border border-white/20 bg-gradient-to-b from-black/90 to-[#0B0E1F]/95 backdrop-blur-2xl p-7 sm:p-9 shadow-2xl relative overflow-hidden transition-all duration-300 hover:scale-[1.02]"
-                    :style="{
-                      boxShadow: `0 25px 70px -15px ${sp.color}35, 0 0 1px 1px ${sp.color}50`
-                    }"
+                    class="w-full max-w-lg rounded-3xl border border-white/25 bg-gradient-to-b from-black/85 via-[#0B0E1F]/90 to-black/95 backdrop-blur-2xl p-7 sm:p-9 shadow-2xl relative overflow-hidden transition-all duration-300 group hover:scale-[1.02]"
+                    :style="getCardStyle(idx, sp.color)"
                   >
-                    <!-- Línea Neón Superior -->
+                    <!-- Línea Neón Superior Resplandeciente -->
                     <div
                       class="absolute top-0 left-0 right-0 h-1.5"
-                      :style="{ backgroundColor: sp.color, boxShadow: `0 0 25px ${sp.color}` }"
+                      :style="{ backgroundColor: sp.color, boxShadow: `0 0 30px ${sp.color}, 0 0 60px ${sp.color}` }"
                     />
 
-                    <!-- Cabecera de Tarjeta -->
-                    <div class="flex items-start justify-between gap-4 mb-6">
+                    <!-- Cabecera de Tarjeta: Logo Oficial Libre y Grande (Sin cuadro) -->
+                    <div class="flex items-center justify-between gap-4 mb-6">
                       <div>
-                        <span class="text-xs font-mono uppercase tracking-wider font-bold" :style="{ color: sp.color }">
+                        <span class="text-xs font-mono uppercase tracking-wider font-black" :style="{ color: sp.color }">
                           {{ modalidadSeleccionada === 'CUENTA_COMPLETA' ? 'PLAN CUENTA COMPLETA' : 'PLAN PANTALLA PRIVADA' }}
                         </span>
-                        <h4 class="font-display text-2xl sm:text-3xl font-black text-white mt-1">
+                        <h4 class="font-display text-2xl sm:text-3xl font-black text-white mt-0.5 drop-shadow">
                           {{ sp.nombre }}
                         </h4>
                       </div>
 
-                      <span class="rounded-full px-3 py-1 text-xs font-bold text-emerald-400 border border-emerald-500/30 bg-emerald-500/10 flex items-center gap-1.5 shrink-0">
-                        <span class="size-1.5 rounded-full bg-emerald-400 animate-pulse" />
-                        Inmediato
-                      </span>
+                      <!-- Logotipo Oficial Libre, Nítido y Prominente (Sin caja ni marco) -->
+                      <div v-if="sp.logo" class="h-10 sm:h-12 flex items-center shrink-0">
+                        <img 
+                          :src="sp.logo" 
+                          :alt="sp.nombre" 
+                          class="h-9 sm:h-11 w-auto max-w-[150px] object-contain filter drop-shadow-[0_4px_16px_rgba(0,0,0,0.85)] transition-transform duration-300 group-hover:scale-105"
+                        />
+                      </div>
                     </div>
 
-                    <!-- Precio Dinámico -->
-                    <div class="p-5 rounded-2xl border border-white/10 bg-white/5 mb-6">
-                      <span class="text-[11px] font-mono uppercase text-slate-400 block mb-1">
+                    <!-- Precio Dinámico con Alto Contraste -->
+                    <div class="p-5 rounded-2xl border border-white/15 bg-white/5 mb-6 backdrop-blur-sm shadow-inner">
+                      <span class="text-[11px] font-mono uppercase text-slate-300 block mb-1 font-bold">
                         {{ modalidadSeleccionada === 'CUENTA_COMPLETA' ? 'Precio Suscripción 30 días' : 'Precio Perfil Individual con PIN' }}
                       </span>
                       <div class="flex items-baseline gap-2">
-                        <span class="font-display text-4xl sm:text-5xl font-black text-white tracking-tight">
+                        <span class="font-display text-4xl sm:text-5xl font-black text-white tracking-tight drop-shadow-md">
                           {{ formatCOP(modalidadSeleccionada === 'CUENTA_COMPLETA' ? sp.precioCompleta : sp.precioPantalla) }}
                         </span>
-                        <span class="text-xs sm:text-sm text-slate-400 font-medium">/ 30 días</span>
+                        <span class="text-xs sm:text-sm text-slate-300 font-medium">/ 30 días</span>
                       </div>
-                      <p class="text-[11px] text-cyan-300/90 mt-1 font-mono">
-                        {{ modalidadSeleccionada === 'CUENTA_COMPLETA' ? 'Acceso total a todos los perfiles' : '1 Pantalla exclusiva protegida con PIN' }}
+                      <p class="text-[11px] text-cyan-300 mt-1 font-mono font-semibold">
+                        {{ modalidadSeleccionada === 'CUENTA_COMPLETA' ? '✔ Acceso total a todos los perfiles de la cuenta' : '✔ 1 Pantalla exclusiva protegida con PIN privado' }}
                       </p>
                     </div>
 
                     <!-- Botón de Compra Directo -->
                     <button
                       type="button"
-                      class="w-full inline-flex items-center justify-center rounded-full text-base font-black py-4 px-8 shadow-xl transition-all duration-200 hover:scale-105 active:scale-95 cursor-pointer gap-2 uppercase tracking-wider text-white"
-                      :style="{ backgroundColor: sp.color, boxShadow: `0 0 35px ${sp.color}50` }"
+                      class="w-full inline-flex items-center justify-center rounded-full text-base font-black py-4 px-8 shadow-2xl transition-all duration-200 hover:scale-[1.03] active:scale-95 cursor-pointer gap-2 uppercase tracking-wider text-white relative overflow-hidden"
+                      :style="{ backgroundColor: sp.color, boxShadow: `0 0 40px ${sp.color}70` }"
                       @click="comprarPlataforma(sp)"
                     >
-                      <span>Comprar Ahora</span>
-                      <ArrowRight class="size-4" />
+                      <span class="relative z-10">Comprar Ahora</span>
+                      <ArrowRight class="size-4 relative z-10 transition-transform group-hover:translate-x-1" />
                     </button>
 
                     <!-- Métodos de Pago y Entrega -->
-                    <div class="mt-4 pt-4 border-t border-white/10 flex items-center justify-between text-[11px] text-slate-400">
-                      <span>⚡ Entrega en &lt; 10s</span>
+                    <div class="mt-4 pt-4 border-t border-white/15 flex items-center justify-between text-[11px] text-slate-300 font-medium">
+                      <span>⚡ Entrega en &lt; 10s · Garantía 30 días</span>
                       <span>💳 Bancolombia · Nequi · Nu</span>
                     </div>
                   </div>
                 </div>
 
-                <!-- COLUMNA DERECHA: INFORMACIÓN Y PROPUESTA DE VALOR DE LA PLATAFORMA -->
-                <div class="lg:col-span-6 space-y-6 text-left order-1 lg:order-2">
-                  <!-- Tag de la Plataforma -->
-                  <div class="inline-flex items-center gap-2.5 px-3.5 py-1.5 rounded-full border border-white/15 bg-white/5 backdrop-blur-md">
-                    <span class="size-2 rounded-full animate-ping" :style="{ backgroundColor: sp.color }" />
-                    <span class="text-xs font-mono uppercase tracking-[0.2em] font-bold" :style="{ color: sp.color }">
-                      {{ sp.tag }}
-                    </span>
+                <!-- COLUMNA DERECHA: INFORMACIÓN Y PROPUESTA DE VALOR -->
+                <div
+                  class="lg:col-span-6 space-y-6 text-left order-1 lg:order-2 transition-all duration-300 ease-out"
+                  :style="getInfoStyle(idx)"
+                >
+                  <!-- Logotipo Oficial de Marca Libre y Grande (Sin caja contenedora) -->
+                  <div v-if="sp.logo" class="mb-4">
+                    <img 
+                      :src="sp.logo" 
+                      :alt="sp.nombre" 
+                      class="h-12 sm:h-16 w-auto max-w-[220px] object-contain filter drop-shadow-[0_10px_30px_rgba(0,0,0,0.95)]" 
+                    />
                   </div>
 
                   <!-- Título e Impacto -->
                   <div class="space-y-3">
-                    <h3 class="font-display text-3xl sm:text-5xl font-black text-white uppercase tracking-tight leading-tight drop-shadow-xl">
+                    <h3 class="font-display text-3xl sm:text-5xl lg:text-6xl font-black text-white uppercase tracking-tight leading-tight drop-shadow-[0_10px_30px_rgba(0,0,0,0.95)]">
                       {{ sp.nombre }}
                     </h3>
-                    <p class="text-base sm:text-lg text-cyan-300 font-medium">
+                    <p class="text-base sm:text-xl font-semibold drop-shadow" :style="{ color: sp.color }">
                       {{ sp.headline }}
                     </p>
                   </div>
 
                   <!-- Descripción -->
-                  <p class="text-sm sm:text-base text-slate-300/90 leading-relaxed font-sans max-w-xl">
+                  <p class="text-sm sm:text-base text-slate-100 leading-relaxed font-sans max-w-xl drop-shadow-md">
                     {{ sp.desc }}
                   </p>
 
@@ -793,21 +1017,13 @@ const formatCOP = (val: number) => {
                     <div
                       v-for="(feat, fIdx) in sp.features"
                       :key="fIdx"
-                      class="flex items-center gap-3 text-xs sm:text-sm text-slate-200"
+                      class="flex items-center gap-3 text-xs sm:text-sm text-slate-100 drop-shadow"
                     >
-                      <div class="size-5 rounded-full flex items-center justify-center shrink-0" :style="{ backgroundColor: `${sp.color}25` }">
+                      <div class="size-5 rounded-full flex items-center justify-center shrink-0 border border-white/20" :style="{ backgroundColor: `${sp.color}35` }">
                         <CheckCircle2 class="size-3.5" :style="{ color: sp.color }" />
                       </div>
                       <span class="font-medium">{{ feat }}</span>
                     </div>
-                  </div>
-
-                  <!-- Badge de Garantía Oficial -->
-                  <div class="inline-flex items-center gap-3 p-3 rounded-2xl border border-white/10 bg-white/5 backdrop-blur-md mt-4">
-                    <ShieldCheck class="size-5 text-emerald-400 shrink-0" />
-                    <span class="text-xs text-slate-300 font-medium">
-                      Garantía ininterrumpida de 30 días · Reemplazo automático 24/7
-                    </span>
                   </div>
                 </div>
               </template>
@@ -815,15 +1031,12 @@ const formatCOP = (val: number) => {
             </div>
           </div>
         </section>
-
-        <!-- Transición posterior a oscuridad total (Se vuelve a oscurecer) -->
-        <div class="h-20 sm:h-28 bg-gradient-to-b from-black via-black to-black pointer-events-none" />
       </div>
     </div>
 
-    <!-- ================= 4. GARANTÍAS Y BENEFICIOS ================= -->
-    <section class="container-app">
-      <div class="rounded-3xl border border-white/10 bg-white/5 p-8 sm:p-12 relative overflow-hidden backdrop-blur-md">
+    <!-- ================= 5. GARANTÍAS Y BENEFICIOS ================= -->
+    <section class="container-app pt-16">
+      <div class="rounded-3xl border border-white/15 bg-white/5 p-8 sm:p-12 relative overflow-hidden backdrop-blur-md">
         <div class="absolute -right-20 -bottom-20 size-64 rounded-full bg-brand-500/10 blur-3xl pointer-events-none" />
 
         <div class="text-center max-w-2xl mx-auto space-y-3 mb-10">
@@ -880,8 +1093,8 @@ const formatCOP = (val: number) => {
       </div>
     </section>
 
-    <!-- ================= 4. PREGUNTAS FRECUENTES ================= -->
-    <section class="container-app max-w-3xl space-y-6">
+    <!-- ================= 6. PREGUNTAS FRECUENTES ================= -->
+    <section class="container-app max-w-3xl space-y-6 pt-16">
       <div class="text-center space-y-2">
         <span class="text-xs font-mono uppercase tracking-[0.25em] text-cyan-400 font-bold">Dudas Habituales</span>
         <h2 class="font-display text-2xl sm:text-4xl font-black text-fg tracking-tight">

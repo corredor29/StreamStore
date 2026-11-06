@@ -1,8 +1,14 @@
 <script setup lang="ts">
 import { reactive, ref } from 'vue'
 import { RouterLink, useRouter } from 'vue-router'
-import { Eye, EyeOff, Lock, Mail, User } from '@lucide/vue'
-import AppLogo from '@/components/layout/AppLogo.vue'
+import { 
+  ArrowLeft, 
+  Eye, 
+  EyeOff, 
+  Lock, 
+  Mail, 
+  User 
+} from '@lucide/vue'
 import { useAuthStore } from '@/stores/auth'
 import { registerSchema } from '@/utils/validators'
 import AppAlert from '@/components/common/AppAlert.vue'
@@ -62,7 +68,6 @@ async function onSubmit() {
       password: form.password,
     })
 
-    // Redirección directa al panel de cliente
     await router.push('/mi-cuenta')
   } catch (err: any) {
     serverError.value = err?.message || 'Error al crear la cuenta. Intenta nuevamente.'
@@ -73,160 +78,231 @@ async function onSubmit() {
 </script>
 
 <template>
-  <div class="container-app flex min-h-[calc(100vh-14rem)] items-center justify-center py-12">
-    <div class="card w-full max-w-md p-6 sm:p-8">
-      <!-- Encabezado con Logotipo StreamStore -->
-      <div class="text-center">
-        <div class="flex justify-center mb-5">
-          <AppLogo size="lg" />
-        </div>
-        <h1 class="mt-2 font-display text-2xl font-black text-fg sm:text-3xl tracking-tight">
-          Crear Cuenta
-        </h1>
-        <p class="mt-2 text-sm text-muted">
-          Regístrate para comprar y gestionar tus cuentas de streaming.
-        </p>
-      </div>
-
-      <!-- Alerta de Error -->
-      <AppAlert
-        v-if="serverError"
-        variant="error"
-        title="Error al registrarse"
-        class="mt-4"
-      >
-        <p>{{ serverError }}</p>
-      </AppAlert>
-
-      <!-- Formulario -->
-      <form class="mt-6 space-y-4" novalidate @submit.prevent="onSubmit">
-        <!-- Campo Nombre -->
-        <div>
-          <label for="register-name" class="field-label">Nombre completo</label>
-          <div class="relative">
-            <input
-              id="register-name"
-              v-model="form.nombre"
-              type="text"
-              autocomplete="name"
-              placeholder="Ej. Juan Pérez"
-              required
-              class="field-input pl-10"
-              :aria-invalid="!!errors.nombre"
-              :aria-describedby="errors.nombre ? 'register-name-error' : undefined"
-              @blur="validateField('nombre')"
-            />
-            <User class="absolute left-3 top-3 size-4 text-muted" aria-hidden="true" />
-          </div>
-          <p v-if="errors.nombre" id="register-name-error" class="field-error" role="alert">
-            {{ errors.nombre }}
-          </p>
-        </div>
-
-        <!-- Campo Correo -->
-        <div>
-          <label for="register-email" class="field-label">Correo electrónico</label>
-          <div class="relative">
-            <input
-              id="register-email"
-              v-model="form.email"
-              type="email"
-              autocomplete="email"
-              placeholder="nombre@ejemplo.com"
-              required
-              class="field-input pl-10"
-              :aria-invalid="!!errors.email"
-              :aria-describedby="errors.email ? 'register-email-error' : undefined"
-              @blur="validateField('email')"
-            />
-            <Mail class="absolute left-3 top-3 size-4 text-muted" aria-hidden="true" />
-          </div>
-          <p v-if="errors.email" id="register-email-error" class="field-error" role="alert">
-            {{ errors.email }}
-          </p>
-        </div>
-
-        <!-- Campo Contraseña -->
-        <div>
-          <label for="register-password" class="field-label">Contraseña</label>
-          <div class="relative">
-            <input
-              id="register-password"
-              v-model="form.password"
-              :type="showPassword ? 'text' : 'password'"
-              autocomplete="new-password"
-              placeholder="Mínimo 6 caracteres"
-              required
-              class="field-input pl-10 pr-10"
-              :aria-invalid="!!errors.password"
-              :aria-describedby="errors.password ? 'register-password-error' : undefined"
-              @blur="validateField('password')"
-            />
-            <Lock class="absolute left-3 top-3 size-4 text-muted" aria-hidden="true" />
-            <button
-              type="button"
-              class="absolute right-3 top-2.5 text-muted hover:text-fg focus:outline-none"
-              :aria-label="showPassword ? 'Ocultar contraseña' : 'Ver contraseña'"
-              @click="showPassword = !showPassword"
-            >
-              <component :is="showPassword ? EyeOff : Eye" class="size-4" aria-hidden="true" />
-            </button>
-          </div>
-          <p v-if="errors.password" id="register-password-error" class="field-error" role="alert">
-            {{ errors.password }}
-          </p>
-        </div>
-
-        <!-- Campo Confirmar Contraseña -->
-        <div>
-          <label for="register-confirm-password" class="field-label">Confirmar contraseña</label>
-          <div class="relative">
-            <input
-              id="register-confirm-password"
-              v-model="form.confirmPassword"
-              :type="showConfirmPassword ? 'text' : 'password'"
-              autocomplete="new-password"
-              placeholder="Repite tu contraseña"
-              required
-              class="field-input pl-10 pr-10"
-              :aria-invalid="!!errors.confirmPassword"
-              :aria-describedby="errors.confirmPassword ? 'register-confirm-password-error' : undefined"
-              @blur="validateField('confirmPassword')"
-            />
-            <Lock class="absolute left-3 top-3 size-4 text-muted" aria-hidden="true" />
-            <button
-              type="button"
-              class="absolute right-3 top-2.5 text-muted hover:text-fg focus:outline-none"
-              :aria-label="showConfirmPassword ? 'Ocultar confirmación' : 'Ver confirmación'"
-              @click="showConfirmPassword = !showConfirmPassword"
-            >
-              <component :is="showConfirmPassword ? EyeOff : Eye" class="size-4" aria-hidden="true" />
-            </button>
-          </div>
-          <p v-if="errors.confirmPassword" id="register-confirm-password-error" class="field-error" role="alert">
-            {{ errors.confirmPassword }}
-          </p>
-        </div>
-
-        <!-- Botón de Registro -->
-        <button
-          type="submit"
-          class="btn-primary w-full py-3"
-          :disabled="isSubmitting"
-          :aria-busy="isSubmitting"
-        >
-          <span v-if="isSubmitting">Creando cuenta...</span>
-          <span v-else>Crear cuenta gratuita</span>
-        </button>
-      </form>
-
-      <!-- Pie con enlace a Login -->
-      <p class="mt-6 text-center text-xs text-muted">
-        ¿Ya tienes una cuenta?
-        <RouterLink to="/login" class="font-semibold text-brand-300 hover:text-brand-200 underline underline-offset-4">
-          Inicia sesión aquí
-        </RouterLink>
-      </p>
+  <div class="relative min-h-screen w-full flex flex-col justify-between bg-black text-white overflow-hidden">
+    <!-- FONDO CINEMATOGRÁFICO AMBIENTAL -->
+    <div
+      class="absolute inset-0 bg-cover bg-center transition-all duration-1000 scale-105 pointer-events-none opacity-40"
+      style="background-image: url('/hbo_max_mosaic_bg.jpg');"
+    >
+      <div class="absolute inset-0 bg-gradient-to-t from-black via-black/80 to-black/95" />
+      <div class="absolute inset-0 bg-[radial-gradient(ellipse_at_center,transparent_10%,rgba(0,0,0,0.85)_75%)]" />
     </div>
+
+    <div class="pointer-events-none absolute -top-40 right-1/4 size-[500px] rounded-full bg-brand-600/15 blur-[140px]" />
+    <div class="pointer-events-none absolute -bottom-40 left-1/4 size-[500px] rounded-full bg-cyan-600/15 blur-[140px]" />
+
+    <!-- CABECERA MINIMALISTA -->
+    <header class="relative z-20 flex items-center justify-between px-6 py-6 sm:px-12">
+      <RouterLink
+        to="/"
+        class="inline-flex items-center gap-3 group transition-transform hover:scale-[1.02]"
+        aria-label="Ir al inicio de StreamStore"
+      >
+        <img
+          src="/streamstore_icon.png"
+          alt="StreamStore"
+          class="size-10 sm:size-11 object-contain drop-shadow-[0_0_15px_rgba(128,87,255,0.7)]"
+        />
+        <span class="font-display text-2xl sm:text-3xl font-black uppercase tracking-tight text-white flex items-baseline gap-1">
+          <span>STREAM</span>
+          <span class="bg-gradient-to-r from-[#8057FF] via-[#9B51E0] to-[#06B6D4] bg-clip-text text-transparent">STORE</span>
+        </span>
+      </RouterLink>
+
+      <RouterLink
+        to="/login"
+        class="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/5 px-4 py-2 text-xs font-semibold text-neutral-300 backdrop-blur hover:bg-white/10 hover:text-white transition-all"
+      >
+        <ArrowLeft class="size-3.5" />
+        <span>Ya tengo cuenta</span>
+      </RouterLink>
+    </header>
+
+    <!-- FORMULARIO CENTRAL -->
+    <main class="relative z-20 my-auto flex flex-col items-center justify-center px-4 py-8 sm:px-6">
+      <div class="w-full max-w-[480px] rounded-3xl border border-white/10 bg-black/75 p-8 sm:p-11 shadow-[0_25px_60px_rgba(0,0,0,0.95)] backdrop-blur-2xl">
+        <div>
+          <h1 class="font-display text-3xl sm:text-4xl font-black text-white tracking-tight">
+            Crear cuenta
+          </h1>
+          <p class="mt-2 text-xs sm:text-sm text-neutral-400 font-light">
+            Regístrate para comprar pantallas y cuentas con entrega inmediata.
+          </p>
+        </div>
+
+        <AppAlert
+          v-if="serverError"
+          variant="error"
+          title="No se pudo crear la cuenta"
+          class="mt-5"
+        >
+          <p>{{ serverError }}</p>
+        </AppAlert>
+
+        <form class="mt-7 space-y-4" novalidate @submit.prevent="onSubmit">
+          <!-- Campo Nombre -->
+          <div class="space-y-1.5">
+            <label for="register-name" class="block text-xs font-semibold uppercase tracking-wider text-neutral-300">
+              Nombre Completo
+            </label>
+            <div class="relative group">
+              <input
+                id="register-name"
+                v-model="form.nombre"
+                type="text"
+                autocomplete="name"
+                placeholder="Ej. Juan Pérez"
+                required
+                class="w-full rounded-xl border border-neutral-700/80 bg-neutral-900/90 pl-11 pr-4 py-3 text-sm text-white placeholder:text-neutral-500 focus:border-cyan-400 focus:bg-black focus:outline-none focus:ring-1 focus:ring-cyan-400 transition-all shadow-inner"
+                :class="{ 'border-rose-500 focus:border-rose-500 focus:ring-rose-500': errors.nombre }"
+                :aria-invalid="!!errors.nombre"
+                :aria-describedby="errors.nombre ? 'register-name-error' : undefined"
+                @blur="validateField('nombre')"
+              />
+              <User class="absolute left-3.5 top-3.5 size-4 text-neutral-400 group-focus-within:text-cyan-400 transition-colors" aria-hidden="true" />
+            </div>
+            <p v-if="errors.nombre" id="register-name-error" class="text-xs font-medium text-rose-400 pt-0.5" role="alert">
+              {{ errors.nombre }}
+            </p>
+          </div>
+
+          <!-- Campo Correo -->
+          <div class="space-y-1.5">
+            <label for="register-email" class="block text-xs font-semibold uppercase tracking-wider text-neutral-300">
+              Correo Electrónico
+            </label>
+            <div class="relative group">
+              <input
+                id="register-email"
+                v-model="form.email"
+                type="email"
+                autocomplete="email"
+                placeholder="nombre@ejemplo.com"
+                required
+                class="w-full rounded-xl border border-neutral-700/80 bg-neutral-900/90 pl-11 pr-4 py-3 text-sm text-white placeholder:text-neutral-500 focus:border-cyan-400 focus:bg-black focus:outline-none focus:ring-1 focus:ring-cyan-400 transition-all shadow-inner"
+                :class="{ 'border-rose-500 focus:border-rose-500 focus:ring-rose-500': errors.email }"
+                :aria-invalid="!!errors.email"
+                :aria-describedby="errors.email ? 'register-email-error' : undefined"
+                @blur="validateField('email')"
+              />
+              <Mail class="absolute left-3.5 top-3.5 size-4 text-neutral-400 group-focus-within:text-cyan-400 transition-colors" aria-hidden="true" />
+            </div>
+            <p v-if="errors.email" id="register-email-error" class="text-xs font-medium text-rose-400 pt-0.5" role="alert">
+              {{ errors.email }}
+            </p>
+          </div>
+
+          <!-- Campo Contraseña -->
+          <div class="space-y-1.5">
+            <label for="register-password" class="block text-xs font-semibold uppercase tracking-wider text-neutral-300">
+              Contraseña
+            </label>
+            <div class="relative group">
+              <input
+                id="register-password"
+                v-model="form.password"
+                :type="showPassword ? 'text' : 'password'"
+                autocomplete="new-password"
+                placeholder="Mínimo 6 caracteres"
+                required
+                class="w-full rounded-xl border border-neutral-700/80 bg-neutral-900/90 pl-11 pr-11 py-3 text-sm text-white placeholder:text-neutral-500 focus:border-cyan-400 focus:bg-black focus:outline-none focus:ring-1 focus:ring-cyan-400 transition-all shadow-inner"
+                :class="{ 'border-rose-500 focus:border-rose-500 focus:ring-rose-500': errors.password }"
+                :aria-invalid="!!errors.password"
+                :aria-describedby="errors.password ? 'register-password-error' : undefined"
+                @blur="validateField('password')"
+              />
+              <Lock class="absolute left-3.5 top-3.5 size-4 text-neutral-400 group-focus-within:text-cyan-400 transition-colors" aria-hidden="true" />
+              <button
+                type="button"
+                class="absolute right-3.5 top-2.5 text-neutral-400 hover:text-white transition-colors focus:outline-none p-0.5 rounded-lg"
+                :aria-label="showPassword ? 'Ocultar contraseña' : 'Ver contraseña'"
+                @click="showPassword = !showPassword"
+              >
+                <component :is="showPassword ? EyeOff : Eye" class="size-4" aria-hidden="true" />
+              </button>
+            </div>
+            <p v-if="errors.password" id="register-password-error" class="text-xs font-medium text-rose-400 pt-0.5" role="alert">
+              {{ errors.password }}
+            </p>
+          </div>
+
+          <!-- Campo Confirmar Contraseña -->
+          <div class="space-y-1.5">
+            <label for="register-confirm-password" class="block text-xs font-semibold uppercase tracking-wider text-neutral-300">
+              Confirmar Contraseña
+            </label>
+            <div class="relative group">
+              <input
+                id="register-confirm-password"
+                v-model="form.confirmPassword"
+                :type="showConfirmPassword ? 'text' : 'password'"
+                autocomplete="new-password"
+                placeholder="Repite tu contraseña"
+                required
+                class="w-full rounded-xl border border-neutral-700/80 bg-neutral-900/90 pl-11 pr-11 py-3 text-sm text-white placeholder:text-neutral-500 focus:border-cyan-400 focus:bg-black focus:outline-none focus:ring-1 focus:ring-cyan-400 transition-all shadow-inner"
+                :class="{ 'border-rose-500 focus:border-rose-500 focus:ring-rose-500': errors.confirmPassword }"
+                :aria-invalid="!!errors.confirmPassword"
+                :aria-describedby="errors.confirmPassword ? 'register-confirm-password-error' : undefined"
+                @blur="validateField('confirmPassword')"
+              />
+              <Lock class="absolute left-3.5 top-3.5 size-4 text-neutral-400 group-focus-within:text-cyan-400 transition-colors" aria-hidden="true" />
+              <button
+                type="button"
+                class="absolute right-3.5 top-2.5 text-neutral-400 hover:text-white transition-colors focus:outline-none p-0.5 rounded-lg"
+                :aria-label="showConfirmPassword ? 'Ocultar confirmación' : 'Ver confirmación'"
+                @click="showConfirmPassword = !showConfirmPassword"
+              >
+                <component :is="showConfirmPassword ? EyeOff : Eye" class="size-4" aria-hidden="true" />
+              </button>
+            </div>
+            <p v-if="errors.confirmPassword" id="register-confirm-password-error" class="text-xs font-medium text-rose-400 pt-0.5" role="alert">
+              {{ errors.confirmPassword }}
+            </p>
+          </div>
+
+          <!-- Botón de Registro -->
+          <div class="pt-3">
+            <button
+              type="submit"
+              class="w-full relative inline-flex items-center justify-center rounded-xl bg-gradient-to-r from-[#8057FF] via-[#9B51E0] to-[#06B6D4] hover:opacity-95 text-white font-bold text-base py-3.5 shadow-[0_0_25px_rgba(128,87,255,0.35)] transition-all duration-200 active:scale-[0.99] disabled:opacity-60 disabled:pointer-events-none"
+              :disabled="isSubmitting"
+              :aria-busy="isSubmitting"
+            >
+              <span v-if="isSubmitting" class="flex items-center gap-2">
+                <span class="size-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                <span>Creando cuenta...</span>
+              </span>
+              <span v-else class="font-display">
+                Crear cuenta gratis
+              </span>
+            </button>
+          </div>
+        </form>
+
+        <!-- Pie de la tarjeta -->
+        <div class="mt-8 border-t border-neutral-800 pt-6 text-center">
+          <p class="text-sm text-neutral-400">
+            ¿Ya tienes una cuenta?
+            <RouterLink
+              to="/login"
+              class="ml-1 font-bold text-white hover:text-cyan-400 underline underline-offset-4 transition-colors"
+            >
+              Inicia sesión aquí
+            </RouterLink>
+          </p>
+        </div>
+      </div>
+    </main>
+
+    <!-- PIE DE PÁGINA MINIMALISTA -->
+    <footer class="relative z-20 py-6 px-6 sm:px-12 text-center text-xs text-neutral-500">
+      <div class="flex flex-wrap items-center justify-center gap-4 sm:gap-6">
+        <span>© {{ new Date().getFullYear() }} StreamStore</span>
+        <span>•</span>
+        <RouterLink to="/" class="hover:text-neutral-300 transition-colors">Términos de servicio</RouterLink>
+        <span>•</span>
+        <RouterLink to="/" class="hover:text-neutral-300 transition-colors">Privacidad</RouterLink>
+      </div>
+    </footer>
   </div>
 </template>

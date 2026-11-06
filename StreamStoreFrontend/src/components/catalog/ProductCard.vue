@@ -123,9 +123,17 @@ function onAgregar() {
           <span class="text-[10px] font-mono uppercase tracking-[0.2em] text-white/60 block">
             Plataforma
           </span>
-          <p class="font-display text-xl font-black text-white tracking-tight drop-shadow">
-            {{ producto.plataforma?.nombre }}
-          </p>
+          <div class="h-8 flex items-center">
+            <img
+              v-if="producto.plataforma?.logoUrl"
+              :src="producto.plataforma.logoUrl"
+              :alt="producto.plataforma?.nombre"
+              class="h-7 max-w-[130px] object-contain drop-shadow"
+            />
+            <p v-else class="font-display text-xl font-black text-white tracking-tight drop-shadow">
+              {{ producto.plataforma?.nombre }}
+            </p>
+          </div>
         </div>
 
         <div class="flex items-center gap-1 text-[11px] font-mono text-white/80 bg-black/40 backdrop-blur-sm px-2 py-0.5 rounded-md border border-white/10">

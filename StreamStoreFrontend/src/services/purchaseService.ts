@@ -9,6 +9,51 @@ export const METODOS_PAGO: ReadonlyArray<{ id: MetodoPago; label: string; descri
   { id: 'DAVIPLATA', label: 'Daviplata', descripcion: 'Billetera digital (simulada)' },
 ]
 
+function normalizeCompra(c: any): Compra {
+  const items = c.items || c.detalles || []
+  return {
+    id: Number(c.id),
+    usuarioId: Number(c.usuario_id ?? c.usuarioId ?? 1),
+    fecha: c.createdAt || c.fecha || new Date().toISOString(),
+    fechaPago: c.pagada_at || c.fecha_pago || c.fechaPago || null,
+    total: Number(c.total ?? 0),
+    estado: (c.estado || 'PENDIENTE').toUpperCase(),
+    metodoPago: c.metodo_pago ?? c.metodoPago ?? 'TARJETA',
+    detalles: items.map((d: any, idx: number) => ({
+      id: Number(d.id ?? idx + 1),
+      productoId: Number(d.producto_id ?? d.productoId ?? 1),
+      producto: d.producto ? {
+        id: Number(d.producto.id),
+        plataformaId: Number(d.producto.plataforma?.id ?? 1),
+        plataforma: d.producto.plataforma ? {
+          id: Number(d.producto.plataforma.id),
+          nombre: d.producto.plataforma.nombre,
+          slug: (d.producto.plataforma.nombre || '').toLowerCase(),
+          color: d.producto.plataforma.color || '#8057FF',
+        } : undefined,
+        nombre: d.producto.nombre,
+        tipo: (d.producto.tipo || '').toUpperCase().includes('COMPLETA') ? 'CUENTA_COMPLETA' : 'PANTALLA',
+        duracionDias: Number(d.producto.duracion_dias ?? d.producto.duracionDias ?? 30),
+        precio: Number(d.precio_unitario ?? d.precioUnitario ?? 0),
+        stock: 5,
+        activo: true,
+      } : {
+        id: Number(d.producto_id ?? 1),
+        plataformaId: 1,
+        nombre: d.nombre_producto || 'Suscripción',
+        tipo: 'CUENTA_COMPLETA',
+        duracionDias: 30,
+        precio: Number(d.precio_unitario ?? 0),
+        stock: 5,
+        activo: true,
+      },
+      cantidad: Number(d.cantidad ?? 1),
+      precioUnitario: Number(d.precio_unitario ?? d.precioUnitario ?? 0),
+      subtotal: Number(d.subtotal ?? 0),
+    })),
+  }
+}
+
 // Historial inicial realista de compras para demostración
 export const mockComprasIniciales: Compra[] = [
   {
@@ -47,27 +92,8 @@ export const mockComprasIniciales: Compra[] = [
       },
     ],
   },
-  {
-    id: 5003,
-    usuarioId: 1,
-    fecha: new Date(Date.now() - 35 * 24 * 60 * 60 * 1000).toISOString(),
-    fechaPago: new Date(Date.now() - 35 * 24 * 60 * 60 * 1000).toISOString(),
-    total: 28000,
-    estado: 'PAGADA',
-    detalles: [
-      {
-        id: 3,
-        productoId: 7,
-        producto: { id: 7, plataformaId: 4, plataforma: { id: 4, nombre: 'Max', slug: 'max', color: '#7B2FF7' }, nombre: 'Max Cuenta Completa', tipo: 'CUENTA_COMPLETA', duracionDias: 30, precio: 28000, stock: 1, activo: true },
-        cantidad: 1,
-        precioUnitario: 28000,
-        subtotal: 28000,
-      },
-    ],
-  },
 ]
 
-// Almacén en memoria de compras creadas durante la sesión para modo mock
 export const mockComprasRealizadas: Compra[] = [...mockComprasIniciales]
 
 export const purchaseService = {
@@ -95,8 +121,9 @@ export const purchaseService = {
       return mockDelay(nuevaCompra, 400)
     }
 
-    const { data } = await api.post<Compra>('/compras', { items })
-    return data
+    const { data } = await api.post<any>('/compras', { items })
+    const raw = data?.data || data
+    return normalizeCompra(raw)
   },
 
   /**
@@ -110,7 +137,6 @@ export const purchaseService = {
         throw { status: 404, message: 'La orden de compra no existe o expiró.' }
       }
 
-      // Simulación de rechazo opcional si los últimos 4 dígitos son 0000
       if (payload.ultimos4 === '0000') {
         compra.estado = 'RECHAZADA'
         return mockDelay<PagoResultado>({
@@ -122,8 +148,6 @@ export const purchaseService = {
 
       compra.estado = 'PAGADA'
       compra.fechaPago = new Date().toISOString()
-
-      // ACTIVACIÓN AUTOMÁTICA DE LOS SERVICIOS DE LA COMPRA
       accountService.activarServiciosDeCompra(compra)
 
       return mockDelay<PagoResultado>({
@@ -133,16 +157,28 @@ export const purchaseService = {
       }, 700)
     }
 
-    const { data } = await api.post<PagoResultado>(`/compras/${compraId}/pagar`, payload)
-    return data
+    const { data } = await api.post<any>(`/compras/${compraId}/pagar`, payload)
+    const raw = data?.data || data
+    return {
+      compra: raw.compra ? normalizeCompra(raw.compra) : undefined as any,
+      aprobado: true,
+      mensaje: data?.message || 'Pago procesado exitosamente',
+    }
   },
 
   async mias(): Promise<Compra[]> {
     if (USE_MOCKS) {
       return mockDelay([...mockComprasRealizadas], 300)
     }
-    const { data } = await api.get<Compra[]>('/compras/mias')
-    return data
+    try {
+      const response = await api.get<any>('/compras/mias')
+      const raw = response.data
+      const list = Array.isArray(raw) ? raw : (Array.isArray(raw?.data) ? raw.data : [])
+      return list.map(normalizeCompra)
+    } catch (e) {
+      console.warn('Fallo al obtener compras del backend, usando datos en memoria:', e)
+      return mockComprasRealizadas
+    }
   },
 
   async get(id: number): Promise<Compra> {
@@ -151,7 +187,8 @@ export const purchaseService = {
       if (!compra) throw { status: 404, message: 'Compra no encontrada.' }
       return mockDelay(compra, 200)
     }
-    const { data } = await api.get<Compra>(`/compras/${id}`)
-    return data
+    const response = await api.get<any>(`/compras/${id}`)
+    const raw = response.data?.data || response.data
+    return normalizeCompra(raw)
   },
 }

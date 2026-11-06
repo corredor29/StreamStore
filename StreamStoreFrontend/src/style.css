@@ -109,3 +109,32 @@
     @apply mt-1 text-xs text-danger font-medium;
   }
 }
+
+
+/* ---------- Scrollbar Moderno StreamStore (Elimina el estilo gris 2008) ---------- */
+::-webkit-scrollbar {
+  width: 9px;
+  height: 9px;
+}
+
+::-webkit-scrollbar-track {
+  background: #05070f;
+}
+
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, #1e2640 0%, #151b32 100%);
+  border-radius: 9999px;
+  border: 2px solid #05070f;
+  transition: all 0.3s ease;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(180deg, #06B6D4 0%, #8057FF 100%);
+  box-shadow: 0 0 12px rgba(6, 182, 212, 0.6);
+}
+
+/* Firefox */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: #242f4c #05070f;
+}

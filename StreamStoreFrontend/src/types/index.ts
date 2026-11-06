@@ -98,6 +98,7 @@ export interface Compra {
   fechaPago?: string | null
   total: number
   estado: EstadoCompra
+  metodoPago?: string | null
   detalles: CompraDetalle[]
 }
 

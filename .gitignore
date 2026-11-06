@@ -22,3 +22,11 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Sensitive & Local files
+.env
+*.env
+*.sqlite
+*.sql
+*.bat
+

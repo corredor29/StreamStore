@@ -1,8 +1,16 @@
 <script setup lang="ts">
 import { reactive, ref } from 'vue'
 import { RouterLink, useRoute, useRouter } from 'vue-router'
-import { Eye, EyeOff, Lock, Mail, ShieldAlert, Sparkles, UserCheck } from '@lucide/vue'
-import AppLogo from '@/components/layout/AppLogo.vue'
+import { 
+  ArrowLeft, 
+  Eye, 
+  EyeOff, 
+  Lock, 
+  Mail, 
+  ShieldCheck, 
+  Sparkles, 
+  UserCheck 
+} from '@lucide/vue'
 import { useAuthStore } from '@/stores/auth'
 import { DEMO_ACCOUNTS } from '@/services/authService'
 import { loginSchema } from '@/utils/validators'
@@ -23,8 +31,10 @@ const errors = reactive<Record<string, string>>({
 })
 
 const showPassword = ref(false)
+const rememberMe = ref(true)
 const isSubmitting = ref(false)
 const serverError = ref<string | null>(null)
+const showDemoQuickAccess = ref(false)
 
 function validateField(field: 'email' | 'password') {
   errors[field] = ''
@@ -68,7 +78,6 @@ async function onSubmit() {
       password: form.password,
     })
 
-    // Redirección inteligente post-login
     const redirectPath = route.query.redirect as string
     if (redirectPath && redirectPath.startsWith('/')) {
       await router.push(redirectPath)
@@ -86,132 +95,238 @@ async function onSubmit() {
 </script>
 
 <template>
-  <div class="container-app flex min-h-[calc(100vh-14rem)] items-center justify-center py-12">
-    <div class="card w-full max-w-md p-6 sm:p-8">
-      <!-- Encabezado con Logotipo StreamStore -->
-      <div class="text-center">
-        <div class="flex justify-center mb-5">
-          <AppLogo size="lg" />
-        </div>
-        <h1 class="mt-2 font-display text-2xl font-black text-fg sm:text-3xl tracking-tight">
-          Iniciar Sesión
-        </h1>
-        <p class="mt-2 text-sm text-muted">
-          Ingresa a tu cuenta para gestionar tus servicios de streaming.
-        </p>
-      </div>
+  <div class="relative min-h-screen w-full flex flex-col justify-between bg-black text-white overflow-hidden">
+    <!-- ================= FONDO CINEMATOGRÁFICO AMBIENTAL ================= -->
+    <div
+      class="absolute inset-0 bg-cover bg-center transition-all duration-1000 scale-105 pointer-events-none opacity-40"
+      style="background-image: url('/hbo_max_mosaic_bg.jpg');"
+    >
+      <!-- Viñeta Gradual Estilo Cine / HBO Max -->
+      <div class="absolute inset-0 bg-gradient-to-t from-black via-black/80 to-black/95" />
+      <div class="absolute inset-0 bg-[radial-gradient(ellipse_at_center,transparent_10%,rgba(0,0,0,0.85)_75%)]" />
+    </div>
 
-      <!-- Cuentas demo para agilizar revisión -->
-      <div class="mt-6 rounded-xl border border-brand-400/30 bg-surface-2 p-3 text-xs">
-        <div class="flex items-center gap-1.5 font-semibold text-brand-200">
-          <Sparkles class="size-3.5" aria-hidden="true" />
-          <span>Accesos de prueba para demostración</span>
-        </div>
-        <div class="mt-2 flex flex-wrap gap-2">
-          <button
-            type="button"
-            class="flex items-center gap-1 rounded-lg border border-line bg-surface px-2.5 py-1 text-fg hover:border-brand-400"
-            @click="fillDemoAccount('cliente')"
-          >
-            <UserCheck class="size-3 text-success" aria-hidden="true" />
-            <span>Cliente Demo (Laura)</span>
-          </button>
-          <button
-            type="button"
-            class="flex items-center gap-1 rounded-lg border border-line bg-surface px-2.5 py-1 text-fg hover:border-brand-400"
-            @click="fillDemoAccount('admin')"
-          >
-            <ShieldAlert class="size-3 text-warning" aria-hidden="true" />
-            <span>Admin Demo (Panel)</span>
-          </button>
-        </div>
-      </div>
+    <!-- Haces de Luz Suaves de Fondo -->
+    <div class="pointer-events-none absolute -top-40 left-1/4 size-[500px] rounded-full bg-brand-600/15 blur-[140px]" />
+    <div class="pointer-events-none absolute -bottom-40 right-1/4 size-[500px] rounded-full bg-cyan-600/15 blur-[140px]" />
 
-      <!-- Alerta de Error de Servidor / Credenciales -->
-      <AppAlert
-        v-if="serverError"
-        variant="error"
-        title="Error de autenticación"
-        class="mt-4"
+    <!-- ================= CABECERA MINIMALISTA (LOGO EXTERIOR) ================= -->
+    <header class="relative z-20 flex items-center justify-between px-6 py-6 sm:px-12">
+      <RouterLink
+        to="/"
+        class="inline-flex items-center gap-3 group transition-transform hover:scale-[1.02]"
+        aria-label="Ir al inicio de StreamStore"
       >
-        <p>{{ serverError }}</p>
-      </AppAlert>
+        <img
+          src="/streamstore_icon.png"
+          alt="StreamStore"
+          class="size-10 sm:size-11 object-contain drop-shadow-[0_0_15px_rgba(128,87,255,0.7)]"
+        />
+        <span class="font-display text-2xl sm:text-3xl font-black uppercase tracking-tight text-white flex items-baseline gap-1">
+          <span>STREAM</span>
+          <span class="bg-gradient-to-r from-[#8057FF] via-[#9B51E0] to-[#06B6D4] bg-clip-text text-transparent">STORE</span>
+        </span>
+      </RouterLink>
 
-      <!-- Formulario -->
-      <form class="mt-6 space-y-4" novalidate @submit.prevent="onSubmit">
-        <!-- Campo Correo -->
+      <RouterLink
+        to="/catalogo"
+        class="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/5 px-4 py-2 text-xs font-semibold text-neutral-300 backdrop-blur hover:bg-white/10 hover:text-white transition-all"
+      >
+        <ArrowLeft class="size-3.5" />
+        <span class="hidden sm:inline">Explorar catálogo</span>
+        <span class="sm:hidden">Catálogo</span>
+      </RouterLink>
+    </header>
+
+    <!-- ================= CONTENEDOR CENTRAL: FORMULARIO LIMPIO ================= -->
+    <main class="relative z-20 my-auto flex flex-col items-center justify-center px-4 py-8 sm:px-6">
+      <div class="w-full max-w-[460px] rounded-3xl border border-white/10 bg-black/75 p-8 sm:p-11 shadow-[0_25px_60px_rgba(0,0,0,0.95)] backdrop-blur-2xl">
+        
+        <!-- Título Principal Limpio -->
         <div>
-          <label for="login-email" class="field-label">Correo electrónico</label>
-          <div class="relative">
-            <input
-              id="login-email"
-              v-model="form.email"
-              type="email"
-              autocomplete="email"
-              placeholder="nombre@ejemplo.com"
-              required
-              class="field-input pl-10"
-              :aria-invalid="!!errors.email"
-              :aria-describedby="errors.email ? 'login-email-error' : undefined"
-              @blur="validateField('email')"
-            />
-            <Mail class="absolute left-3 top-3 size-4 text-muted" aria-hidden="true" />
-          </div>
-          <p v-if="errors.email" id="login-email-error" class="field-error" role="alert">
-            {{ errors.email }}
+          <h1 class="font-display text-3xl sm:text-4xl font-black text-white tracking-tight">
+            Iniciar sesión
+          </h1>
+          <p class="mt-2 text-xs sm:text-sm text-neutral-400 font-light">
+            Ingresa tus datos para acceder a tus pantallas y suscripciones.
           </p>
         </div>
 
-        <!-- Campo Contraseña -->
-        <div>
-          <label for="login-password" class="field-label">Contraseña</label>
-          <div class="relative">
-            <input
-              id="login-password"
-              v-model="form.password"
-              :type="showPassword ? 'text' : 'password'"
-              autocomplete="current-password"
-              placeholder="••••••••"
-              required
-              class="field-input pl-10 pr-10"
-              :aria-invalid="!!errors.password"
-              :aria-describedby="errors.password ? 'login-password-error' : undefined"
-              @blur="validateField('password')"
-            />
-            <Lock class="absolute left-3 top-3 size-4 text-muted" aria-hidden="true" />
+        <!-- Alerta de Error -->
+        <AppAlert
+          v-if="serverError"
+          variant="error"
+          title="No se pudo iniciar sesión"
+          class="mt-5"
+        >
+          <p>{{ serverError }}</p>
+        </AppAlert>
+
+        <!-- Formulario -->
+        <form class="mt-7 space-y-5" novalidate @submit.prevent="onSubmit">
+          <!-- Campo Correo Electrónico -->
+          <div class="space-y-1.5">
+            <label for="login-email" class="block text-xs font-semibold uppercase tracking-wider text-neutral-300">
+              Correo Electrónico
+            </label>
+            <div class="relative group">
+              <input
+                id="login-email"
+                v-model="form.email"
+                type="email"
+                autocomplete="email"
+                placeholder="nombre@ejemplo.com"
+                required
+                class="w-full rounded-xl border border-neutral-700/80 bg-neutral-900/90 pl-11 pr-4 py-3.5 text-sm text-white placeholder:text-neutral-500 focus:border-cyan-400 focus:bg-black focus:outline-none focus:ring-1 focus:ring-cyan-400 transition-all shadow-inner"
+                :class="{ 'border-rose-500 focus:border-rose-500 focus:ring-rose-500': errors.email }"
+                :aria-invalid="!!errors.email"
+                :aria-describedby="errors.email ? 'login-email-error' : undefined"
+                @blur="validateField('email')"
+              />
+              <Mail class="absolute left-3.5 top-3.5 size-4 text-neutral-400 group-focus-within:text-cyan-400 transition-colors" aria-hidden="true" />
+            </div>
+            <p v-if="errors.email" id="login-email-error" class="text-xs font-medium text-rose-400 pt-0.5" role="alert">
+              {{ errors.email }}
+            </p>
+          </div>
+
+          <!-- Campo Contraseña -->
+          <div class="space-y-1.5">
+            <div class="flex items-center justify-between">
+              <label for="login-password" class="block text-xs font-semibold uppercase tracking-wider text-neutral-300">
+                Contraseña
+              </label>
+              <button
+                type="button"
+                class="text-xs text-neutral-400 hover:text-cyan-400 transition-colors"
+                @click="fillDemoAccount('cliente')"
+              >
+                ¿Olvidaste tu contraseña?
+              </button>
+            </div>
+            <div class="relative group">
+              <input
+                id="login-password"
+                v-model="form.password"
+                :type="showPassword ? 'text' : 'password'"
+                autocomplete="current-password"
+                placeholder="••••••••"
+                required
+                class="w-full rounded-xl border border-neutral-700/80 bg-neutral-900/90 pl-11 pr-11 py-3.5 text-sm text-white placeholder:text-neutral-500 focus:border-cyan-400 focus:bg-black focus:outline-none focus:ring-1 focus:ring-cyan-400 transition-all shadow-inner"
+                :class="{ 'border-rose-500 focus:border-rose-500 focus:ring-rose-500': errors.password }"
+                :aria-invalid="!!errors.password"
+                :aria-describedby="errors.password ? 'login-password-error' : undefined"
+                @blur="validateField('password')"
+              />
+              <Lock class="absolute left-3.5 top-3.5 size-4 text-neutral-400 group-focus-within:text-cyan-400 transition-colors" aria-hidden="true" />
+              <button
+                type="button"
+                class="absolute right-3.5 top-3 text-neutral-400 hover:text-white transition-colors focus:outline-none p-0.5 rounded-lg"
+                :aria-label="showPassword ? 'Ocultar contraseña' : 'Ver contraseña'"
+                @click="showPassword = !showPassword"
+              >
+                <component :is="showPassword ? EyeOff : Eye" class="size-4" aria-hidden="true" />
+              </button>
+            </div>
+            <p v-if="errors.password" id="login-password-error" class="text-xs font-medium text-rose-400 pt-0.5" role="alert">
+              {{ errors.password }}
+            </p>
+          </div>
+
+          <!-- Opciones adicionales: Recordarme -->
+          <div class="flex items-center justify-between text-xs text-neutral-400 pt-1">
+            <label class="flex items-center gap-2 cursor-pointer select-none">
+              <input
+                v-model="rememberMe"
+                type="checkbox"
+                class="size-4 rounded border-neutral-700 bg-neutral-900 text-brand-500 focus:ring-brand-400 focus:ring-offset-0"
+              />
+              <span>Recordar mi sesión</span>
+            </label>
+
+            <!-- Acceso rápido Demo sutil -->
             <button
               type="button"
-              class="absolute right-3 top-2.5 text-muted hover:text-fg focus:outline-none"
-              :aria-label="showPassword ? 'Ocultar contraseña' : 'Ver contraseña'"
-              @click="showPassword = !showPassword"
+              class="inline-flex items-center gap-1 text-[11px] font-mono text-cyan-400/90 hover:text-cyan-300 transition-colors"
+              @click="showDemoQuickAccess = !showDemoQuickAccess"
             >
-              <component :is="showPassword ? EyeOff : Eye" class="size-4" aria-hidden="true" />
+              <Sparkles class="size-3" />
+              <span>{{ showDemoQuickAccess ? 'Cerrar demos' : 'Accesos Demo' }}</span>
             </button>
           </div>
-          <p v-if="errors.password" id="login-password-error" class="field-error" role="alert">
-            {{ errors.password }}
+
+          <!-- Panel desplegable discreto de cuentas Demo -->
+          <div
+            v-if="showDemoQuickAccess"
+            class="rounded-xl border border-white/10 bg-white/5 p-2.5 transition-all flex items-center justify-between gap-2"
+          >
+            <button
+              type="button"
+              class="flex-1 flex items-center justify-center gap-1.5 rounded-lg border border-white/10 bg-black/60 px-3 py-1.5 text-xs text-neutral-200 hover:border-emerald-400 hover:text-emerald-300 transition-colors"
+              @click="fillDemoAccount('cliente')"
+            >
+              <UserCheck class="size-3 text-emerald-400" />
+              <span>Cliente (Laura)</span>
+            </button>
+            <button
+              type="button"
+              class="flex-1 flex items-center justify-center gap-1.5 rounded-lg border border-white/10 bg-black/60 px-3 py-1.5 text-xs text-neutral-200 hover:border-brand-400 hover:text-brand-300 transition-colors"
+              @click="fillDemoAccount('admin')"
+            >
+              <ShieldCheck class="size-3 text-brand-400" />
+              <span>Admin (Panel)</span>
+            </button>
+          </div>
+
+          <!-- Botón Principal -->
+          <div class="pt-3">
+            <button
+              type="submit"
+              class="w-full relative inline-flex items-center justify-center rounded-xl bg-gradient-to-r from-[#8057FF] via-[#9B51E0] to-[#06B6D4] hover:opacity-95 text-white font-bold text-base py-3.5 shadow-[0_0_25px_rgba(128,87,255,0.35)] transition-all duration-200 active:scale-[0.99] disabled:opacity-60 disabled:pointer-events-none"
+              :disabled="isSubmitting"
+              :aria-busy="isSubmitting"
+            >
+              <span v-if="isSubmitting" class="flex items-center gap-2">
+                <span class="size-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                <span>Iniciando sesión...</span>
+              </span>
+              <span v-else class="font-display">
+                Iniciar sesión
+              </span>
+            </button>
+          </div>
+        </form>
+
+        <!-- Pie de la tarjeta -->
+        <div class="mt-8 border-t border-neutral-800 pt-6 text-center">
+          <p class="text-sm text-neutral-400">
+            ¿Primera vez en StreamStore?
+            <RouterLink
+              to="/registro"
+              class="ml-1 font-bold text-white hover:text-cyan-400 underline underline-offset-4 transition-colors"
+            >
+              Suscríbete ahora
+            </RouterLink>
           </p>
         </div>
 
-        <!-- Botón de Envío -->
-        <button
-          type="submit"
-          class="btn-primary w-full py-3"
-          :disabled="isSubmitting"
-          :aria-busy="isSubmitting"
-        >
-          <span v-if="isSubmitting">Iniciando sesión...</span>
-          <span v-else>Entrar a mi cuenta</span>
-        </button>
-      </form>
+        <p class="mt-6 text-[11px] text-neutral-500 text-center leading-relaxed">
+          Esta página está protegida con cifrado SSL para garantizar la seguridad de tus accesos a servicios de streaming.
+        </p>
+      </div>
+    </main>
 
-      <!-- Pie con enlace a Registro -->
-      <p class="mt-6 text-center text-xs text-muted">
-        ¿Aún no tienes cuenta?
-        <RouterLink to="/registro" class="font-semibold text-brand-300 hover:text-brand-200 underline underline-offset-4">
-          Crea tu cuenta aquí
-        </RouterLink>
-      </p>
-    </div>
+    <!-- ================= PIE DE PÁGINA MINIMALISTA ================= -->
+    <footer class="relative z-20 py-6 px-6 sm:px-12 text-center text-xs text-neutral-500">
+      <div class="flex flex-wrap items-center justify-center gap-4 sm:gap-6">
+        <span>© {{ new Date().getFullYear() }} StreamStore</span>
+        <span>•</span>
+        <RouterLink to="/" class="hover:text-neutral-300 transition-colors">Términos de servicio</RouterLink>
+        <span>•</span>
+        <RouterLink to="/" class="hover:text-neutral-300 transition-colors">Privacidad</RouterLink>
+        <span>•</span>
+        <RouterLink to="/catalogo" class="hover:text-neutral-300 transition-colors">Centro de ayuda</RouterLink>
+      </div>
+    </footer>
   </div>
 </template>

@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { RouterLink } from 'vue-router'
-import { ShoppingCart, User } from '@lucide/vue'
+import { ShoppingCart, User, Sparkles, Tv } from '@lucide/vue'
 import AppLogo from './AppLogo.vue'
 import { useCartStore } from '@/stores/cart'
 import { useAuthStore } from '@/stores/auth'
@@ -13,11 +13,41 @@ const auth = useAuthStore()
   <header class="sticky top-0 z-40 border-b border-white/10 bg-black/90 backdrop-blur-md">
     <div class="container-app flex h-16 items-center justify-between gap-4">
       <!-- Lado Izquierdo: Logotipo Oficial (Estilo HBO Max) -->
-      <div class="flex items-center">
+      <div class="flex items-center gap-6">
         <AppLogo />
+
+        <!-- Enlaces centrales de navegación -->
+        <nav class="hidden md:flex items-center gap-6 text-xs font-bold uppercase tracking-wider text-slate-300">
+          <RouterLink
+            to="/"
+            class="hover:text-white transition-colors"
+            active-class="text-white"
+          >
+            Inicio
+          </RouterLink>
+
+          <RouterLink
+            to="/catalogo"
+            class="flex items-center gap-1.5 hover:text-cyan-300 transition-colors"
+            active-class="text-cyan-400"
+          >
+            <Sparkles class="size-3 text-cyan-400" aria-hidden="true" />
+            <span>Catálogo</span>
+          </RouterLink>
+
+          <RouterLink
+            v-if="auth.isAuthenticated"
+            to="/mi-cuenta"
+            class="flex items-center gap-1.5 hover:text-white transition-colors"
+            active-class="text-brand-300"
+          >
+            <Tv class="size-3" aria-hidden="true" />
+            <span>Mis Servicios</span>
+          </RouterLink>
+        </nav>
       </div>
 
-      <!-- Lado Derecho: Carrito y Botón Iniciar Sesión (Estilo HBO Max) -->
+      <!-- Lado Derecho: Carrito y Botón Iniciar Sesión / Perfil -->
       <div class="flex items-center gap-3">
         <!-- Carrito de compras -->
         <RouterLink
@@ -45,7 +75,7 @@ const auth = useAuthStore()
           <span>{{ auth.isAdmin ? 'Admin' : auth.usuario?.nombre.split(' ')[0] }}</span>
         </RouterLink>
 
-        <!-- Botón Iniciar Sesión (Reemplazo de Suscribirse estilo HBO Max) -->
+        <!-- Botón Iniciar Sesión -->
         <RouterLink
           v-else
           to="/login"

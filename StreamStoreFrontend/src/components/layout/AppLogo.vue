@@ -19,17 +19,17 @@ withDefaults(
     class="group inline-flex items-center gap-2.5 rounded-lg focus-visible:outline-none"
     aria-label="Ir al inicio de StreamStore"
   >
-    <!-- Logotipo Oficial StreamStore -->
+    <!-- Logotipo Oficial StreamStore (Icono transparente sin cuadro tosco) -->
     <div
-      class="relative flex items-center justify-center shrink-0 rounded-xl overflow-hidden border border-brand-500/30 shadow-md shadow-brand-500/25 transition-transform duration-300 group-hover:scale-105 bg-[#151B32]"
+      class="relative flex items-center justify-center shrink-0 transition-transform duration-300 group-hover:scale-105"
       :class="[
-        size === 'sm' ? 'size-8' : size === 'lg' ? 'size-12' : 'size-9',
+        size === 'sm' ? 'size-7' : size === 'lg' ? 'size-11' : 'size-9',
       ]"
     >
       <img
-        src="/streamstore_logo_official.png"
+        src="/streamstore_icon.png"
         alt="StreamStore Logo"
-        class="h-full w-full object-contain p-0.5"
+        class="h-full w-full object-contain drop-shadow-[0_0_12px_rgba(128,87,255,0.6)]"
       />
     </div>
 
