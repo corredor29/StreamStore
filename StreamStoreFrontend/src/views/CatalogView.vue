@@ -33,8 +33,6 @@ const ordenSeleccionado = ref('destacados')
 // Secciones de acordeón en sidebar (abiertas por defecto)
 const openSections = ref<Record<string, boolean>>({
   plataformas: true,
-  duracion: true,
-  pantallas: true,
   tipo: true,
   precio: true,
 })
@@ -132,40 +130,40 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="min-h-screen bg-black text-white pb-16 pt-4 sm:pt-6">
+  <div class="min-h-screen bg-[#f8f9fa] text-slate-900 pb-16 pt-4 sm:pt-6">
     <div class="container-app">
-      <!-- 1. BREADCRUMB -->
-      <nav aria-label="Breadcrumb" class="text-xs text-slate-400 mb-3 flex items-center gap-1.5 font-normal">
-        <RouterLink to="/" class="hover:text-cyan-300 transition-colors">
+      <!-- 1. BREADCRUMB (ESTILO LION TECH STORE) -->
+      <nav aria-label="Breadcrumb" class="text-xs text-slate-500 mb-3 flex items-center gap-1.5 font-normal">
+        <RouterLink to="/" class="hover:text-slate-900 transition-colors">
           Inicio
         </RouterLink>
-        <ChevronRight class="size-3 text-slate-500" />
-        <span class="text-white font-medium truncate">
-          Cuentas para streaming (Netflix, Disney+, Max)
+        <ChevronRight class="size-3 text-slate-400" />
+        <span class="text-slate-800 font-medium truncate">
+          Cuentas para streaming (Netflix, Disney+)
         </span>
       </nav>
 
-      <!-- 2. CABECERA DE CATEGORÍA CON TITULAR Y SELECTOR DE ORDEN -->
+      <!-- 2. CABECERA DE CATEGORÍA CON TITULAR Y SELECTOR DE ORDEN (ESTILO LION TECH STORE) -->
       <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
         <div>
-          <h1 class="font-display text-2xl sm:text-3xl font-black text-white tracking-tight">
+          <h1 class="font-display text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
             Cuentas para streaming (Netflix, Disney+)
           </h1>
-          <p class="text-xs text-slate-400 mt-0.5">
-            Mostrando {{ productosFiltrados.length }} productos con fotos de referencia ({{ totalDisponibles }} disponibles con activación inmediata)
+          <p class="text-xs text-slate-500 mt-0.5">
+            Mostrando {{ productosFiltrados.length }} productos ({{ totalDisponibles }} disponibles con activación inmediata)
           </p>
         </div>
 
         <!-- Selector de Orden -->
         <div class="flex items-center gap-2 self-end sm:self-auto">
-          <label for="orden-select" class="text-xs text-slate-300 font-medium flex items-center gap-1">
+          <label for="orden-select" class="text-xs text-slate-500 font-medium flex items-center gap-1">
             <ArrowUpDown class="size-3.5 text-slate-400" />
             <span>Ordenar</span>
           </label>
           <select
             id="orden-select"
             v-model="ordenSeleccionado"
-            class="rounded-xl border border-white/20 bg-neutral-900 px-3 py-1.5 text-xs font-medium text-white focus:border-cyan-400 focus:outline-none shadow-md cursor-pointer"
+            class="rounded-xl border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-800 focus:border-slate-400 focus:outline-none shadow-xs cursor-pointer"
           >
             <option value="destacados">Relevancia / Destacados</option>
             <option value="precio_asc">Precio: Menor a Mayor</option>
@@ -177,18 +175,18 @@ onMounted(() => {
 
       <!-- 3. LAYOUT DE 2 COLUMNAS (SIDEBAR FILTROS + GRID DE PRODUCTOS) -->
       <div class="flex flex-col lg:flex-row gap-6 items-start">
-        <!-- SIDEBAR DE FILTROS IZQUIERDO -->
-        <aside class="w-full lg:w-64 shrink-0 bg-neutral-900/90 rounded-2xl border border-white/10 shadow-xl divide-y divide-white/10 overflow-hidden backdrop-blur-md">
+        <!-- SIDEBAR DE FILTROS IZQUIERDO (ESTILO LION TECH STORE) -->
+        <aside class="w-full lg:w-64 shrink-0 bg-white rounded-2xl border border-slate-200 shadow-sm divide-y divide-slate-100 overflow-hidden">
           <!-- Título de Filtros con botón Limpiar -->
-          <div class="p-4 flex items-center justify-between bg-white/5">
-            <span class="text-xs font-bold uppercase tracking-wider text-slate-200 flex items-center gap-1.5">
-              <SlidersHorizontal class="size-3.5 text-cyan-400" />
+          <div class="p-4 flex items-center justify-between bg-slate-50/60">
+            <span class="text-xs font-bold uppercase tracking-wider text-slate-800 flex items-center gap-1.5">
+              <SlidersHorizontal class="size-3.5 text-slate-600" />
               Filtros
             </span>
             <button
               v-if="plataformaSeleccionada || tipoSeleccionado || precioMin || precioMax"
               type="button"
-              class="text-[11px] font-semibold text-rose-400 hover:text-rose-300 flex items-center gap-1 cursor-pointer"
+              class="text-[11px] font-semibold text-rose-600 hover:text-rose-700 flex items-center gap-1 cursor-pointer"
               @click="resetFiltros"
             >
               <RotateCcw class="size-3" />
@@ -200,7 +198,7 @@ onMounted(() => {
           <div class="p-4">
             <button
               type="button"
-              class="w-full flex items-center justify-between text-xs font-bold uppercase tracking-wider text-white cursor-pointer"
+              class="w-full flex items-center justify-between text-xs font-bold uppercase tracking-wider text-slate-800 cursor-pointer"
               @click="toggleSection('plataformas')"
             >
               <span>Plataforma</span>
@@ -210,85 +208,85 @@ onMounted(() => {
               />
             </button>
             <div v-show="openSections.plataformas" class="mt-3 space-y-1.5 max-h-48 overflow-y-auto pr-1">
-              <label class="flex items-center gap-2 text-xs text-slate-300 hover:text-white cursor-pointer py-1">
+              <label class="flex items-center gap-2 text-xs text-slate-700 hover:text-slate-900 cursor-pointer py-1">
                 <input
                   type="radio"
                   name="plataforma"
                   value=""
                   :checked="plataformaSeleccionada === ''"
-                  class="rounded-full text-cyan-500 focus:ring-0 cursor-pointer"
+                  class="rounded-full text-slate-900 focus:ring-0 cursor-pointer"
                   @change="plataformaSeleccionada = ''"
                 />
-                <span :class="{ 'font-bold text-cyan-300': plataformaSeleccionada === '' }">Todas</span>
+                <span :class="{ 'font-bold text-slate-900': plataformaSeleccionada === '' }">Todas</span>
               </label>
               <label
                 v-for="plat in plataformas"
                 :key="plat.id"
-                class="flex items-center gap-2 text-xs text-slate-300 hover:text-white cursor-pointer py-1"
+                class="flex items-center gap-2 text-xs text-slate-700 hover:text-slate-900 cursor-pointer py-1"
               >
                 <input
                   type="radio"
                   name="plataforma"
                   :value="plat.slug"
                   :checked="plataformaSeleccionada === plat.slug"
-                  class="rounded-full text-cyan-500 focus:ring-0 cursor-pointer"
+                  class="rounded-full text-slate-900 focus:ring-0 cursor-pointer"
                   @change="plataformaSeleccionada = plat.slug"
                 />
-                <span :class="{ 'font-bold text-cyan-300': plataformaSeleccionada === plat.slug }">
+                <span :class="{ 'font-bold text-slate-900': plataformaSeleccionada === plat.slug }">
                   {{ plat.nombre }}
                 </span>
               </label>
             </div>
           </div>
 
-          <!-- FILTRO 2: TIPO / MODALIDAD -->
+          <!-- FILTRO 2: TIPO / PANTALLAS -->
           <div class="p-4">
             <button
               type="button"
-              class="w-full flex items-center justify-between text-xs font-bold uppercase tracking-wider text-white cursor-pointer"
+              class="w-full flex items-center justify-between text-xs font-bold uppercase tracking-wider text-slate-800 cursor-pointer"
               @click="toggleSection('tipo')"
             >
-              <span>Tipo / Pantallas</span>
+              <span>Pantallas / Tipo</span>
               <ChevronDown
                 class="size-4 text-slate-400 transition-transform duration-200"
                 :class="{ 'rotate-180': openSections.tipo }"
               />
             </button>
             <div v-show="openSections.tipo" class="mt-3 space-y-1.5">
-              <label class="flex items-center gap-2 text-xs text-slate-300 hover:text-white cursor-pointer py-1">
+              <label class="flex items-center gap-2 text-xs text-slate-700 hover:text-slate-900 cursor-pointer py-1">
                 <input
                   type="radio"
                   name="tipo"
                   value=""
                   :checked="tipoSeleccionado === ''"
-                  class="rounded-full text-cyan-500 focus:ring-0 cursor-pointer"
+                  class="rounded-full text-slate-900 focus:ring-0 cursor-pointer"
                   @change="tipoSeleccionado = ''"
                 />
-                <span :class="{ 'font-bold text-cyan-300': tipoSeleccionado === '' }">Todos los tipos</span>
+                <span :class="{ 'font-bold text-slate-900': tipoSeleccionado === '' }">Todos los tipos</span>
               </label>
-              <label class="flex items-center gap-2 text-xs text-slate-300 hover:text-white cursor-pointer py-1">
+              <label class="flex items-center gap-2 text-xs text-slate-700 hover:text-slate-900 cursor-pointer py-1">
                 <input
                   type="radio"
                   name="tipo"
                   value="PANTALLA_INDIVIDUAL"
                   :checked="tipoSeleccionado === 'PANTALLA_INDIVIDUAL'"
-                  class="rounded-full text-cyan-500 focus:ring-0 cursor-pointer"
+                  class="rounded-full text-slate-900 focus:ring-0 cursor-pointer"
                   @change="tipoSeleccionado = 'PANTALLA_INDIVIDUAL'"
                 />
-                <span :class="{ 'font-bold text-cyan-300': tipoSeleccionado === 'PANTALLA_INDIVIDUAL' }">
+                <span :class="{ 'font-bold text-slate-900': tipoSeleccionado === 'PANTALLA_INDIVIDUAL' }">
                   Pantalla Individual (PIN)
                 </span>
               </label>
-              <label class="flex items-center gap-2 text-xs text-slate-300 hover:text-white cursor-pointer py-1">
+              <label class="flex items-center gap-2 text-xs text-slate-700 hover:text-slate-900 cursor-pointer py-1">
                 <input
                   type="radio"
                   name="tipo"
                   value="CUENTA_COMPLETA"
                   :checked="tipoSeleccionado === 'CUENTA_COMPLETA'"
-                  class="rounded-full text-cyan-500 focus:ring-0 cursor-pointer"
+                  class="rounded-full text-slate-900 focus:ring-0 cursor-pointer"
                   @change="tipoSeleccionado = 'CUENTA_COMPLETA'"
                 />
-                <span :class="{ 'font-bold text-cyan-300': tipoSeleccionado === 'CUENTA_COMPLETA' }">
+                <span :class="{ 'font-bold text-slate-900': tipoSeleccionado === 'CUENTA_COMPLETA' }">
                   Cuenta Completa
                 </span>
               </label>
@@ -299,10 +297,10 @@ onMounted(() => {
           <div class="p-4">
             <button
               type="button"
-              class="w-full flex items-center justify-between text-xs font-bold uppercase tracking-wider text-white cursor-pointer"
+              class="w-full flex items-center justify-between text-xs font-bold uppercase tracking-wider text-slate-800 cursor-pointer"
               @click="toggleSection('precio')"
             >
-              <span>Precio (COP)</span>
+              <span>Precio</span>
               <ChevronDown
                 class="size-4 text-slate-400 transition-transform duration-200"
                 :class="{ 'rotate-180': openSections.precio }"
@@ -311,23 +309,23 @@ onMounted(() => {
             <div v-show="openSections.precio" class="mt-3 space-y-2.5">
               <div class="grid grid-cols-2 gap-2 text-xs">
                 <div>
-                  <label for="precio-desde" class="text-[11px] text-slate-400 block mb-1">Desde</label>
+                  <label for="precio-desde" class="text-[11px] text-slate-500 block mb-1">Desde</label>
                   <input
                     id="precio-desde"
                     v-model="precioMin"
                     type="number"
                     placeholder="Min"
-                    class="w-full rounded-xl border border-white/20 bg-black/60 px-2.5 py-1.5 text-xs text-white focus:border-cyan-400 focus:outline-none"
+                    class="w-full rounded-xl border border-slate-200 bg-slate-50 px-2.5 py-1.5 text-xs text-slate-800 focus:border-slate-400 focus:outline-none"
                   />
                 </div>
                 <div>
-                  <label for="precio-hasta" class="text-[11px] text-slate-400 block mb-1">Hasta</label>
+                  <label for="precio-hasta" class="text-[11px] text-slate-500 block mb-1">Hasta</label>
                   <input
                     id="precio-hasta"
                     v-model="precioMax"
                     type="number"
                     placeholder="Max"
-                    class="w-full rounded-xl border border-white/20 bg-black/60 px-2.5 py-1.5 text-xs text-white focus:border-cyan-400 focus:outline-none"
+                    class="w-full rounded-xl border border-slate-200 bg-slate-50 px-2.5 py-1.5 text-xs text-slate-800 focus:border-slate-400 focus:outline-none"
                   />
                 </div>
               </div>
@@ -335,7 +333,7 @@ onMounted(() => {
           </div>
         </aside>
 
-        <!-- PRODUCT GRID DERECHO -->
+        <!-- PRODUCT GRID DERECHO (4 COLUMNAS EN PANTALLAS GRANDES) -->
         <main class="flex-1 w-full">
           <!-- Loading State -->
           <AppLoader v-if="loading && productos.length === 0" label="Cargando catálogo..." />
@@ -348,11 +346,11 @@ onMounted(() => {
             </button>
           </AppAlert>
 
-          <!-- Grid de Productos con Fotos Cinemáticas -->
+          <!-- Grid de Productos Estilo Lion Tech Store -->
           <div v-else>
             <div
               v-if="productosFiltrados.length > 0"
-              class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-5"
+              class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-5"
             >
               <ProductCard
                 v-for="producto in productosFiltrados"
@@ -364,18 +362,18 @@ onMounted(() => {
             <!-- Estado Vacío -->
             <div
               v-else
-              class="bg-neutral-900/90 rounded-2xl border border-white/10 p-12 text-center shadow-xl flex flex-col items-center justify-center backdrop-blur-md"
+              class="bg-white rounded-2xl border border-slate-200 p-12 text-center shadow-sm flex flex-col items-center justify-center"
             >
-              <PackageX class="size-12 text-slate-500" aria-hidden="true" />
-              <h2 class="mt-4 font-display text-lg font-bold text-white">
+              <PackageX class="size-12 text-slate-400" aria-hidden="true" />
+              <h2 class="mt-4 font-display text-lg font-bold text-slate-900">
                 No se encontraron productos
               </h2>
-              <p class="mt-1 max-w-sm text-xs text-slate-400">
+              <p class="mt-1 max-w-sm text-xs text-slate-500">
                 No hay productos que coincidan con los filtros seleccionados. Intenta restablecer los filtros para ver otros planes.
               </p>
               <button
                 type="button"
-                class="mt-5 rounded-xl bg-white hover:bg-slate-200 text-neutral-950 font-bold text-xs px-5 py-2.5 transition-colors cursor-pointer shadow-md"
+                class="mt-5 rounded-xl bg-slate-900 hover:bg-black text-white font-bold text-xs px-5 py-2.5 transition-colors cursor-pointer shadow-sm"
                 @click="resetFiltros"
               >
                 Ver todo el catálogo
