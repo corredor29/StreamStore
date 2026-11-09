@@ -8,6 +8,10 @@ export interface ScrollyPlatform {
   tag: string
   slug: string
   logo?: string
+  /** Proporción ancho/alto del logo recortado, usada para equilibrar su tamaño visual */
+  logoRatio: number
+  /** Placa clara detrás del logo cuando la marca es oscura y se pierde sobre fondo negro */
+  logoPlate?: 'light'
   logoFilter?: string
   color: string
   bgImage: string
@@ -52,15 +56,16 @@ const scrollyPlatforms: ScrollyPlatform[] = [
     nombre: 'Netflix Premium 4K',
     tag: 'NETFLIX · 4K ULTRA HD',
     slug: 'netflix',
-    logo: '/netflix.webp',
+    logo: '/home_logos/netflix.png',
+    logoRatio: 3.69,
     logoFilter: 'drop-shadow(0 4px 18px rgba(229,9,20,0.7))',
     color: '#E50914',
     bgImage: '/watching_netflix.jpg',
-    badge: '🔥 MÁS VENDIDO',
+    badge: 'PLAN DESTACADO',
     headline: 'El catálogo más grande del mundo en Ultra HD.',
     desc: 'Disfruta de series exclusivas, películas taquilleras y documentales en 4K Ultra HD con audio espacial y perfiles protegidos.',
     features: [
-      'Calidad 4K Ultra HD + HDR10 + Dolby Vision',
+      'Calidad 4K Ultra HD con HDR10 y Dolby Vision',
       'Audio espacial inmersivo para cine en casa',
       'Descargas ilimitadas para disfrutar sin conexión',
       'Garantía total de 30 días sin caídas',
@@ -77,17 +82,18 @@ const scrollyPlatforms: ScrollyPlatform[] = [
     nombre: 'Disney+ Total Family',
     tag: 'DISNEY+ · FAMILIAR & MARVEL',
     slug: 'disney',
-    logo: '/disne.png',
-    logoFilter: 'drop-shadow(0 4px 20px rgba(17,60,207,0.8)) drop-shadow(0 0 10px rgba(255,255,255,0.4))',
+    logo: '/home_logos/disney.jfif',
+    logoRatio: 1.33,
+    logoFilter: 'none',
     color: '#113CCF',
     bgImage: '/watching_disney.jpg',
-    badge: '⭐ TOP FAMILIAR',
+    badge: 'FAMILIAR & KIDS',
     headline: 'Tus mundos favoritos juntos en un solo lugar.',
-    desc: 'Todo el universo Disney, Pixar, Marvel, Star Wars, National Geographic y deportes en vivo de ESPN con la máxima fidelidad.',
+    desc: 'Todo el universo de Disney, Pixar, Marvel, Star Wars y National Geographic, además de deportes en vivo de ESPN, con la máxima calidad de imagen.',
     features: [
-      'Contenido completo de Marvel Studios, Star Wars y Pixar',
+      'Catálogo completo de Marvel Studios, Star Wars y Pixar',
       'Transmisiones deportivas de ESPN en vivo',
-      'Formatos IMAX Enhanced en títulos seleccionados',
+      'Formato IMAX Enhanced en títulos seleccionados',
       'Control parental avanzado con PIN por perfil',
       'Activación digital en menos de 10 segundos'
     ],
@@ -102,19 +108,21 @@ const scrollyPlatforms: ScrollyPlatform[] = [
     nombre: 'Max (HBO) 4K Ultra',
     tag: 'MAX · HBO ORIGINALS & WARNER',
     slug: 'max',
-    logo: '/hbomax.png',
+    logo: '/home_logos/max.png',
+    logoRatio: 5.76,
+    logoPlate: 'light',
     logoFilter: 'drop-shadow(0 4px 20px rgba(123,47,247,0.85)) drop-shadow(0 0 10px rgba(255,255,255,0.4))',
     color: '#7B2FF7',
     bgImage: '/watching_max.jpg',
-    badge: '🏆 SERIES EMMY',
+    badge: 'SERIES EXCLUSIVAS',
     headline: 'Historias extraordinarias que definen la cultura.',
-    desc: 'Desde La Casa del Dragón y The Last of Us hasta los clásicos inmortales de Warner Bros, DC Comics y HBO en 4K Ultra HD.',
+    desc: 'Desde La Casa del Dragón y The Last of Us hasta los grandes clásicos de Warner Bros., DC y HBO, en 4K Ultra HD.',
     features: [
       'Series HBO galardonadas con múltiples premios Emmy',
-      'Estrenos cinematográficos de Warner Bros y DC',
+      'Estrenos de cine de Warner Bros. y DC',
       'Audio envolvente Dolby Atmos disponible',
       'Perfiles privados protegidos con código PIN',
-      'Reemplazo inmediato garantizado ante fallas'
+      'Reemplazo inmediato garantizado ante cualquier falla'
     ],
     productoIdCompleta: 7,
     productoIdPantalla: 8,
@@ -127,18 +135,19 @@ const scrollyPlatforms: ScrollyPlatform[] = [
     nombre: 'Amazon Prime Video',
     tag: 'PRIME VIDEO · ORIGINALS & DEPORTES',
     slug: 'prime',
-    logo: '/primevideo.jpg',
+    logo: '/home_logos/prime.png',
+    logoRatio: 3.14,
     logoFilter: 'drop-shadow(0 4px 20px rgba(0,168,225,0.85)) drop-shadow(0 0 10px rgba(255,255,255,0.4))',
     color: '#00A8E1',
     bgImage: '/watching_prime.jpg',
-    badge: '🎬 ORIGINALS & CINE',
+    badge: 'ORIGINALS & CINE',
     headline: 'Producciones originales y canales exclusivos.',
-    desc: 'Disfruta de producciones icónicas como The Boys, El Señor de los Anillos y eventos deportivos en vivo con reproducción simultánea.',
+    desc: 'Disfruta de producciones icónicas como The Boys y El Señor de los Anillos: Los Anillos de Poder, además de eventos deportivos en vivo.',
     features: [
       'Producciones exclusivas Amazon Originals',
-      'X-Ray con información de actores y música en vivo',
+      'Función X-Ray con datos de actores y música en tiempo real',
       'Compatibilidad universal con cualquier Smart TV',
-      'Soporte técnico preferencial 24/7 vía WhatsApp',
+      'Soporte técnico preferencial 24/7 por WhatsApp',
       'Precios transparentes en pesos colombianos'
     ],
     productoIdCompleta: 5,
@@ -152,19 +161,21 @@ const scrollyPlatforms: ScrollyPlatform[] = [
     nombre: 'Paramount+ Premium',
     tag: 'PARAMOUNT+ · BLOCKBUSTERS & SHOWTIME',
     slug: 'paramount',
-    logo: '/paramont.png',
+    logo: '/home_logos/paramount.png',
+    logoRatio: 4.31,
+    logoPlate: 'light',
     logoFilter: 'drop-shadow(0 4px 20px rgba(0,100,255,0.85)) drop-shadow(0 0 10px rgba(255,255,255,0.4))',
     color: '#0064FF',
     bgImage: '/hero_cinema_wall.jpg',
-    badge: '🚀 BLOCKBUSTERS 4K',
-    headline: 'Montañas de entretenimiento con cine y fútbol en vivo.',
-    desc: 'Estrenos directos de cine de Paramount Pictures, producciones completas de Showtime y transmisiones exclusivas en vivo.',
+    badge: 'CINE DE ESTRENO',
+    headline: 'Cine de estreno, series y fútbol en vivo.',
+    desc: 'Estrenos de Paramount Pictures, el catálogo completo de Showtime y transmisiones exclusivas en vivo.',
     features: [
       'Estrenos exclusivos de películas Paramount Pictures',
       'Catálogo completo de series Showtime y MTV',
       'Transmisiones de fútbol internacional en vivo',
       'Perfiles familiares con controles parentales',
-      'Activación automatizada al instante'
+      'Activación automática al instante'
     ],
     productoIdCompleta: 9,
     productoIdPantalla: 10,
@@ -177,19 +188,20 @@ const scrollyPlatforms: ScrollyPlatform[] = [
     nombre: 'Crunchyroll Mega Fan',
     tag: 'CRUNCHYROLL · ANIME EN SIMULCAST',
     slug: 'crunchyroll',
-    logo: '/crunchiroll.png',
+    logo: '/home_logos/crunchyroll.png',
+    logoRatio: 1.78,
     logoFilter: 'drop-shadow(0 4px 20px rgba(244,117,33,0.85)) drop-shadow(0 0 10px rgba(255,255,255,0.4))',
     color: '#F47521',
     bgImage: '/hero_cinema_wall.jpg',
-    badge: '⚡ SIMULCAST JAPÓN',
+    badge: 'SIMULCAST GLOBAL',
     headline: 'El catálogo definitivo de anime sin anuncios.',
-    desc: 'Episodios estreno en simultáneo una hora después de Japón, doblajes exclusivos al español y la biblioteca de anime más grande del mundo.',
+    desc: 'Estrenos en simulcast una hora después de su emisión en Japón, doblajes exclusivos al español y la biblioteca de anime más grande del mundo.',
     features: [
       'Episodios en simultáneo con Japón en Full HD',
-      'Visualización sin anuncios y modo sin conexión',
+      'Sin anuncios y con descargas para ver sin conexión',
       'Doblajes exclusivos al español latino',
       'Hasta 4 pantallas simultáneas en Mega Fan',
-      'Soporte técnico y garantía ininterrumpida'
+      'Soporte técnico y garantía durante todo el ciclo'
     ],
     productoIdCompleta: 11,
     productoIdPantalla: 12,
@@ -202,17 +214,18 @@ const scrollyPlatforms: ScrollyPlatform[] = [
     nombre: 'Spotify Premium Individual',
     tag: 'SPOTIFY · MÚSICA & AUDIO HI-FI',
     slug: 'spotify',
-    logo: '/spotify.png',
+    logo: '/home_logos/spotify.png',
+    logoRatio: 3.25,
     logoFilter: 'drop-shadow(0 4px 20px rgba(29,185,84,0.85)) drop-shadow(0 0 10px rgba(255,255,255,0.4))',
     color: '#1DB954',
     bgImage: '/hbo_max_mosaic_bg.jpg',
-    badge: '🎧 AUDIO SIN ANUNCIOS',
+    badge: 'MÚSICA HI-FI',
     headline: 'Millones de canciones y podcasts sin interrupciones.',
-    desc: 'Reproducción sin anuncios, saltos ilimitados, descargas para modo offline y audio en máxima fidelidad en todos tus dispositivos.',
+    desc: 'Reproducción sin anuncios, saltos ilimitados, descargas para escuchar sin conexión y audio de alta fidelidad en todos tus dispositivos.',
     features: [
-      'Audio en máxima fidelidad sin cortes comerciales',
+      'Audio de alta fidelidad sin cortes comerciales',
       'Descargas ilimitadas para escuchar sin internet',
-      'Compatibilidad con parlantes, smart TV y autos',
+      'Compatible con parlantes, smart TV y autos',
       'Listas personalizadas y estrenos semanales',
       'Garantía total de renovación mensual'
     ],
@@ -227,18 +240,19 @@ const scrollyPlatforms: ScrollyPlatform[] = [
     nombre: 'Apple TV+ Original',
     tag: 'APPLE TV+ · APPLE ORIGINALS',
     slug: 'appletv',
-    logo: '/appletv.webp',
+    logo: '/home_logos/appletv.png',
+    logoRatio: 2.63,
     logoFilter: 'drop-shadow(0 4px 20px rgba(255,255,255,0.6)) drop-shadow(0 0 10px rgba(255,255,255,0.3))',
     color: '#E2E8F0',
     bgImage: '/watching_prime.jpg',
-    badge: '🌟 CALIDAD OSCAR & EMMY',
+    badge: 'PRODUCCIONES ORIGINALES',
     headline: 'Historias visionarias creadas por las mejores mentes.',
-    desc: 'Producciones galardonadas por la academia, documentales impactantes y series de ciencia ficción en 4K HDR y Dolby Atmos.',
+    desc: 'Producciones premiadas por la Academia, documentales impactantes y series de ciencia ficción en 4K HDR con Dolby Atmos.',
     features: [
-      'Calidad técnica insuperable en 4K HDR y Dolby Vision',
+      'Imagen 4K HDR con Dolby Vision',
       'Audio espacial inmersivo con tecnología Dolby Atmos',
-      'Acceso en app Apple TV para Smart TV y consolas',
-      'Sin anuncios y reproducción multi-dispositivo',
+      'App de Apple TV para smart TV y consolas',
+      'Sin anuncios y en varios dispositivos',
       'Activación instantánea garantizada 24/7'
     ],
     productoIdCompleta: 15,
@@ -329,6 +343,7 @@ function startCinematicIntro() {
 }
 
 function closeCinematicIntro() {
+  if (typeof window !== 'undefined') sessionStorage.setItem('streamstore_intro_seen', 'true')
   introStage.value = 'finished'
   showNetflixIntro.value = false
 }
@@ -417,151 +432,170 @@ function handleScroll() {
   updateScrollTargets()
 }
 
-// Transiciones fluidas del Hero
+// ================= PREFERENCIA DE MOVIMIENTO REDUCIDO =================
+const prefersReducedMotion = ref(false)
+let motionQuery: MediaQueryList | null = null
+function syncMotionPreference() {
+  prefersReducedMotion.value = !!motionQuery?.matches
+}
+
+// Transiciones fluidas del Hero: el texto se desplaza pero nunca se vuelve transparente
 const heroContentStyle = computed(() => {
-  const p = Math.min(1, Math.max(0, scrollY.value / 320))
+  if (prefersReducedMotion.value) return {}
+  const p = Math.min(1, Math.max(0, scrollY.value / 420))
   const eased = easeOutCubic(p)
+  // Al scrollear hacia la pantalla 2, el contenido del Hero se desvanece suavemente a negro
+  const opacity = Math.max(0, 1 - p * 1.35)
   return {
-    opacity: (1 - p).toFixed(2),
-    transform: `translate3d(0, -${(eased * 45).toFixed(1)}px, 0)`,
-    pointerEvents: (p > 0.85 ? 'none' : 'auto') as any,
+    transform: `translate3d(0, -${(eased * 50).toFixed(1)}px, 0)`,
+    opacity: opacity.toFixed(2),
   }
 })
 
 const heroDarkenStyle = computed(() => {
-  const p = Math.min(1, Math.max(0, scrollY.value / 260))
+  const p = Math.min(1, Math.max(0, scrollY.value / 360))
+  // Se oscurece completamente hacia negro absoluto
   return {
-    opacity: p.toFixed(2),
+    opacity: Math.min(1, p * 1.25).toFixed(2),
   }
 })
 
-// ================= ANIMACIÓN DINÁMICA DE ENTRADA Y SALIDA DE LAS TARJETAS =================
+// ================= ANIMACIONES FLUIDAS CON FÍSICA CINEMÁTICA =================
 function getCardStyle(idx: number, color: string) {
   const p = sectionProgress.value[idx] ?? 0.5
+  const restShadow = `0 25px 60px -15px rgba(0,0,0,0.9), 0 0 30px -10px ${color}40, inset 0 1px 0 rgba(255,255,255,0.15)`
+  if (prefersReducedMotion.value) {
+    return { boxShadow: restShadow }
+  }
 
-  // 1. Fase de Entrada (p: 0.05 a 0.40): Deslizando desde abajo con curva suave y ganando nitidez
-  if (p < 0.40) {
-    const t = Math.max(0, Math.min(1, (p - 0.05) / 0.35))
+  // 1. Entrada fluida con impulso ascendente y profundidad (siempre visible, sin vacíos)
+  if (p < 0.44) {
+    const t = Math.max(0, Math.min(1, (p - 0.05) / 0.39))
     const eased = easeOutCubic(t)
-    const translateY = (1 - eased) * 85
-    const scale = 0.90 + eased * 0.10
-    const opacity = Math.max(0.04, Math.pow(t, 1.2))
-    const blur = (1 - eased) * 6
+    const translateY = (1 - eased) * 50
+    const rotateX = ((1 - eased) * 8).toFixed(1)
+    const scale = (0.94 + eased * 0.06).toFixed(3)
+    const opacity = (0.25 + eased * 0.75).toFixed(2)
 
     return {
-      transform: `translate3d(0, ${translateY.toFixed(1)}px, 0) scale(${scale.toFixed(3)})`,
-      opacity: opacity.toFixed(2),
-      filter: blur > 0.3 ? `blur(${blur.toFixed(1)}px)` : 'none',
-      boxShadow: `0 25px 60px -15px ${color}35, 0 0 1px 1px ${color}45`,
-      willChange: 'transform, opacity, filter',
+      transform: `perspective(1200px) rotateX(${rotateX}deg) translate3d(0, ${translateY.toFixed(1)}px, 0) scale(${scale})`,
+      boxShadow: restShadow,
+      opacity,
     }
   }
 
-  // 2. Fase Activa / Enfocada (p: 0.40 a 0.60): Sweet Spot con halo neón reactivo y flotación suave
-  if (p >= 0.40 && p <= 0.60) {
-    const centerNorm = (p - 0.40) / 0.20
-    const floatY = Math.sin(centerNorm * Math.PI) * 8
-    const neonIntensity = (0.55 + Math.sin(centerNorm * Math.PI) * 0.35).toFixed(2)
+  // 2. Punto focal cinemático (Flotación suave y halo reactivo en el centro)
+  if (p <= 0.56) {
+    const centerNorm = (p - 0.44) / 0.12
+    const wave = Math.sin(centerNorm * Math.PI)
+    const scale = (1.0 + wave * 0.025).toFixed(3)
+    const translateY = -(wave * 6).toFixed(1)
+    const glowAlpha = Math.round((0.50 + wave * 0.40) * 255).toString(16).padStart(2, '0')
 
     return {
-      transform: `translate3d(0, -${floatY.toFixed(1)}px, 0) scale(1)`,
+      transform: `perspective(1200px) scale(${scale}) translate3d(0, ${translateY}px, 0)`,
+      boxShadow: `0 35px 80px -15px rgba(0,0,0,0.95), 0 0 45px -5px ${color}${glowAlpha}, inset 0 1px 0 rgba(255,255,255,0.25)`,
       opacity: '1',
-      filter: 'none',
-      boxShadow: `0 35px 90px -15px ${color}75, 0 0 30px -5px ${color}${Math.round(parseFloat(neonIntensity) * 255).toString(16).padStart(2, '0')}, 0 0 1px 1px ${color}90`,
-      willChange: 'transform, opacity, filter',
     }
   }
 
-  // 3. Fase de Salida (p: 0.60 a 1.05): Flotando suavemente hacia arriba y desvaneciéndose con elegancia
-  const t = Math.max(0, Math.min(1, (p - 0.60) / 0.40))
+  // 3. Salida suave y progresiva hacia arriba (sin desaparecer de golpe)
+  const t = Math.max(0, Math.min(1, (p - 0.56) / 0.38))
   const eased = easeInCubic(t)
-  const translateY = -eased * 80
-  const scale = 1 - eased * 0.08
-  const opacity = Math.max(0.04, 1 - eased * 0.96)
-  const blur = eased * 6
+  const translateY = -eased * 50
+  const rotateX = (-eased * 8).toFixed(1)
+  const scale = (1.0 - eased * 0.05).toFixed(3)
+  const opacity = Math.max(0.20, 1 - eased * 0.80).toFixed(2)
 
   return {
-    transform: `translate3d(0, ${translateY.toFixed(1)}px, 0) scale(${scale.toFixed(3)})`,
-    opacity: opacity.toFixed(2),
-    filter: blur > 0.3 ? `blur(${blur.toFixed(1)}px)` : 'none',
-    boxShadow: `0 15px 40px -15px ${color}25, 0 0 1px 1px ${color}30`,
-    willChange: 'transform, opacity, filter',
+    transform: `perspective(1200px) rotateX(${rotateX}deg) translate3d(0, ${translateY.toFixed(1)}px, 0) scale(${scale})`,
+    boxShadow: restShadow,
+    opacity,
   }
 }
 
-// ================= SINCRONIZACIÓN DE HISTORIA Y PROPUESTA DE VALOR =================
 function getInfoStyle(idx: number) {
+  if (prefersReducedMotion.value) return {}
   const p = sectionProgress.value[idx] ?? 0.5
 
-  if (p < 0.40) {
-    const t = Math.max(0, Math.min(1, (p - 0.05) / 0.35))
+  if (p < 0.44) {
+    const t = Math.max(0, Math.min(1, (p - 0.05) / 0.39))
     const eased = easeOutCubic(t)
-    const translateY = (1 - eased) * 55
     return {
-      transform: `translate3d(0, ${translateY.toFixed(1)}px, 0)`,
-      opacity: Math.max(0.06, t).toFixed(2),
-      willChange: 'transform, opacity',
+      transform: `translate3d(0, ${((1 - eased) * 40).toFixed(1)}px, 0)`,
+      opacity: (0.30 + eased * 0.70).toFixed(2),
     }
   }
-
-  if (p >= 0.40 && p <= 0.60) {
-    const centerNorm = (p - 0.40) / 0.20
-    const floatY = Math.sin(centerNorm * Math.PI) * 4
+  if (p <= 0.56) {
+    const wave = Math.sin(((p - 0.44) / 0.12) * Math.PI)
     return {
-      transform: `translate3d(0, -${floatY.toFixed(1)}px, 0)`,
+      transform: `translate3d(0, -${(wave * 4).toFixed(1)}px, 0)`,
       opacity: '1',
-      willChange: 'transform, opacity',
     }
   }
-
-  const t = Math.max(0, Math.min(1, (p - 0.60) / 0.40))
+  const t = Math.max(0, Math.min(1, (p - 0.56) / 0.38))
   const eased = easeInCubic(t)
-  const translateY = -eased * 50
   return {
-    transform: `translate3d(0, ${translateY.toFixed(1)}px, 0)`,
-    opacity: Math.max(0.08, 1 - eased * 0.92).toFixed(2),
-    willChange: 'transform, opacity',
+    transform: `translate3d(0, ${(-eased * 40).toFixed(1)}px, 0)`,
+    opacity: Math.max(0.25, 1 - eased * 0.75).toFixed(2),
   }
 }
 
 // ================= HALO AMBIENTAL REACTIVO AL ENFOQUE =================
 function getHaloStyle(idx: number, color: string) {
-  const p = sectionProgress.value[idx] ?? 0.5
+  const p = prefersReducedMotion.value ? 0.5 : (sectionProgress.value[idx] ?? 0.5)
   const dist = Math.abs(p - 0.50)
-  const norm = Math.max(0, 1 - dist / 0.40)
-  const eased = smoothstep(0, 1, norm)
-  const opacity = (0.15 + eased * 0.40).toFixed(2)
-  const scale = (0.90 + eased * 0.25).toFixed(2)
-
+  const eased = smoothstep(0, 1, Math.max(0, 1 - dist / 0.38))
   return {
     backgroundColor: color,
-    opacity: opacity,
-    transform: `scale(${scale})`,
-    willChange: 'opacity, transform',
+    opacity: (0.15 + eased * 0.40).toFixed(2),
+    transform: `scale(${(0.90 + eased * 0.20).toFixed(2)})`,
   }
 }
 
-// ================= EFECTO PARALLAX CINEMÁTICO EN EL FONDO =================
+// ================= PARALLAX FLUIDO DEL FONDO =================
 function getBgParallax(idx: number, bgImage: string) {
+  if (prefersReducedMotion.value) {
+    return { backgroundImage: `url('${bgImage}')` }
+  }
   const p = sectionProgress.value[idx] ?? 0.5
-  const zoom = 1.03 + Math.min(0.07, Math.max(0, p * 0.07))
-  const panY = (p - 0.5) * 45
+  const panY = Math.max(-20, Math.min(20, (p - 0.5) * 35))
   return {
     backgroundImage: `url('${bgImage}')`,
-    transform: `translate3d(0, ${panY.toFixed(1)}px, 0) scale(${zoom.toFixed(3)})`,
-    willChange: 'transform',
+    transform: `translate3d(0, ${panY.toFixed(1)}px, 0) scale(1.05)`,
   }
+}
+
+// Barra de progreso del capítulo: avanza al bajar y retrocede al subir
+function getChapterProgress(idx: number) {
+  const p = sectionProgress.value[idx] ?? 0
+  return Math.max(0, Math.min(1, (p - 0.1) / 0.8))
 }
 
 function scrollToPlatform(slug: string) {
   const el = document.getElementById(`plataforma-${slug}`)
   if (el) {
-    el.scrollIntoView({ behavior: 'smooth', block: 'center' })
+    el.scrollIntoView({ behavior: prefersReducedMotion.value ? 'auto' : 'smooth', block: 'center' })
   }
+}
+
+// Tipografías propias del inicio (nombres exclusivos: no alteran otras vistas ni el panel administrativo)
+function ensureHomeFonts() {
+  const id = 'home-fonts-sora-manrope'
+  if (document.getElementById(id)) return
+  const link = document.createElement('link')
+  link.id = id
+  link.rel = 'stylesheet'
+  link.href = 'https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Sora:wght@600;700;800&display=swap'
+  document.head.appendChild(link)
 }
 
 onMounted(() => {
   if (typeof window !== 'undefined') {
+    ensureHomeFonts()
+    motionQuery = window.matchMedia('(prefers-reduced-motion: reduce)')
+    syncMotionPreference()
+    motionQuery.addEventListener('change', syncMotionPreference)
     scrollY.value = window.scrollY
     window.addEventListener('scroll', handleScroll, { passive: true })
     window.addEventListener('resize', updateScrollTargets, { passive: true })
@@ -594,6 +628,7 @@ onUnmounted(() => {
   if (typeof window !== 'undefined') {
     window.removeEventListener('scroll', handleScroll)
     window.removeEventListener('resize', updateScrollTargets)
+    motionQuery?.removeEventListener('change', syncMotionPreference)
     if (rafId) window.cancelAnimationFrame(rafId)
   }
 })
@@ -602,52 +637,69 @@ function toggleMute() {
   isMuted.value = !isMuted.value
 }
 
+// ================= LOGOS: ÁREA VISUAL EQUILIBRADA =================
+// Cada logo recibe aproximadamente la misma superficie según su proporción, dentro de una
+// caja fija, para que ninguna marca domine a otra ni invada el texto.
 
-// ================= AJUSTES PERSONALIZADOS DE LOGO POR PLATAFORMA =================
-function getHeadlineLogoClass(slug: string) {
-  if (slug === 'max') {
-    return 'h-20 sm:h-28 w-auto max-w-[320px] sm:max-w-[420px]'
+// ================= TIPOGRAFÍAS DE MARCA POR PLATAFORMA =================
+function getPlatformFontClass(slug: string) {
+  switch (slug) {
+    case 'netflix':
+      return 'font-brand-netflix'
+    case 'disney':
+      return 'font-brand-disney'
+    case 'max':
+      return 'font-brand-max'
+    case 'prime':
+      return 'font-brand-prime'
+    case 'paramount':
+      return 'font-brand-paramount'
+    case 'crunchyroll':
+      return 'font-brand-crunchyroll'
+    case 'spotify':
+      return 'font-brand-spotify'
+    case 'appletv':
+      return 'font-brand-apple'
+    default:
+      return 'font-display'
   }
-  if (slug === 'paramount') {
-    return 'h-16 sm:h-24 w-auto max-w-[300px] sm:max-w-[380px]'
-  }
-  if (slug === 'appletv') {
-    return 'h-8 sm:h-10 w-auto max-w-[110px] sm:max-w-[130px]'
-  }
-  if (slug === 'disney') {
-    return 'h-12 sm:h-16 w-auto max-w-[220px] sm:max-w-[260px]'
-  }
-  return 'h-16 sm:h-22 w-auto max-w-[260px] sm:max-w-[320px]'
 }
 
-function getHeadlineLogoWrapperClass(slug: string) {
-  if (slug === 'disney') {
-    return 'inline-flex items-center justify-center rounded-2xl px-6 py-3 bg-white shadow-[0_0_40px_rgba(255,255,255,0.45)] border border-white'
-  }
-  return 'inline-block'
+function getLogoSize(sp: ScrollyPlatform, area: number, maxW: number, maxH: number) {
+  let h = Math.sqrt(area / sp.logoRatio)
+  let w = h * sp.logoRatio
+  if (w > maxW) { w = maxW; h = w / sp.logoRatio }
+  if (h > maxH) { h = maxH; w = h * sp.logoRatio }
+  return { '--logo-w': `${Math.round(w)}px`, '--logo-h': `${Math.round(h)}px` }
 }
 
-function getCardLogoClass(slug: string) {
-  if (slug === 'max') {
-    return 'h-10 sm:h-12 w-auto max-w-[160px] sm:max-w-[190px]'
-  }
-  if (slug === 'paramount') {
-    return 'h-9 sm:h-11 w-auto max-w-[150px] sm:max-w-[180px]'
-  }
-  if (slug === 'appletv') {
-    return 'h-6 sm:h-7 w-auto max-w-[80px] sm:max-w-[95px]'
-  }
-  if (slug === 'disney') {
-    return 'h-7 sm:h-8 w-auto max-w-[120px] sm:max-w-[140px]'
-  }
-  return 'h-9 sm:h-11 w-auto max-w-[150px] sm:max-w-[180px]'
+function getLogoImgClass(sp: ScrollyPlatform) {
+  // El logo de Disney trae su propio fondo: se presenta como insignia redondeada
+  return sp.slug === 'disney' ? 'rounded-xl ring-1 ring-white/25 shadow-[0_10px_30px_rgba(0,180,200,0.35)]' : ''
 }
 
-function getCardLogoWrapperClass(slug: string) {
-  if (slug === 'disney') {
-    return 'inline-flex items-center justify-center rounded-xl px-3 py-1.5 bg-white shadow-md border border-white'
-  }
-  return ''
+function getLogoPlateClass(sp: ScrollyPlatform) {
+  return sp.logoPlate === 'light'
+    ? 'bg-white/90 border-white/60 shadow-[0_8px_30px_rgba(0,0,0,0.45)]'
+    : 'bg-white/[0.06] border-white/15'
+}
+
+// ================= CONTRASTE DE TEXTOS CON EL COLOR DE MARCA =================
+function luminance(hex: string) {
+  const v = hex.replace('#', '')
+  const [r, g, b] = [0, 2, 4]
+    .map((i) => parseInt(v.slice(i, i + 2), 16) / 255)
+    .map((c) => (c <= 0.03928 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4)))
+  return 0.2126 * r + 0.7152 * g + 0.0722 * b
+}
+// Texto del botón de compra: blanco o casi negro, el que ofrezca mayor contraste
+function getButtonTextColor(color: string) {
+  const l = luminance(color)
+  return 1.05 / (l + 0.05) >= (l + 0.05) / 0.05 ? '#FFFFFF' : '#0B0E1F'
+}
+// Acento legible sobre fondo oscuro: mezcla el color de marca con blanco
+function getAccentText(color: string) {
+  return `color-mix(in srgb, ${color} 62%, white)`
 }
 
 function comprarPlataforma(p: ScrollyPlatform) {
@@ -681,22 +733,22 @@ function comprarPlataforma(p: ScrollyPlatform) {
 const faqs = ref([
   {
     q: '¿Cómo se realiza la entrega de la cuenta o pantalla?',
-    a: 'La entrega es automatizada e inmediata. En cuanto tu pago es verificado en el sistema, tus credenciales (correo, contraseña y PIN de perfil individual si corresponde) se activan y muestran de inmediato en tu panel "Mi Cuenta > Mis Servicios".',
+    a: 'La entrega es automática e inmediata. En cuanto el sistema verifica tu pago, tus credenciales (correo, contraseña y, si corresponde, el PIN de tu perfil) aparecen en "Mi cuenta > Mis servicios".',
     open: true,
   },
   {
     q: '¿Qué diferencia hay entre una cuenta completa y una pantalla individual?',
-    a: 'En la Cuenta Completa recibes el acceso integral a la suscripción para usar en hasta 4 o 5 dispositivos según la plataforma. En Pantalla Individual adquieres 1 perfil exclusivo y personal protegido con PIN privado dentro de una cuenta compartida por nuestro sistema.',
+    a: 'Con la cuenta completa recibes acceso total a la suscripción para usarla en 4 o 5 dispositivos, según la plataforma. Con la pantalla individual obtienes un perfil exclusivo, protegido con PIN privado, dentro de una cuenta compartida.',
     open: false,
   },
   {
     q: '¿Qué pasa si la cuenta presenta fallas o deja de funcionar?',
-    a: 'Cuentas con garantía total de reposición. Si alguna pantalla presenta inconvenientes de conexión o credenciales durante los 30 días del ciclo contratado, nuestro sistema te reasigna una nueva cuenta de inmediato sin costo.',
+    a: 'Tienes garantía total de reposición. Si una pantalla presenta problemas de conexión o de credenciales durante los 30 días contratados, te asignamos una nueva cuenta de inmediato y sin costo.',
     open: false,
   },
   {
     q: '¿Cuáles son los métodos de pago disponibles en Colombia?',
-    a: 'Admitimos pagos con Tarjeta Débito (Bancolombia, Nu, Genérica multimarca y BBVA con auto-detección de Visa, Mastercard y Amex) y la pasarela móvil directa para Nequi con confirmación en tu celular.',
+    a: 'Aceptamos tarjetas débito (Bancolombia, Nu, BBVA y otras entidades, con detección automática de Visa, Mastercard y American Express) y pagos con Nequi, que confirmas directamente desde tu celular.',
     open: false,
   },
 ])
@@ -715,7 +767,7 @@ const formatCOP = (val: number) => {
 </script>
 
 <template>
-  <div class="bg-black text-white selection:bg-brand-500/30 selection:text-white pb-24 overflow-x-hidden relative">
+  <div class="home-type bg-black text-white selection:bg-brand-500/30 selection:text-white pb-24 overflow-x-hidden relative">
     <!-- ================= MODAL / OVERLAY INTRO CINEMÁTICA TIPO NETFLIX ================= -->
     <Teleport to="body">
       <Transition
@@ -728,14 +780,14 @@ const formatCOP = (val: number) => {
       >
         <div
           v-if="showNetflixIntro"
-          class="fixed inset-0 z-50 bg-black flex items-center justify-center overflow-hidden select-none"
+          class="home-type fixed inset-0 z-50 bg-black flex items-center justify-center overflow-hidden select-none"
         >
           <!-- Controles de la Intro (Saltar y Silencio) -->
           <div class="absolute top-6 right-6 z-50 flex items-center gap-3">
             <button
               type="button"
               class="size-10 rounded-full border border-white/20 bg-black/60 text-white flex items-center justify-center hover:bg-white/10 transition-colors"
-              title="Activar/Silenciar sonido"
+              :aria-label="isMuted ? 'Activar sonido' : 'Silenciar sonido'"
               @click="toggleMute"
             >
               <VolumeX v-if="isMuted" class="size-4" />
@@ -747,7 +799,7 @@ const formatCOP = (val: number) => {
               class="px-4 py-2 rounded-full border border-white/20 bg-black/60 text-white text-xs font-mono font-semibold hover:bg-white/20 transition-all flex items-center gap-1.5"
               @click="closeCinematicIntro"
             >
-              <span>Saltar Intro</span>
+              <span>Saltar intro</span>
               <X class="size-3.5" />
             </button>
           </div>
@@ -775,11 +827,11 @@ const formatCOP = (val: number) => {
             ]"
           >
             <div
-              class="absolute h-1 w-[200vw] bg-gradient-to-r from-transparent via-cyan-400 to-transparent blur-sm animate-pulse"
+              class="absolute h-1 w-[200vw] bg-gradient-to-r from-transparent via-cyan-400 to-transparent blur-sm motion-safe:animate-pulse"
               style="box-shadow: 0 0 40px #8057FF, 0 0 80px #06B6D4;"
             />
 
-            <div class="relative size-32 sm:size-44 rounded-3xl p-1 bg-gradient-to-tr from-[#8057FF] via-[#06B6D4] to-[#8057FF] shadow-[0_0_80px_rgba(128,87,255,0.7)] animate-bounce duration-1000">
+            <div class="relative size-32 sm:size-44 rounded-3xl p-1 bg-gradient-to-tr from-[#8057FF] via-[#06B6D4] to-[#8057FF] shadow-[0_0_80px_rgba(128,87,255,0.7)] motion-safe:animate-bounce">
               <img
                 src="/streamstore_logo_official.png"
                 alt="StreamStore Logo Oficial"
@@ -802,81 +854,92 @@ const formatCOP = (val: number) => {
     <section class="relative min-h-screen flex items-center justify-center overflow-hidden bg-black">
       <!-- FONDO: MOSAICO DE ENTRETENIMIENTO CLARO Y VÍVIDO -->
       <div
-        class="absolute inset-0 bg-cover bg-center transition-transform duration-[25000ms] ease-out kenburns-bg opacity-85 saturate-[1.15] contrast-[1.05]"
+        class="absolute inset-0 bg-cover bg-center kenburns-bg opacity-85 saturate-[1.15] contrast-[1.05]"
         style="background-image: url('/hbo_max_mosaic_bg.jpg');"
       >
-        <!-- Viñeta Gradual Estilo Cine: no tapa completamente el mosaico -->
-        <div class="absolute inset-0 bg-gradient-to-b from-black/80 via-black/35 via-50% to-black pointer-events-none" />
-        
-        <!-- Radial sutil para concentrar la atención en el centro sin oscurecer en exceso -->
+        <!-- Viñeta gradual estilo cine: no tapa completamente el mosaico -->
+        <div class="absolute inset-0 bg-gradient-to-b from-black/80 via-black/40 via-50% to-black pointer-events-none" />
+
+        <!-- Radial sutil para concentrar la atención en el centro -->
         <div class="absolute inset-0 bg-[radial-gradient(ellipse_at_center,transparent_30%,rgba(0,0,0,0.75)_90%)] pointer-events-none" />
 
         <!-- Oscurecimiento dinámico suave al hacer scroll -->
         <div
-          class="absolute inset-0 bg-black pointer-events-none transition-opacity duration-150"
+          class="absolute inset-0 bg-black pointer-events-none"
           :style="heroDarkenStyle"
         />
       </div>
 
       <!-- CONTENIDO CENTRAL DEL HERO -->
       <div
-        class="container-app relative z-10 text-center max-w-4xl mx-auto pt-28 sm:pt-40 pb-16 flex flex-col items-center justify-center space-y-6 transition-all duration-150 ease-out will-change-transform"
+        class="container-app relative z-10 text-center max-w-4xl mx-auto pt-28 sm:pt-36 pb-16 flex flex-col items-center justify-center space-y-6"
         :style="heroContentStyle"
       >
-        <div class="flex flex-col items-center justify-center space-y-2 mt-8 sm:mt-14">
-          <h1 class="font-display text-5xl sm:text-7xl md:text-8xl lg:text-9xl font-black uppercase tracking-tight select-none leading-none drop-shadow-[0_15px_45px_rgba(0,0,0,0.95)]">
-            <span class="text-white drop-shadow-[0_10px_25px_rgba(0,0,0,0.9)]">STREAM</span>
-            <span class="block sm:inline sm:ml-4 bg-gradient-to-r from-[#8057FF] via-[#9B51E0] to-[#06B6D4] bg-clip-text text-transparent filter drop-shadow-[0_0_40px_rgba(6,182,212,0.5)]">STORE</span>
+        <div class="flex flex-col items-center justify-center space-y-2 mt-6 sm:mt-10">
+          <h1 class="font-display text-[3.25rem] leading-[0.95] sm:text-7xl md:text-8xl lg:text-9xl font-extrabold uppercase tracking-tight select-none drop-shadow-[0_15px_45px_rgba(0,0,0,0.95)]">
+            <span class="title-metal">STREAM</span>
+            <span class="block sm:inline sm:ml-4 bg-gradient-to-r from-[#9B7BFF] via-[#B26BFF] to-[#22D3EE] bg-clip-text text-transparent drop-shadow-[0_0_40px_rgba(6,182,212,0.45)]">STORE</span>
           </h1>
         </div>
 
-        <p class="text-xl sm:text-2xl md:text-3xl text-white/95 font-medium tracking-tight drop-shadow-[0_4px_16px_rgba(0,0,0,0.9)]">
-          Los planes empiezan desde <strong class="text-white font-black drop-shadow-md">$6.500/mes</strong>
+        <p class="font-display text-xl sm:text-2xl md:text-3xl text-white font-semibold tracking-tight drop-shadow-[0_4px_16px_rgba(0,0,0,0.9)]">
+          Planes desde <strong class="font-extrabold text-cyan-300">$6.500</strong> por 30 días
         </p>
 
-        <p class="text-sm sm:text-base text-slate-200 max-w-xl mx-auto font-sans leading-relaxed drop-shadow-md">
-          Acceso instantáneo a Netflix, Disney+, Max, Prime Video, Paramount+, Crunchyroll, Spotify y Apple TV+ con garantía ininterrumpida.
+        <p class="text-sm sm:text-base text-slate-100 max-w-xl mx-auto leading-relaxed drop-shadow-md">
+          Acceso inmediato a Netflix, Disney+, Max, Prime Video, Paramount+, Crunchyroll, Spotify y Apple TV+, con garantía durante todo tu plan.
         </p>
 
         <!-- Botones de Acción -->
         <div class="flex flex-col sm:flex-row items-center justify-center gap-4 pt-3 w-full sm:w-auto">
           <RouterLink
             to="/login"
-            class="inline-flex items-center justify-center rounded-full bg-white hover:bg-slate-200 text-neutral-950 font-black text-base px-10 sm:px-14 py-3.5 sm:py-4 shadow-[0_0_35px_rgba(255,255,255,0.4)] hover:shadow-[0_0_55px_rgba(255,255,255,0.7)] transition-all duration-200 hover:scale-105 active:scale-95 w-full sm:w-auto uppercase tracking-wider"
+            class="inline-flex items-center justify-center rounded-full bg-white hover:bg-slate-200 text-neutral-950 font-extrabold text-base px-10 sm:px-14 py-3.5 sm:py-4 shadow-[0_0_35px_rgba(255,255,255,0.4)] hover:shadow-[0_0_55px_rgba(255,255,255,0.7)] transition-[background-color,box-shadow,transform] duration-200 motion-safe:hover:-translate-y-0.5 active:translate-y-0 w-full sm:w-auto uppercase tracking-wider focus-visible:outline-offset-4"
           >
-            Iniciar Sesión
+            Iniciar sesión
           </RouterLink>
 
           <a
             href="#plataformas-showcase"
-            class="inline-flex items-center justify-center rounded-full border border-white/35 bg-black/60 hover:bg-white/10 text-white font-bold text-base px-8 sm:px-10 py-3.5 sm:py-4 backdrop-blur-md transition-all duration-200 hover:border-white w-full sm:w-auto cursor-pointer"
+            class="inline-flex items-center justify-center rounded-full border border-white/40 bg-black/60 hover:bg-white/10 text-white font-bold text-base px-8 sm:px-10 py-3.5 sm:py-4 backdrop-blur-md transition-colors duration-200 hover:border-white w-full sm:w-auto cursor-pointer focus-visible:outline-offset-4"
           >
-            <span>Ver Canales & Planes</span>
-            <ArrowRight class="size-4 ml-2" />
+            <span>Ver plataformas y planes</span>
+            <ArrowRight class="size-4 ml-2" aria-hidden="true" />
           </a>
         </div>
 
         <!-- 4 Métricas de Confianza -->
         <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-5 pt-8 w-full max-w-3xl border-t border-white/15 mt-6">
           <div class="rounded-xl border border-white/15 bg-black/70 p-3.5 shadow-lg backdrop-blur-md">
-            <p class="font-display text-2xl sm:text-3xl font-black text-white tracking-tight">+15K</p>
-            <p class="text-[11px] sm:text-xs text-slate-300 mt-0.5">Clientes Satisfechos</p>
+            <p class="font-display text-2xl sm:text-3xl font-extrabold text-white tracking-tight">+15K</p>
+            <p class="text-xs text-slate-200 mt-0.5 font-medium">Clientes satisfechos</p>
           </div>
           <div class="rounded-xl border border-white/15 bg-black/70 p-3.5 shadow-lg backdrop-blur-md">
-            <p class="font-display text-2xl sm:text-3xl font-black text-emerald-400 tracking-tight">100%</p>
-            <p class="text-[11px] sm:text-xs text-slate-300 mt-0.5">Garantía Activa</p>
+            <p class="font-display text-2xl sm:text-3xl font-extrabold text-emerald-400 tracking-tight">100%</p>
+            <p class="text-xs text-slate-200 mt-0.5 font-medium">Garantía activa</p>
           </div>
           <div class="rounded-xl border border-white/15 bg-black/70 p-3.5 shadow-lg backdrop-blur-md">
-            <p class="font-display text-2xl sm:text-3xl font-black text-cyan-300 tracking-tight">24/7</p>
-            <p class="text-[11px] sm:text-xs text-slate-300 mt-0.5">Soporte Inmediato</p>
+            <p class="font-display text-2xl sm:text-3xl font-extrabold text-cyan-300 tracking-tight">24/7</p>
+            <p class="text-xs text-slate-200 mt-0.5 font-medium">Soporte inmediato</p>
           </div>
           <div class="rounded-xl border border-white/15 bg-black/70 p-3.5 shadow-lg backdrop-blur-md">
-            <p class="font-display text-2xl sm:text-3xl font-black text-purple-300 tracking-tight">&lt; 10s</p>
-            <p class="text-[11px] sm:text-xs text-slate-300 mt-0.5">Entrega Automática</p>
+            <p class="font-display text-2xl sm:text-3xl font-extrabold text-purple-300 tracking-tight">&lt; 10 s</p>
+            <p class="text-xs text-slate-200 mt-0.5 font-medium">Entrega automática</p>
           </div>
         </div>
       </div>
     </section>
+
+
+    <!-- ================= CONECTOR CINEMÁTICO FLUIDO ================= -->
+    <div
+      class="relative h-20 sm:h-28 bg-black flex items-center justify-center overflow-hidden pointer-events-none select-none"
+      aria-hidden="true"
+    >
+      <!-- Haz anamórfico central -->
+      <div class="w-full max-w-2xl h-[1px] bg-gradient-to-r from-transparent via-[#8057FF]/40 via-50% via-[#06B6D4]/40 to-transparent" />
+      <div class="absolute size-36 rounded-full bg-cyan-400/10 blur-3xl" />
+    </div>
 
     <!-- ================= 2. CABECERA: ELIGE EL MEJOR PLAN PARA TI ================= -->
     <section id="planes-intro" class="relative bg-black pt-16 pb-12 text-center overflow-hidden">
@@ -884,411 +947,356 @@ const formatCOP = (val: number) => {
       <div class="absolute top-0 left-1/2 -translate-x-1/2 w-3/4 max-w-3xl h-32 bg-gradient-to-b from-[#8057FF]/20 via-[#06B6D4]/15 to-transparent blur-3xl pointer-events-none" />
 
       <div class="container-app relative z-10 max-w-3xl mx-auto space-y-5">
-        <h2 class="font-display text-4xl sm:text-6xl font-black text-white uppercase tracking-tight leading-[1.05] drop-shadow-2xl">
-          ELIGE EL MEJOR <br />
-          <span class="bg-gradient-to-r from-[#8057FF] via-[#A855F7] to-[#06B6D4] bg-clip-text text-transparent">
-            PLAN PARA TI
+        <h2 class="font-display text-4xl sm:text-6xl font-extrabold uppercase tracking-tight leading-[1.05] drop-shadow-2xl">
+          <span class="title-metal">Elige el mejor</span><br />
+          <span class="bg-gradient-to-r from-[#9B7BFF] via-[#B26BFF] to-[#22D3EE] bg-clip-text text-transparent">
+            plan para ti
           </span>
         </h2>
 
-        <p class="text-sm sm:text-base text-slate-200 font-sans max-w-xl mx-auto leading-relaxed drop-shadow">
-          Desliza para recorrer cada plataforma con activación automática en segundos y garantía total de 30 días.
+        <p class="text-sm sm:text-base text-slate-200 max-w-xl mx-auto leading-relaxed drop-shadow">
+          Desplázate para recorrer cada plataforma. Activación automática en segundos y garantía total de 30 días.
         </p>
 
         <!-- Selector de Modalidad (Cuentas Completas vs Pantallas Individuales) -->
         <div class="pt-2 flex justify-center">
-          <div class="flex p-1.5 rounded-full border border-white/20 bg-black/80 backdrop-blur-xl w-full max-w-sm shadow-2xl">
+          <div
+            class="flex p-1.5 rounded-full border border-white/20 bg-black/80 backdrop-blur-xl w-full max-w-sm shadow-2xl"
+            role="group"
+            aria-label="Modalidad de compra"
+          >
             <button
               type="button"
-              class="flex-1 py-3 px-5 rounded-full text-xs sm:text-sm font-black transition-all duration-300 cursor-pointer text-center"
+              class="flex-1 py-3 px-4 rounded-full text-xs sm:text-sm font-extrabold transition-colors duration-300 cursor-pointer text-center"
               :class="
                 modalidadSeleccionada === 'CUENTA_COMPLETA'
-                  ? 'bg-white text-neutral-950 shadow-lg scale-100'
-                  : 'text-slate-400 hover:text-white'
+                  ? 'bg-white text-neutral-950 shadow-lg'
+                  : 'text-slate-300 hover:text-white hover:bg-white/10'
               "
+              :aria-pressed="modalidadSeleccionada === 'CUENTA_COMPLETA'"
               @click="modalidadSeleccionada = 'CUENTA_COMPLETA'"
             >
-              Cuentas Completas
+              Cuentas completas
             </button>
             <button
               type="button"
-              class="flex-1 py-3 px-5 rounded-full text-xs sm:text-sm font-black transition-all duration-300 cursor-pointer text-center"
+              class="flex-1 py-3 px-4 rounded-full text-xs sm:text-sm font-extrabold transition-colors duration-300 cursor-pointer text-center"
               :class="
                 modalidadSeleccionada === 'PANTALLA'
-                  ? 'bg-cyan-400 text-neutral-950 shadow-lg scale-100'
-                  : 'text-slate-400 hover:text-white'
+                  ? 'bg-cyan-400 text-neutral-950 shadow-lg'
+                  : 'text-slate-300 hover:text-white hover:bg-white/10'
               "
+              :aria-pressed="modalidadSeleccionada === 'PANTALLA'"
               @click="modalidadSeleccionada = 'PANTALLA'"
             >
-              Pantallas (PIN)
+              Pantallas con PIN
             </button>
           </div>
         </div>
+
+        <!-- Índice de plataformas para móvil y tableta (el dock lateral solo aparece en pantallas anchas) -->
+        <nav class="xl:hidden pt-4" aria-label="Ir a una plataforma">
+          <ul class="flex flex-wrap justify-center gap-2.5">
+            <li v-for="sp in scrollyPlatforms" :key="'chip-' + sp.slug">
+              <button
+                type="button"
+                class="h-12 w-[4.75rem] rounded-xl border flex items-center justify-center px-2 transition-colors duration-200 cursor-pointer hover:border-white/50"
+                :class="sp.logoPlate === 'light' ? 'bg-white/90 border-white/60' : 'bg-white/[0.06] border-white/15'"
+                :aria-label="`Ir a ${sp.nombre}`"
+                @click="scrollToPlatform(sp.slug)"
+              >
+                <img
+                  v-if="sp.logo"
+                  :src="sp.logo"
+                  alt=""
+                  class="max-h-8 max-w-full object-contain"
+                  :class="sp.slug === 'disney' ? 'rounded-md' : ''"
+                />
+              </button>
+            </li>
+          </ul>
+        </nav>
       </div>
     </section>
 
     <!-- ================= 3. CAPÍTULOS SCROLLYTELLING POR PLATAFORMA ================= -->
-    <div id="plataformas-showcase" class="space-y-0 bg-black relative">
+    <div id="plataformas-showcase" class="bg-black relative scroll-mt-20">
 
-      <!-- ================= DOCK FLOTANTE LATERAL (HIPERVÍNCULOS A CANALES) ================= -->
-      <aside 
-        class="fixed right-2.5 sm:right-5 top-1/2 -translate-y-1/2 z-40 flex flex-col gap-2 p-1.5 sm:p-2 rounded-2xl border border-white/20 bg-black/85 backdrop-blur-2xl shadow-[0_0_35px_rgba(0,0,0,0.9)] transition-all duration-300"
+      <!-- ================= DOCK FLOTANTE LATERAL (solo pantallas anchas, fuera del contenido) ================= -->
+      <nav
+        class="hidden xl:flex fixed right-4 top-1/2 -translate-y-1/2 z-40 flex-col gap-2 p-2 rounded-2xl border border-white/20 bg-black/85 backdrop-blur-2xl shadow-[0_0_35px_rgba(0,0,0,0.9)]"
+        aria-label="Plataformas"
       >
         <button
           v-for="(sp, idx) in scrollyPlatforms"
           :key="'dock-' + sp.slug"
           type="button"
-          class="size-10 sm:size-12 rounded-xl flex items-center justify-center p-2 transition-all duration-300 cursor-pointer relative group border"
-          :class="activeIndex === idx ? 'bg-white/20 scale-110 shadow-xl border-white/40' : 'border-transparent hover:bg-white/10 opacity-70 hover:opacity-100'"
+          class="size-12 rounded-xl flex items-center justify-center p-1.5 transition-[background-color,border-color,box-shadow] duration-300 cursor-pointer relative group border"
+          :class="[
+            activeIndex === idx ? 'border-white/60' : 'border-transparent hover:border-white/30',
+            sp.logoPlate === 'light' ? 'bg-white/90' : activeIndex === idx ? 'bg-white/20' : 'bg-white/[0.04] hover:bg-white/10',
+          ]"
           :style="activeIndex === idx ? { boxShadow: `0 0 18px ${sp.color}` } : {}"
-          :title="sp.nombre"
+          :aria-label="`Ir a ${sp.nombre}`"
+          :aria-current="activeIndex === idx ? 'true' : undefined"
           @click="scrollToPlatform(sp.slug)"
         >
           <img
             v-if="sp.logo"
             :src="sp.logo"
-            :alt="sp.nombre"
-            class="max-h-7 max-w-8 sm:max-h-8 sm:max-w-9 object-contain drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]"
+            alt=""
+            class="max-h-8 max-w-full object-contain"
+            :class="sp.slug === 'disney' ? 'rounded-md' : ''"
           />
-          <span v-else class="text-[10px] font-black" :style="{ color: sp.color }">
-            {{ sp.slug.substring(0, 3).toUpperCase() }}
-          </span>
 
-          <!-- Tooltip flotante a la izquierda -->
-          <span class="absolute right-full mr-3 px-3 py-1.5 rounded-xl bg-black/95 border border-white/20 text-xs font-bold text-white whitespace-nowrap opacity-0 group-hover:opacity-100 transition-all pointer-events-none shadow-2xl flex items-center gap-1.5">
+          <!-- Tooltip a la izquierda: visible con ratón y con teclado -->
+          <span class="absolute right-full mr-3 px-3 py-1.5 rounded-xl bg-black/95 border border-white/20 text-xs font-bold text-white whitespace-nowrap opacity-0 group-hover:opacity-100 group-focus-visible:opacity-100 transition-opacity pointer-events-none shadow-2xl flex items-center gap-1.5">
             <span class="size-2 rounded-full" :style="{ backgroundColor: sp.color }" />
             {{ sp.nombre }}
           </span>
         </button>
-      </aside>
+      </nav>
 
       <!-- SECCIONES DE PLATAFORMAS (SCROLLYTELLING) -->
-      <div
-        v-for="(sp, idx) in scrollyPlatforms"
-        :key="sp.id"
-        class="relative"
-      >
+      <template v-for="(sp, idx) in scrollyPlatforms" :key="sp.id">
+        <!-- Divisor sutil y elegante entre plataformas -->
+        <div
+          v-if="idx > 0"
+          class="relative h-12 sm:h-16 flex items-center justify-center overflow-hidden pointer-events-none select-none"
+          aria-hidden="true"
+        >
+          <div class="w-full max-w-lg h-[1px] bg-gradient-to-r from-transparent via-white/10 to-transparent" />
+        </div>
+
         <section
           :id="'plataforma-' + sp.slug"
-          class="relative min-h-[95vh] flex items-center justify-center overflow-hidden py-16 sm:py-24 bg-black"
-        >
-          <!-- FOTO DE REFERENCIA CINEMÁTICA DE FONDO: CLARA, VÍVIDA Y APRECIABLE -->
+        class="relative min-h-[95vh] flex items-center justify-center overflow-hidden py-16 sm:py-24 bg-black scroll-mt-20"
+        :aria-labelledby="'titulo-' + sp.slug"
+      >
+        <!-- FOTO DE REFERENCIA CINEMÁTICA DE FONDO -->
+        <div
+          class="absolute inset-0 bg-cover bg-center opacity-85 sm:opacity-90 saturate-[1.12] contrast-[1.06] brightness-[0.92] pointer-events-none"
+          :style="getBgParallax(idx, sp.bgImage)"
+        />
+
+        <!-- VIÑETAS CINEMÁTICAS (PROTEGEN EL TEXTO SIN APAGAR LA IMAGEN) -->
+        <div class="absolute inset-0 bg-gradient-to-b from-black/85 via-black/35 via-50% to-black/85 pointer-events-none" />
+        <div class="absolute inset-0 bg-[radial-gradient(ellipse_at_center,transparent_35%,rgba(0,0,0,0.6)_95%)] pointer-events-none" />
+
+        <!-- Halo neón ambiental con el color de la plataforma -->
+        <div
+          class="absolute top-1/2 -translate-y-1/2 size-[520px] sm:size-[680px] rounded-full blur-[140px] pointer-events-none"
+          :class="idx % 2 === 0 ? 'right-10' : 'left-10'"
+          :style="getHaloStyle(idx, sp.color)"
+        />
+
+        <!-- Riel de progreso del capítulo: crece al bajar y se recoge al subir -->
+        <div class="absolute left-0 top-0 bottom-0 w-[3px] bg-white/10 pointer-events-none" aria-hidden="true">
           <div
-            class="absolute inset-0 bg-cover bg-center opacity-85 sm:opacity-90 saturate-[1.12] contrast-[1.06] brightness-[0.92] will-change-transform pointer-events-none"
-            :style="getBgParallax(idx, sp.bgImage)"
+            class="absolute inset-x-0 top-0 h-full origin-top"
+            :style="{ backgroundColor: sp.color, transform: `scaleY(${getChapterProgress(idx).toFixed(3)})`, boxShadow: `0 0 12px ${sp.color}` }"
           />
+        </div>
 
-          <!-- VIÑETAS CINEMÁTICAS SUAVES (PROTEGEN EL TEXTO SIN APAGAR LA IMAGEN) -->
-          <!-- 1. Suave degradado vertical para fundir con las secciones superior e inferior -->
-          <div class="absolute inset-0 bg-gradient-to-b from-black/85 via-black/25 via-50% to-black/85 pointer-events-none" />
+        <!-- CONTENIDO EN 2 COLUMNAS ALTERNADAS -->
+        <div class="container-app relative z-10 w-full xl:pr-24">
+          <div class="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-14 items-center">
 
-          <!-- 2. Suave radial en las esquinas -->
-          <div class="absolute inset-0 bg-[radial-gradient(ellipse_at_center,transparent_35%,rgba(0,0,0,0.6)_95%)] pointer-events-none" />
+            <!-- INFORMACIÓN Y PROPUESTA DE VALOR -->
+            <div
+              class="lg:col-span-6 space-y-6 text-left"
+              :class="idx % 2 === 0 ? 'lg:order-1' : 'lg:order-2'"
+              :style="getInfoStyle(idx)"
+            >
+              <!-- Logo en caja de tamaño controlado: nunca invade el título -->
+              <div
+                v-if="sp.logo"
+                class="inline-flex items-center justify-center rounded-2xl border backdrop-blur-md"
+                :class="sp.slug === 'disney' ? 'border-transparent' : ['px-5 py-4', getLogoPlateClass(sp)]"
+              >
+                <img
+                  :src="sp.logo"
+                  :alt="`Logo de ${sp.nombre}`"
+                  class="logo-fit logo-hero"
+                  :class="getLogoImgClass(sp)"
+                  :style="[getLogoSize(sp, 13000, 250, 96), sp.logoPlate === 'light' ? {} : { filter: sp.logoFilter }]"
+                  loading="lazy"
+                />
+              </div>
 
-          <!-- 3. Halo neón ambiental con el color distintivo de la plataforma iluminando la escena -->
-          <div
-            class="absolute top-1/2 -translate-y-1/2 size-[680px] rounded-full blur-[140px] pointer-events-none will-change-transform"
-            :class="idx % 2 === 0 ? 'right-10' : 'left-10'"
-            :style="getHaloStyle(idx, sp.color)"
-          />
-
-          <!-- CONTENIDO EN 2 COLUMNAS ALTERNADAS (CON ANIMACIÓN DE ENTRADA Y SALIDA) -->
-          <div class="container-app relative z-10 w-full">
-            <div class="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-14 items-center">
-
-              <!-- ================= CASO 1: ÍNDICE PAR -> INFORMACIÓN A LA IZQUIERDA, TARJETA A LA DERECHA ================= -->
-              <template v-if="idx % 2 === 0">
-                <!-- COLUMNA IZQUIERDA: INFORMACIÓN Y PROPUESTA DE VALOR -->
-                <div
-                  class="lg:col-span-6 space-y-6 text-left will-change-transform"
-                  :style="getInfoStyle(idx)"
+              <!-- Título e impacto -->
+              <div class="space-y-3">
+                <p class="font-mono text-[11px] sm:text-xs font-bold uppercase tracking-[0.2em]" :style="{ color: getAccentText(sp.color) }">
+                  {{ sp.tag }}
+                </p>
+                <h3
+                  :id="'titulo-' + sp.slug"
+                  class="font-display text-[2rem] sm:text-5xl lg:text-[3.5rem] font-extrabold uppercase tracking-tight leading-[1.02] drop-shadow-[0_10px_30px_rgba(0,0,0,0.95)] text-balance"
                 >
-                  <!-- Logotipo Oficial de Marca Libre y Grande (Sin caja contenedora) -->
-                  <div v-if="sp.logo" class="mb-4">
-                    <img 
-                      :src="sp.logo" 
-                      :alt="sp.nombre" 
-                      class="h-24 sm:h-36 w-auto max-w-[320px] sm:max-w-[420px] object-contain transition-transform duration-300 drop-shadow-2xl scale-125 origin-left"
-                      :style="{ filter: sp.logoFilter }"
-                    />
-                  </div>
+                  <span class="title-metal">{{ sp.nombre }}</span>
+                </h3>
+                <p class="font-display text-lg sm:text-2xl font-semibold leading-snug drop-shadow" :style="{ color: getAccentText(sp.color) }">
+                  {{ sp.headline }}
+                </p>
+              </div>
 
-                  <!-- Título e Impacto -->
-                  <div class="space-y-3">
-                    <h3 class="font-display text-3xl sm:text-5xl lg:text-6xl font-black text-white uppercase tracking-tight leading-tight drop-shadow-[0_10px_30px_rgba(0,0,0,0.95)]">
-                      {{ sp.nombre }}
-                    </h3>
-                    <p class="text-base sm:text-xl font-semibold drop-shadow" :style="{ color: sp.color }">
-                      {{ sp.headline }}
-                    </p>
-                  </div>
+              <!-- Descripción -->
+              <p class="text-sm sm:text-base text-slate-100 leading-relaxed max-w-xl drop-shadow-md">
+                {{ sp.desc }}
+              </p>
 
-                  <!-- Descripción -->
-                  <p class="text-sm sm:text-base text-slate-100 leading-relaxed font-sans max-w-xl drop-shadow-md">
-                    {{ sp.desc }}
-                  </p>
-
-                  <!-- Checklist de Beneficios Exclusivos -->
-                  <div class="space-y-3 pt-2">
-                    <div
-                      v-for="(feat, fIdx) in sp.features"
-                      :key="fIdx"
-                      class="flex items-center gap-3 text-xs sm:text-sm text-slate-100 drop-shadow"
-                    >
-                      <div class="size-5 rounded-full flex items-center justify-center shrink-0 border border-white/20" :style="{ backgroundColor: `${sp.color}35` }">
-                        <CheckCircle2 class="size-3.5" :style="{ color: sp.color }" />
-                      </div>
-                      <span class="font-medium">{{ feat }}</span>
-                    </div>
-                  </div>
-                </div>
-
-                <!-- COLUMNA DERECHA: TARJETA DE PRECIO Y COMPRA DIRECTA -->
-                <div class="lg:col-span-6 flex justify-center lg:justify-end">
-                  <div
-                    class="w-full max-w-lg rounded-3xl border border-white/25 bg-gradient-to-b from-black/85 via-[#0B0E1F]/90 to-black/95 backdrop-blur-2xl p-7 sm:p-9 shadow-2xl relative overflow-hidden group hover:border-white/40 will-change-transform"
-                    :style="getCardStyle(idx, sp.color)"
-                  >
-                    <!-- Línea Neón Superior Resplandeciente -->
-                    <div
-                      class="absolute top-0 left-0 right-0 h-1.5"
-                      :style="{ backgroundColor: sp.color, boxShadow: `0 0 30px ${sp.color}, 0 0 60px ${sp.color}` }"
-                    />
-
-                    <!-- Cabecera de Tarjeta: Logo Oficial Libre y Grande (Sin cuadro) -->
-                    <div class="flex items-center justify-between gap-4 mb-6">
-                      <div>
-                        <span class="text-xs font-mono uppercase tracking-wider font-black" :style="{ color: sp.color }">
-                          {{ modalidadSeleccionada === 'CUENTA_COMPLETA' ? 'PLAN CUENTA COMPLETA' : 'PLAN PANTALLA PRIVADA' }}
-                        </span>
-                        <h4 class="font-display text-2xl sm:text-3xl font-black text-white mt-0.5 drop-shadow">
-                          {{ sp.nombre }}
-                        </h4>
-                      </div>
-
-                      <!-- Logotipo Oficial Libre, Nítido y Prominente (Sin caja ni marco) -->
-                      <div v-if="sp.logo" class="h-16 sm:h-20 flex items-center justify-end shrink-0 overflow-visible">
-                        <img 
-                          :src="sp.logo" 
-                          :alt="sp.nombre" 
-                          class="h-14 sm:h-16 w-auto max-w-[200px] sm:max-w-[240px] object-contain transition-transform duration-300 group-hover:scale-125 scale-110 origin-right"
-                          :style="{ filter: sp.logoFilter }"
-                        />
-                      </div>
-                    </div>
-
-                    <!-- Precio Dinámico con Alto Contraste -->
-                    <div class="p-5 rounded-2xl border border-white/15 bg-white/5 mb-6 backdrop-blur-sm shadow-inner">
-                      <span class="text-[11px] font-mono uppercase text-slate-300 block mb-1 font-bold">
-                        {{ modalidadSeleccionada === 'CUENTA_COMPLETA' ? 'Precio Suscripción 30 días' : 'Precio Perfil Individual con PIN' }}
-                      </span>
-                      <div class="flex items-baseline gap-2">
-                        <span class="font-display text-4xl sm:text-5xl font-black text-white tracking-tight drop-shadow-md">
-                          {{ formatCOP(modalidadSeleccionada === 'CUENTA_COMPLETA' ? sp.precioCompleta : sp.precioPantalla) }}
-                        </span>
-                        <span class="text-xs sm:text-sm text-slate-300 font-medium">/ 30 días</span>
-                      </div>
-                      <p class="text-[11px] text-cyan-300 mt-1 font-mono font-semibold">
-                        {{ modalidadSeleccionada === 'CUENTA_COMPLETA' ? '✔ Acceso total a todos los perfiles de la cuenta' : '✔ 1 Pantalla exclusiva protegida con PIN privado' }}
-                      </p>
-                    </div>
-
-                    <!-- Botón de Compra Directo -->
-                    <button
-                      type="button"
-                      class="w-full inline-flex items-center justify-center rounded-full text-base font-black py-4 px-8 shadow-2xl transition-all duration-200 hover:scale-[1.03] active:scale-95 cursor-pointer gap-2 uppercase tracking-wider text-white relative overflow-hidden"
-                      :style="{ backgroundColor: sp.color, boxShadow: `0 0 40px ${sp.color}70` }"
-                      @click="comprarPlataforma(sp)"
-                    >
-                      <span class="relative z-10">Comprar Ahora</span>
-                      <ArrowRight class="size-4 relative z-10 transition-transform group-hover:translate-x-1" />
-                    </button>
-
-                    <!-- Métodos de Pago y Entrega -->
-                    <div class="mt-4 pt-4 border-t border-white/15 flex items-center justify-between text-[11px] text-slate-300 font-medium">
-                      <span>⚡ Entrega en &lt; 10s · Garantía 30 días</span>
-                      <span>💳 Bancolombia · Nequi · Nu</span>
-                    </div>
-                  </div>
-                </div>
-              </template>
-
-              <!-- ================= CASO 2: ÍNDICE IMPAR -> TARJETA A LA IZQUIERDA, INFORMACIÓN A LA DERECHA ================= -->
-              <template v-else>
-                <!-- COLUMNA IZQUIERDA: TARJETA DE PRECIO Y COMPRA DIRECTA -->
-                <div class="lg:col-span-6 flex justify-center lg:justify-start order-2 lg:order-1">
-                  <div
-                    class="w-full max-w-lg rounded-3xl border border-white/25 bg-gradient-to-b from-black/85 via-[#0B0E1F]/90 to-black/95 backdrop-blur-2xl p-7 sm:p-9 shadow-2xl relative overflow-hidden group hover:border-white/40 will-change-transform"
-                    :style="getCardStyle(idx, sp.color)"
-                  >
-                    <!-- Línea Neón Superior Resplandeciente -->
-                    <div
-                      class="absolute top-0 left-0 right-0 h-1.5"
-                      :style="{ backgroundColor: sp.color, boxShadow: `0 0 30px ${sp.color}, 0 0 60px ${sp.color}` }"
-                    />
-
-                    <!-- Cabecera de Tarjeta: Logo Oficial Libre y Grande (Sin cuadro) -->
-                    <div class="flex items-center justify-between gap-4 mb-6">
-                      <div>
-                        <span class="text-xs font-mono uppercase tracking-wider font-black" :style="{ color: sp.color }">
-                          {{ modalidadSeleccionada === 'CUENTA_COMPLETA' ? 'PLAN CUENTA COMPLETA' : 'PLAN PANTALLA PRIVADA' }}
-                        </span>
-                        <h4 class="font-display text-2xl sm:text-3xl font-black text-white mt-0.5 drop-shadow">
-                          {{ sp.nombre }}
-                        </h4>
-                      </div>
-
-                      <!-- Logotipo Oficial Libre, Nítido y Prominente (Sin caja ni marco) -->
-                      <div v-if="sp.logo" class="h-16 sm:h-20 flex items-center justify-end shrink-0 overflow-visible">
-                        <img 
-                          :src="sp.logo" 
-                          :alt="sp.nombre" 
-                          class="h-14 sm:h-16 w-auto max-w-[200px] sm:max-w-[240px] object-contain transition-transform duration-300 group-hover:scale-125 scale-110 origin-right"
-                          :style="{ filter: sp.logoFilter }"
-                        />
-                      </div>
-                    </div>
-
-                    <!-- Precio Dinámico con Alto Contraste -->
-                    <div class="p-5 rounded-2xl border border-white/15 bg-white/5 mb-6 backdrop-blur-sm shadow-inner">
-                      <span class="text-[11px] font-mono uppercase text-slate-300 block mb-1 font-bold">
-                        {{ modalidadSeleccionada === 'CUENTA_COMPLETA' ? 'Precio Suscripción 30 días' : 'Precio Perfil Individual con PIN' }}
-                      </span>
-                      <div class="flex items-baseline gap-2">
-                        <span class="font-display text-4xl sm:text-5xl font-black text-white tracking-tight drop-shadow-md">
-                          {{ formatCOP(modalidadSeleccionada === 'CUENTA_COMPLETA' ? sp.precioCompleta : sp.precioPantalla) }}
-                        </span>
-                        <span class="text-xs sm:text-sm text-slate-300 font-medium">/ 30 días</span>
-                      </div>
-                      <p class="text-[11px] text-cyan-300 mt-1 font-mono font-semibold">
-                        {{ modalidadSeleccionada === 'CUENTA_COMPLETA' ? '✔ Acceso total a todos los perfiles de la cuenta' : '✔ 1 Pantalla exclusiva protegida con PIN privado' }}
-                      </p>
-                    </div>
-
-                    <!-- Botón de Compra Directo -->
-                    <button
-                      type="button"
-                      class="w-full inline-flex items-center justify-center rounded-full text-base font-black py-4 px-8 shadow-2xl transition-all duration-200 hover:scale-[1.03] active:scale-95 cursor-pointer gap-2 uppercase tracking-wider text-white relative overflow-hidden"
-                      :style="{ backgroundColor: sp.color, boxShadow: `0 0 40px ${sp.color}70` }"
-                      @click="comprarPlataforma(sp)"
-                    >
-                      <span class="relative z-10">Comprar Ahora</span>
-                      <ArrowRight class="size-4 relative z-10 transition-transform group-hover:translate-x-1" />
-                    </button>
-
-                    <!-- Métodos de Pago y Entrega -->
-                    <div class="mt-4 pt-4 border-t border-white/15 flex items-center justify-between text-[11px] text-slate-300 font-medium">
-                      <span>⚡ Entrega en &lt; 10s · Garantía 30 días</span>
-                      <span>💳 Bancolombia · Nequi · Nu</span>
-                    </div>
-                  </div>
-                </div>
-
-                <!-- COLUMNA DERECHA: INFORMACIÓN Y PROPUESTA DE VALOR -->
-                <div
-                  class="lg:col-span-6 space-y-6 text-left order-1 lg:order-2 will-change-transform"
-                  :style="getInfoStyle(idx)"
+              <!-- Beneficios -->
+              <ul class="space-y-3 pt-1">
+                <li
+                  v-for="(feat, fIdx) in sp.features"
+                  :key="fIdx"
+                  class="flex items-start gap-3 text-sm text-slate-100 drop-shadow"
                 >
-                  <!-- Logotipo Oficial de Marca Libre y Grande (Sin caja contenedora) -->
-                  <div v-if="sp.logo" class="mb-4">
-                    <img 
-                      :src="sp.logo" 
-                      :alt="sp.nombre" 
-                      class="h-24 sm:h-36 w-auto max-w-[320px] sm:max-w-[420px] object-contain transition-transform duration-300 drop-shadow-2xl scale-125 origin-left"
-                      :style="{ filter: sp.logoFilter }"
-                    />
-                  </div>
-
-                  <!-- Título e Impacto -->
-                  <div class="space-y-3">
-                    <h3 class="font-display text-3xl sm:text-5xl lg:text-6xl font-black text-white uppercase tracking-tight leading-tight drop-shadow-[0_10px_30px_rgba(0,0,0,0.95)]">
-                      {{ sp.nombre }}
-                    </h3>
-                    <p class="text-base sm:text-xl font-semibold drop-shadow" :style="{ color: sp.color }">
-                      {{ sp.headline }}
-                    </p>
-                  </div>
-
-                  <!-- Descripción -->
-                  <p class="text-sm sm:text-base text-slate-100 leading-relaxed font-sans max-w-xl drop-shadow-md">
-                    {{ sp.desc }}
-                  </p>
-
-                  <!-- Checklist de Beneficios Exclusivos -->
-                  <div class="space-y-3 pt-2">
-                    <div
-                      v-for="(feat, fIdx) in sp.features"
-                      :key="fIdx"
-                      class="flex items-center gap-3 text-xs sm:text-sm text-slate-100 drop-shadow"
-                    >
-                      <div class="size-5 rounded-full flex items-center justify-center shrink-0 border border-white/20" :style="{ backgroundColor: `${sp.color}35` }">
-                        <CheckCircle2 class="size-3.5" :style="{ color: sp.color }" />
-                      </div>
-                      <span class="font-medium">{{ feat }}</span>
-                    </div>
-                  </div>
-                </div>
-              </template>
-
+                  <span class="mt-0.5 size-5 rounded-full flex items-center justify-center shrink-0 border border-white/20" :style="{ backgroundColor: `${sp.color}40` }">
+                    <CheckCircle2 class="size-3.5" :style="{ color: getAccentText(sp.color) }" aria-hidden="true" />
+                  </span>
+                  <span class="font-medium">{{ feat }}</span>
+                </li>
+              </ul>
             </div>
+
+            <!-- TARJETA DE PRECIO Y COMPRA DIRECTA -->
+            <div
+              class="lg:col-span-6 flex justify-center"
+              :class="idx % 2 === 0 ? 'lg:order-2 lg:justify-end' : 'lg:order-1 lg:justify-start'"
+            >
+              <article
+                class="w-full max-w-lg rounded-[2rem] border border-white/15 bg-gradient-to-b from-[#13172E]/95 via-[#0B0E1F]/98 to-black backdrop-blur-2xl p-6 sm:p-9 shadow-[0_25px_65px_-15px_rgba(0,0,0,0.9)] relative overflow-hidden transition-all duration-300 hover:border-white/30"
+                :style="getCardStyle(idx, sp.color)"
+                :aria-label="`Plan de ${sp.nombre}`"
+              >
+                <!-- Resplandor ambiental interno suave en la esquina -->
+                <div
+                  class="absolute -top-20 -right-20 size-48 rounded-full blur-3xl opacity-25 pointer-events-none"
+                  :style="{ backgroundColor: sp.color }"
+                />
+
+                <!-- Línea de acento neón superior -->
+                <div
+                  class="absolute top-0 left-0 right-0 h-1"
+                  :style="{ backgroundColor: sp.color, boxShadow: `0 0 25px ${sp.color}` }"
+                />
+
+                <!-- Cabecera del plan -->
+                <div class="mb-5 relative z-10">
+                  <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-white/10 bg-white/[0.04] backdrop-blur-md mb-2.5">
+                    <span class="size-1.5 rounded-full" :style="{ backgroundColor: sp.color, boxShadow: `0 0 8px ${sp.color}` }" />
+                    <span class="text-[10px] sm:text-[11px] font-mono uppercase tracking-[0.2em] font-bold text-slate-300">
+                      {{ modalidadSeleccionada === 'CUENTA_COMPLETA' ? 'Cuenta Completa' : 'Pantalla con PIN' }}
+                    </span>
+                  </div>
+                  <h4
+                    class="text-2xl sm:text-3xl font-extrabold text-white tracking-tight leading-snug drop-shadow"
+                    :class="getPlatformFontClass(sp.slug)"
+                  >
+                    {{ sp.nombre }}
+                  </h4>
+                </div>
+
+                <!-- Bloque de Precio Glassmorphism -->
+                <div class="p-5 sm:p-6 rounded-2xl border border-white/10 bg-white/[0.03] mb-6 backdrop-blur-md shadow-inner relative overflow-hidden">
+                  <div class="flex items-center justify-between mb-1.5">
+                    <span class="text-[11px] font-mono uppercase tracking-wider text-slate-400 font-bold">
+                      Suscripción de 30 días
+                    </span>
+                    <span class="text-[10px] font-mono uppercase tracking-wider px-2 py-0.5 rounded-md border border-white/10 bg-white/[0.05] text-slate-300 font-medium">
+                      Garantía 100%
+                    </span>
+                  </div>
+
+                  <div class="flex flex-wrap items-baseline gap-x-2 pt-1">
+                    <span class="font-display text-4xl sm:text-5xl font-extrabold text-white tracking-tight drop-shadow">
+                      {{ formatCOP(modalidadSeleccionada === 'CUENTA_COMPLETA' ? sp.precioCompleta : sp.precioPantalla) }}
+                    </span>
+                    <span class="text-sm text-slate-400 font-medium">/ 30 días</span>
+                  </div>
+
+                  <div class="flex items-center gap-2 mt-3 pt-3 border-t border-white/10 text-xs text-slate-200 font-medium">
+                    <CheckCircle2 class="size-4 shrink-0" :style="{ color: getAccentText(sp.color) }" aria-hidden="true" />
+                    <span>
+                      {{ modalidadSeleccionada === 'CUENTA_COMPLETA' ? 'Acceso completo a todos los perfiles de la cuenta' : 'Pantalla individual exclusiva con PIN privado' }}
+                    </span>
+                  </div>
+                </div>
+
+                <!-- Botón de compra moderno -->
+                <button
+                  type="button"
+                  class="group/buy w-full inline-flex items-center justify-center rounded-2xl text-base font-extrabold py-4 px-8 transition-all duration-300 hover:brightness-110 motion-safe:hover:-translate-y-0.5 active:translate-y-0 cursor-pointer gap-2 uppercase tracking-wider relative overflow-hidden focus-visible:outline-offset-4 shadow-lg hover:shadow-2xl"
+                  :style="{ backgroundColor: sp.color, color: getButtonTextColor(sp.color), boxShadow: `0 8px 30px -6px ${sp.color}80` }"
+                  :aria-label="`Comprar ${sp.nombre}`"
+                  @click="comprarPlataforma(sp)"
+                >
+                  <span class="relative z-10 font-black">Comprar ahora</span>
+                  <ArrowRight class="size-4 relative z-10 transition-transform duration-200 motion-safe:group-hover/buy:translate-x-1" aria-hidden="true" />
+                </button>
+              </article>
+            </div>
+
           </div>
-        </section>
-      </div>
+        </div>
+      </section>
+      </template>
     </div>
 
     <!-- ================= 5. GARANTÍAS Y BENEFICIOS ================= -->
     <section class="container-app pt-16">
-      <div class="rounded-3xl border border-white/15 bg-white/5 p-8 sm:p-12 relative overflow-hidden backdrop-blur-md">
+      <div class="rounded-3xl border border-white/15 bg-white/5 p-6 sm:p-12 relative overflow-hidden backdrop-blur-md">
         <div class="absolute -right-20 -bottom-20 size-64 rounded-full bg-brand-500/10 blur-3xl pointer-events-none" />
 
         <div class="text-center max-w-2xl mx-auto space-y-3 mb-10">
-          <span class="text-xs font-mono uppercase tracking-[0.25em] text-brand-300 font-bold">Por Qué Elegirnos</span>
-          <h2 class="font-display text-2xl sm:text-4xl font-black text-fg tracking-tight">
-            Experiencia Sin Complicaciones
+          <span class="text-xs font-mono uppercase tracking-[0.25em] text-brand-300 font-bold">Por qué elegirnos</span>
+          <h2 class="font-display text-3xl sm:text-4xl font-extrabold tracking-tight">
+            <span class="title-metal">Compra sin complicaciones</span>
           </h2>
-          <p class="text-sm text-muted">
-            Diseñado para ofrecerte máxima velocidad, seguridad y tranquilidad en cada compra digital.
+          <p class="text-sm text-slate-300">
+            Pensado para ofrecerte rapidez, seguridad y tranquilidad en cada compra.
           </p>
         </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
           <div class="space-y-2.5">
             <div class="size-10 rounded-xl bg-brand-500/20 text-brand-300 flex items-center justify-center border border-brand-500/30">
-              <Zap class="size-5" />
+              <Zap class="size-5" aria-hidden="true" />
             </div>
-            <h3 class="font-bold text-fg text-sm">Entrega Inmediata</h3>
-            <p class="text-xs text-muted leading-relaxed">
-              Recibe tus datos de acceso en segundos de forma automatizada tras verificar tu pago.
+            <h3 class="font-display font-bold text-fg text-base">Entrega inmediata</h3>
+            <p class="text-sm text-slate-300 leading-relaxed">
+              Recibe tus datos de acceso en segundos, de forma automática, tras verificar tu pago.
             </p>
           </div>
 
           <div class="space-y-2.5">
             <div class="size-10 rounded-xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center border border-emerald-500/30">
-              <ShieldCheck class="size-5" />
+              <ShieldCheck class="size-5" aria-hidden="true" />
             </div>
-            <h3 class="font-bold text-fg text-sm">Garantía Total</h3>
-            <p class="text-xs text-muted leading-relaxed">
-              Reemplazo inmediato garantizado durante todo el periodo de tu suscripción contratada.
+            <h3 class="font-display font-bold text-fg text-base">Garantía total</h3>
+            <p class="text-sm text-slate-300 leading-relaxed">
+              Reemplazo inmediato durante todo el periodo de tu suscripción.
             </p>
           </div>
 
           <div class="space-y-2.5">
             <div class="size-10 rounded-xl bg-cyan-500/20 text-cyan-300 flex items-center justify-center border border-cyan-500/30">
-              <Headphones class="size-5" />
+              <Headphones class="size-5" aria-hidden="true" />
             </div>
-            <h3 class="font-bold text-fg text-sm">Soporte 24/7</h3>
-            <p class="text-xs text-muted leading-relaxed">
-              Equipo técnico disponible vía WhatsApp y ticket para resolver cualquier duda al instante.
+            <h3 class="font-display font-bold text-fg text-base">Soporte 24/7</h3>
+            <p class="text-sm text-slate-300 leading-relaxed">
+              Equipo técnico disponible por WhatsApp y tickets para resolver cualquier duda.
             </p>
           </div>
 
           <div class="space-y-2.5">
             <div class="size-10 rounded-xl bg-purple-500/20 text-purple-300 flex items-center justify-center border border-purple-500/30">
-              <CheckCircle2 class="size-5" />
+              <CheckCircle2 class="size-5" aria-hidden="true" />
             </div>
-            <h3 class="font-bold text-fg text-sm">Pagos en COP</h3>
-            <p class="text-xs text-muted leading-relaxed">
-              Paga fácilmente en pesos colombianos con múltiples métodos de pago locales seguros.
+            <h3 class="font-display font-bold text-fg text-base">Pagos en pesos colombianos</h3>
+            <p class="text-sm text-slate-300 leading-relaxed">
+              Paga en COP con métodos de pago locales y seguros.
             </p>
           </div>
         </div>
@@ -1298,9 +1306,9 @@ const formatCOP = (val: number) => {
     <!-- ================= 6. PREGUNTAS FRECUENTES ================= -->
     <section class="container-app max-w-3xl space-y-6 pt-16">
       <div class="text-center space-y-2">
-        <span class="text-xs font-mono uppercase tracking-[0.25em] text-cyan-400 font-bold">Dudas Habituales</span>
-        <h2 class="font-display text-2xl sm:text-4xl font-black text-fg tracking-tight">
-          Preguntas Frecuentes
+        <span class="text-xs font-mono uppercase tracking-[0.25em] text-cyan-400 font-bold">Dudas habituales</span>
+        <h2 class="font-display text-3xl sm:text-4xl font-extrabold tracking-tight">
+          <span class="title-metal">Preguntas frecuentes</span>
         </h2>
       </div>
 
@@ -1308,21 +1316,31 @@ const formatCOP = (val: number) => {
         <div
           v-for="(faq, i) in faqs"
           :key="i"
-          class="rounded-xl border border-white/10 bg-white/5 overflow-hidden transition-all duration-200"
+          class="rounded-xl border border-white/10 bg-white/5 overflow-hidden transition-colors duration-200 hover:border-white/20"
         >
           <button
+            :id="'faq-btn-' + i"
             type="button"
-            class="w-full p-4 sm:p-5 text-left font-bold text-sm text-fg flex items-center justify-between gap-4 hover:text-cyan-300 transition-colors cursor-pointer"
+            class="w-full p-4 sm:p-5 text-left font-bold text-sm sm:text-base text-fg flex items-center justify-between gap-4 hover:text-cyan-300 transition-colors cursor-pointer"
+            :aria-expanded="faq.open"
+            :aria-controls="'faq-panel-' + i"
             @click="toggleFaq(i)"
           >
             <span>{{ faq.q }}</span>
             <ChevronDown
               class="size-4 shrink-0 transition-transform duration-300"
               :class="{ 'rotate-180 text-cyan-300': faq.open }"
+              aria-hidden="true"
             />
           </button>
 
-          <div v-show="faq.open" class="px-4 pb-4 sm:px-5 sm:pb-5 text-xs text-muted leading-relaxed border-t border-white/10 pt-3">
+          <div
+            v-show="faq.open"
+            :id="'faq-panel-' + i"
+            role="region"
+            :aria-labelledby="'faq-btn-' + i"
+            class="px-4 pb-4 sm:px-5 sm:pb-5 text-sm text-slate-300 leading-relaxed border-t border-white/10 pt-3"
+          >
             {{ faq.a }}
           </div>
         </div>
@@ -1332,12 +1350,101 @@ const formatCOP = (val: number) => {
 </template>
 
 <style scoped>
+
+/* Tipografías auténticas por plataforma de streaming */
+.font-brand-netflix {
+  font-family: 'Bebas Neue', sans-serif !important;
+  letter-spacing: 0.05em;
+  font-weight: 400;
+}
+.font-brand-disney {
+  font-family: 'Plus Jakarta Sans', sans-serif !important;
+  letter-spacing: -0.03em;
+  font-weight: 800;
+}
+.font-brand-max {
+  font-family: 'Syne', sans-serif !important;
+  letter-spacing: -0.02em;
+  font-weight: 800;
+}
+.font-brand-prime {
+  font-family: 'Space Grotesk', sans-serif !important;
+  letter-spacing: -0.03em;
+  font-weight: 700;
+}
+.font-brand-paramount {
+  font-family: 'DM Serif Display', Georgia, serif !important;
+  letter-spacing: 0.02em;
+  font-weight: 400;
+  font-style: italic;
+}
+.font-brand-crunchyroll {
+  font-family: 'Kanit', sans-serif !important;
+  letter-spacing: 0.03em;
+  font-weight: 800;
+  font-style: italic;
+  text-transform: uppercase;
+}
+.font-brand-spotify {
+  font-family: 'Plus Jakarta Sans', sans-serif !important;
+  letter-spacing: -0.02em;
+  font-weight: 800;
+}
+.font-brand-apple {
+  font-family: 'Inter', -apple-system, sans-serif !important;
+  letter-spacing: -0.02em;
+  font-weight: 600;
+}
+
+/* Tipografía propia del inicio: más carácter que la fuente del sistema */
+.home-type {
+  font-family: 'Manrope', var(--font-sans);
+}
+.home-type .font-display {
+  font-family: 'Sora', var(--font-display);
+  letter-spacing: -0.02em;
+}
+
+/* Títulos con volumen: degradado metálico sutil + sombra (no es transparencia: el texto es opaco) */
+.title-metal {
+  background-image: linear-gradient(180deg, #ffffff 0%, #ffffff 45%, #c9d2e3 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  filter: drop-shadow(0 2px 0 rgba(0, 0, 0, 0.45)) drop-shadow(0 10px 24px rgba(0, 0, 0, 0.55));
+}
+
+/* Logos con tamaño equilibrado: se escalan dentro de su caja sin deformarse */
+.logo-fit {
+  display: block;
+  max-width: 100%;
+  object-fit: contain;
+}
+.logo-hero {
+  width: calc(var(--logo-w) * 0.78);
+  height: calc(var(--logo-h) * 0.78);
+}
+.logo-card {
+  width: calc(var(--logo-w) * 0.74);
+  height: calc(var(--logo-h) * 0.74);
+}
+@media (min-width: 640px) {
+  .logo-hero {
+    width: var(--logo-w);
+    height: var(--logo-h);
+  }
+  .logo-card {
+    width: var(--logo-w);
+    height: var(--logo-h);
+  }
+}
+
 @keyframes kenburns {
   0% {
     transform: scale(1.02) translate(0, 0);
   }
   50% {
-    transform: scale(1.08) translate(-1%, -1%);
+    transform: scale(1.06) translate(-1%, -1%);
   }
   100% {
     transform: scale(1.02) translate(0, 0);
@@ -1346,5 +1453,11 @@ const formatCOP = (val: number) => {
 
 .kenburns-bg {
   animation: kenburns 30s ease-in-out infinite alternate;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .kenburns-bg {
+    animation: none;
+  }
 }
 </style>
