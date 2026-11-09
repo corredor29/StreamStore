@@ -35,6 +35,27 @@
   --color-success: #22C55E;
   --color-warning: #F59E0B;
   --color-danger: #EF4444;
+
+  /* Consola de administración: misma identidad que la tienda (negro cine, cian + violeta de marca) */
+  --font-hud: 'Space Grotesk', 'Inter', ui-sans-serif, system-ui, sans-serif;
+  --color-ad-bg: #08080A;
+  --color-ad-panel: #131316;
+  --color-ad-raised: #1A1A1E;
+  --color-ad-hover: #222227;
+  --color-ad-line: #26262C;
+  --color-ad-line-strong: #36363E;
+  --color-ad-text: #F1F5F9;
+  --color-ad-dim: #A1A1AA;
+  --color-ad-faint: #8A8A94;
+  --color-ad-accent: #22D3EE;
+  --color-ad-accent-hover: #67E8F9;
+  --color-ad-accent-text: #67E8F9;
+  --color-ad-on-accent: #0A0A0A;
+  --color-ad-brand: #8057FF;
+  --color-ad-brand-text: #B799FF;
+  --color-ad-ok: #34D399;
+  --color-ad-warn: #FBBF24;
+  --color-ad-err: #F87171;
 }
 
 @layer base {
@@ -108,6 +129,77 @@
   .field-error {
     @apply mt-1 text-xs text-danger font-medium;
   }
+
+  /* ---------- Consola admin ---------- */
+  .admin-ui {
+    @apply bg-ad-bg text-ad-text;
+    font-feature-settings: 'cv11', 'ss01';
+    /* La luz de sala de la tienda: violeta de marca a la izquierda, cian a la derecha */
+    background-image:
+      radial-gradient(900px 420px at 15% -8%, rgb(128 87 255 / 0.12), transparent 70%),
+      radial-gradient(900px 420px at 90% -10%, rgb(34 211 238 / 0.08), transparent 70%);
+    background-attachment: fixed;
+  }
+  .admin-ui .font-hud { font-family: var(--font-hud); }
+
+  /* Etiqueta de telemetría: datos medidos, no adorno */
+  .hud-label {
+    font-family: var(--font-mono);
+    @apply text-[11px] font-medium uppercase tracking-[0.14em] text-ad-dim;
+  }
+
+  /* Panel con el mismo material que las tarjetas del catálogo */
+  .hud-panel {
+    @apply relative rounded-2xl border border-white/10 bg-ad-panel/90;
+    box-shadow: 0 12px 32px -16px rgb(0 0 0 / 0.7);
+  }
+
+  /* Botón principal = el «Agregar» de la tienda */
+  .btn-ad {
+    @apply inline-flex items-center justify-center gap-2 rounded-lg bg-gradient-to-r from-cyan-400 to-blue-500 px-4 text-xs font-black uppercase tracking-wider text-neutral-950 transition-colors hover:from-cyan-300 hover:to-blue-400 disabled:opacity-50 cursor-pointer;
+  }
+  .btn-ad-ghost {
+    @apply inline-flex items-center justify-center gap-2 rounded-lg border border-white/15 bg-white/5 px-4 text-xs font-bold uppercase tracking-wider text-ad-text transition-colors hover:border-cyan-400/50 hover:text-white cursor-pointer;
+  }
+
+  /* Etiquetas de tipo, idénticas a las del catálogo */
+  .chip-completa {
+    @apply inline-flex items-center gap-1 rounded-md border border-purple-400/50 bg-purple-950/85 px-2 py-0.5 font-mono text-[10px] font-bold uppercase tracking-wider text-purple-200;
+  }
+  .chip-pantalla {
+    @apply inline-flex items-center gap-1 rounded-md border border-cyan-400/50 bg-cyan-950/85 px-2 py-0.5 font-mono text-[10px] font-bold uppercase tracking-wider text-cyan-200;
+  }
+
+  /* LED de estado: la luz es el dato */
+  .led {
+    @apply inline-block size-1.5 rounded-full;
+    background: currentColor;
+    box-shadow: 0 0 6px 0 currentColor;
+  }
+  .admin-ui ::selection {
+    background: color-mix(in srgb, var(--color-ad-accent) 45%, transparent);
+    color: var(--color-ad-text);
+  }
+  .admin-ui :focus-visible {
+    outline: 2px solid var(--color-ad-accent);
+    outline-offset: 1px;
+    border-radius: 0.375rem;
+  }
+  .admin-ui table {
+    font-variant-numeric: tabular-nums;
+  }
+  .admin-ui .btn-primary {
+    @apply rounded-lg bg-gradient-to-r from-cyan-400 to-blue-500 text-neutral-950 font-black uppercase tracking-wider shadow-none hover:from-cyan-300 hover:to-blue-400;
+  }
+  .admin-ui .btn-secondary {
+    @apply rounded-lg border-white/15 bg-white/5 text-ad-text hover:border-cyan-400/50;
+  }
+  .admin-nav {
+    @apply relative flex items-center gap-2.5 rounded-lg px-3 py-2 text-[13px] font-semibold text-ad-dim transition-colors hover:bg-white/5 hover:text-white;
+  }
+  .admin-nav-active {
+    @apply bg-white/[0.06] text-white;
+  }
 }
 
 
@@ -132,6 +224,17 @@
   background: linear-gradient(180deg, #06B6D4 0%, #8057FF 100%);
   box-shadow: 0 0 12px rgba(6, 182, 212, 0.6);
 }
+
+.admin-ui ::-webkit-scrollbar-track { background: var(--color-ad-bg); }
+.admin-ui ::-webkit-scrollbar-thumb,
+.admin-ui ::-webkit-scrollbar-thumb:hover {
+  background: var(--color-ad-line-strong);
+  border-color: var(--color-ad-bg);
+  box-shadow: none;
+}
+.admin-ui, .admin-ui * { scrollbar-color: var(--color-ad-line-strong) var(--color-ad-bg); }
+.admin-ui .no-scrollbar { scrollbar-width: none; }
+.admin-ui .no-scrollbar::-webkit-scrollbar { display: none; }
 
 /* Firefox */
 * {

@@ -1,9 +1,59 @@
-import { api, mockDelay, USE_MOCKS } from './api'
-import type { ComboPromo, Compra, CrearComboPayload, CrearCuentaPayload, CrearPlataformaPayload, CuentaAdmin, Plataforma, ResumenAdmin } from '@/types'
+import { api, mockDelay, normalizeError, USE_MOCKS } from './api'
+import type { ComboPromo, Compra, CrearComboPayload, CrearCuentaPayload, CrearPlataformaPayload, CuentaAdmin, EntregarCredencialesPayload, Plataforma, ProductoCatalogo, ResumenAdmin, Servicio, ServicioAdmin } from '@/types'
 import { mockPlataformas } from '@/mocks/mockData'
-import { mockComprasRealizadas } from './purchaseService'
+import { mockComprasRealizadas, normalizeCompra } from './purchaseService'
 import { mockServiciosEnMemoria } from './accountService'
 import { normalizePlataforma } from './productService'
+
+const ESTADOS_SERVICIO: Record<string, ServicioAdmin['estado']> = { activo: 'ACTIVO', por_vencer: 'POR_VENCER', vencido: 'VENCIDO' }
+
+function normalizeServicioAdmin(raw: unknown): ServicioAdmin {
+  const s = raw as Record<string, any>
+  const pantallas = (list: any[] | undefined) =>
+    (Array.isArray(list) ? list : []).map((p) => ({ numero: Number(p.numero), perfil: p.perfil ?? '', pin: p.pin ?? '' }))
+  return {
+    id: Number(s.id),
+    compraId: Number(s.compra_id),
+    tipo: s.tipo === 'pantalla' ? 'PANTALLA' : 'CUENTA_COMPLETA',
+    estado: ESTADOS_SERVICIO[s.estado] ?? 'ACTIVO',
+    estadoEntrega: s.estado_entrega === 'entregado' ? 'ENTREGADO' : 'PENDIENTE',
+    entregadoAt: s.entregado_at ?? null,
+    fechaInicio: s.fecha_inicio,
+    fechaVencimiento: s.fecha_vencimiento,
+    diasRestantes: Number(s.dias_restantes ?? 0),
+    producto: s.producto?.nombre ?? '',
+    plataforma: s.plataforma ?? '',
+    cliente: s.usuario ? { id: Number(s.usuario.id), nombre: s.usuario.nombre, email: s.usuario.email } : null,
+    cuentaId: Number(s.cuenta_id),
+    cuentaTieneCredenciales: Boolean(s.cuenta_tiene_credenciales),
+    pantallasCuenta: pantallas(s.pantallas_cuenta),
+    credenciales: s.credenciales
+      ? { email: s.credenciales.email, password: s.credenciales.password, pantallas: pantallas(s.credenciales.pantallas) }
+      : null,
+  }
+}
+
+function mockServicioAdmin(s: Servicio): ServicioAdmin {
+  const pantalla = { numero: 1, perfil: s.perfil ?? 'Principal', pin: s.pin ?? '' }
+  return {
+    id: s.id,
+    compraId: s.compraId,
+    tipo: s.tipo,
+    estado: s.estado,
+    estadoEntrega: 'ENTREGADO',
+    entregadoAt: s.fechaCompra,
+    fechaInicio: s.fechaCompra,
+    fechaVencimiento: s.fechaVencimiento,
+    diasRestantes: s.diasRestantes,
+    producto: s.plataforma?.nombre ?? '',
+    plataforma: s.plataforma?.nombre ?? '',
+    cliente: { id: 0, nombre: 'Cliente Demo', email: 'cliente@streamstore.test' },
+    cuentaId: 0,
+    cuentaTieneCredenciales: true,
+    pantallasCuenta: [pantalla],
+    credenciales: { email: s.correoAcceso, password: s.passwordAcceso, pantallas: [pantalla] },
+  }
+}
 
 // El backend responde en snake_case y con DECIMAL como texto
 function normalizeCombo(raw: unknown): ComboPromo {
@@ -146,13 +196,20 @@ export const adminService = {
         const response = await api.get<any>('/admin/resumen')
         const raw = response.data?.data ?? response.data
         if (raw) {
+          // Todas las cifras salen de MySQL (/admin/resumen); sin valores inventados
+          const c = raw.cuentas ?? {}
+          const s = raw.suscripciones ?? {}
           return {
-            ventasHoy: Number(raw.hoy?.total ?? raw.ventasHoy ?? 75000),
-            ventasMes: Number(raw.mes?.total ?? raw.ventasMes ?? 450000),
-            totalCuentas: Number(raw.total_cuentas ?? raw.totalCuentas ?? mockCuentasAdmin.length),
-            cuentasDisponibles: Number(raw.cuentas_disponibles ?? raw.cuentasDisponibles ?? 2),
-            pantallasDisponibles: Number(raw.pantallas_disponibles ?? raw.pantallasDisponibles ?? 8),
-            serviciosActivos: Number(raw.servicios_activos ?? raw.serviciosActivos ?? 2),
+            ventasHoy: Number(raw.hoy?.total ?? 0),
+            ventasMes: Number(raw.mes?.total ?? 0),
+            totalCuentas: Number(c.total ?? 0),
+            cuentasDisponibles: Number(c.sin_vender ?? 0),
+            pantallasDisponibles: Number(c.pantallas_libres ?? 0),
+            pantallasTotales: Number(c.pantallas_totales ?? 0),
+            cuentasSinCredenciales: Number(c.sin_credenciales ?? 0),
+            serviciosActivos: Number(s.activas ?? 0),
+            entregasPendientes: Number(s.por_entregar ?? 0),
+            desdeServidor: true,
           }
         }
       } catch (e) {
@@ -282,6 +339,52 @@ export const adminService = {
     return mockDelay(nuevaPlat, 200)
   },
 
+  // Productos del catálogo de una plataforma (uno por tipo): lo que ven y pagan los clientes
+  async productosDePlataforma(plataformaId: number): Promise<Partial<Record<'cuenta_completa' | 'pantalla', ProductoCatalogo>>> {
+    if (USE_MOCKS) return {}
+    const res = await api.get<any>('/admin/productos', { params: { plataforma_id: plataformaId } })
+    const raw = res.data
+    const list: any[] = Array.isArray(raw) ? raw : Array.isArray(raw?.data) ? raw.data : []
+    const out: Partial<Record<'cuenta_completa' | 'pantalla', ProductoCatalogo>> = {}
+    for (const p of list) {
+      if (Number(p.plataforma_id) !== plataformaId) continue
+      const tipo = String(p.tipo).toLowerCase().includes('completa') ? 'cuenta_completa' : 'pantalla'
+      out[tipo] = { id: Number(p.id), precio: Number(p.precio), duracionDias: Number(p.duracion_dias), nombre: p.nombre, activo: Boolean(p.activo) }
+    }
+    return out
+  },
+
+  // Deja los dos productos de la plataforma con el precio y la duración indicados (los crea si faltan)
+  async sincronizarProductos(
+    plataformaId: number,
+    nombrePlataforma: string,
+    datos: { precioCompleta: number; precioPantalla: number; duracionDias: number },
+  ): Promise<void> {
+    if (USE_MOCKS) return
+    const actuales = await this.productosDePlataforma(plataformaId)
+    const meses = datos.duracionDias === 365 ? ' 1 año' : ` ${datos.duracionDias} días`
+    const destino = {
+      cuenta_completa: { precio: datos.precioCompleta, nombre: `${nombrePlataforma} - Cuenta completa${meses}` },
+      pantalla: { precio: datos.precioPantalla, nombre: `${nombrePlataforma} - 1 pantalla${meses}` },
+    } as const
+    for (const tipo of ['cuenta_completa', 'pantalla'] as const) {
+      const actual = actuales[tipo]
+      const quiere = destino[tipo]
+      if (!actual) {
+        await api.post('/admin/productos', {
+          plataforma_id: plataformaId, tipo, nombre: quiere.nombre, precio: quiere.precio,
+          duracion_dias: datos.duracionDias, stock_minimo: 2, activo: true,
+        })
+      } else if (actual.precio !== quiere.precio || actual.duracionDias !== datos.duracionDias || !actual.activo) {
+        await api.patch(`/admin/productos/${actual.id}`, {
+          precio: quiere.precio, duracion_dias: datos.duracionDias, activo: true,
+          // El nombre lleva la duración: se actualiza solo si cambió la duración
+          ...(actual.duracionDias !== datos.duracionDias ? { nombre: quiere.nombre } : {}),
+        })
+      }
+    }
+  },
+
   async crearCuenta(payload: CrearCuentaPayload): Promise<CuentaAdmin> {
     let portadaUrl = payload.coverUrl || null
 
@@ -334,33 +437,9 @@ export const adminService = {
             const platData = platCreate.data?.data ?? platCreate.data
             targetPlatId = Number(platData.id)
 
-            // Auto-crear productos para el catálogo público (cuenta completa y pantalla)
-            try {
-              await Promise.all([
-                api.post('/admin/productos', {
-                  plataforma_id: targetPlatId,
-                  nombre: `${nombrePlat} - Cuenta Completa 30 días`,
-                  tipo: 'cuenta_completa',
-                  precio: 35000,
-                  duracion_dias: 30,
-                  stock_minimo: 2,
-                  activo: true,
-                }),
-                api.post('/admin/productos', {
-                  plataforma_id: targetPlatId,
-                  nombre: `${nombrePlat} - 1 Pantalla 30 días`,
-                  tipo: 'pantalla',
-                  precio: 12000,
-                  duracion_dias: 30,
-                  stock_minimo: 2,
-                  activo: true,
-                }),
-              ])
-            } catch (prodErr) {
-              console.warn('Aviso: no se crearon productos automáticamente:', prodErr)
-            }
           }
         }
+
 
         // 3. Crear la cuenta en MySQL
         const cuentaBody: any = {
@@ -371,8 +450,23 @@ export const adminService = {
           cuentaBody.email = payload.correo
           cuentaBody.password = payload.password
         }
+        if (payload.pantallas?.length) {
+          cuentaBody.pantallas = payload.pantallas.map((p) => ({
+            perfil: p.perfil?.trim() || undefined,
+            pin: p.pin?.trim() || undefined,
+          }))
+        }
 
         const resCuenta = await api.post<any>('/admin/cuentas', cuentaBody)
+
+        // Ya guardada la cuenta: precio y duración del formulario = lo que paga el cliente en el catálogo
+        if (targetPlatId && payload.precio && payload.precioPantalla) {
+          await this.sincronizarProductos(targetPlatId, nombrePlat || 'Plataforma', {
+            precioCompleta: payload.precio,
+            precioPantalla: payload.precioPantalla,
+            duracionDias: payload.duracionDias || 30,
+          })
+        }
         const cData = resCuenta.data?.data ?? resCuenta.data
         const cuentaObj = Array.isArray(cData) ? cData[0] : cData
 
@@ -429,8 +523,9 @@ export const adminService = {
 
         mockCuentasAdmin.unshift(resultadoCuenta)
         return resultadoCuenta
-      } catch (e: any) {
-        console.warn('Fallo en registro directo en backend, aplicando persistencia sincronizada:', e)
+      } catch (e: unknown) {
+        // Con backend real el error se muestra tal cual: inventar una cuenta en memoria hacía creer que se había guardado
+        throw normalizeError(e)
       }
     }
 
@@ -501,7 +596,7 @@ export const adminService = {
         const raw = response.data
         const list = Array.isArray(raw) ? raw : Array.isArray(raw?.data) ? raw.data : []
         if (list.length > 0) {
-          return list
+          return list.map(normalizeCompra)
         }
       } catch (e) {
         console.warn('Error al cargar compras de admin desde backend, usando histórico integrado:', e)
@@ -510,20 +605,27 @@ export const adminService = {
     return mockDelay([...mockComprasRealizadas], 200)
   },
 
-  async servicios(): Promise<any[]> {
+  async servicios(): Promise<ServicioAdmin[]> {
     if (!USE_MOCKS) {
-      try {
-        const response = await api.get<any>('/admin/servicios')
-        const raw = response.data
-        const list = Array.isArray(raw) ? raw : Array.isArray(raw?.data) ? raw.data : []
-        if (list.length > 0) {
-          return list
-        }
-      } catch (e) {
-        console.warn('Error al cargar servicios de clientes desde backend:', e)
+      const response = await api.get<any>('/admin/servicios')
+      const raw = response.data
+      const list = Array.isArray(raw) ? raw : Array.isArray(raw?.data) ? raw.data : []
+      return list.map(normalizeServicioAdmin)
+    }
+    return mockDelay(mockServiciosEnMemoria.map(mockServicioAdmin), 200)
+  },
+
+  // Asigna (o corrige) las credenciales de un servicio y, si notificar=true, se las envía al cliente por correo
+  async entregarCredenciales(servicioId: number, payload: EntregarCredencialesPayload): Promise<{ mensaje: string; notificado: boolean }> {
+    if (!USE_MOCKS) {
+      const res = await api.patch<any>(`/admin/servicios/${servicioId}/credenciales`, payload)
+      const notificado = Boolean(res.data?.notificado)
+      return {
+        notificado,
+        mensaje: notificado ? 'Credenciales enviadas al correo del cliente.' : 'Credenciales guardadas.',
       }
     }
-    return mockDelay([...mockServiciosEnMemoria], 200)
+    return mockDelay({ notificado: payload.notificar, mensaje: 'Credenciales enviadas (modo demo).' }, 400)
   },
 
   async ejecutarCron(): Promise<{ mensaje: string }> {

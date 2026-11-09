@@ -16,6 +16,7 @@ import {
 } from '@lucide/vue'
 import type { CuentaAdmin, Plataforma } from '@/types'
 import { adminService } from '@/services/adminService'
+import { portadaPlataforma } from '@/utils/platformArt'
 
 const props = defineProps<{
   cuentas: CuentaAdmin[]
@@ -76,30 +77,30 @@ function getEstadoBadge(estado: CuentaAdmin['estado']) {
     case 'DISPONIBLE':
       return { 
         label: 'Disponible', 
-        dot: 'bg-emerald-400',
-        text: 'text-emerald-400',
-        bg: 'bg-emerald-500/10 border-emerald-500/20'
+        dot: 'bg-ad-ok',
+        text: 'text-ad-ok',
+        bg: 'bg-ad-ok/10 border-ad-ok/20'
       }
     case 'PARCIAL':
       return { 
         label: 'En uso parcial', 
-        dot: 'bg-amber-400',
-        text: 'text-amber-400',
-        bg: 'bg-amber-500/10 border-amber-500/20'
+        dot: 'bg-ad-warn',
+        text: 'text-ad-warn',
+        bg: 'bg-ad-warn/10 border-ad-warn/20'
       }
     case 'VENDIDA':
       return { 
         label: 'Agotada', 
-        dot: 'bg-rose-400',
-        text: 'text-rose-300',
-        bg: 'bg-rose-500/10 border-rose-500/20'
+        dot: 'bg-ad-err',
+        text: 'text-ad-err',
+        bg: 'bg-ad-err/10 border-ad-err/20'
       }
     default:
       return { 
         label: 'Inactiva', 
-        dot: 'bg-slate-400',
-        text: 'text-slate-400',
-        bg: 'bg-slate-500/10 border-slate-500/20'
+        dot: 'bg-ad-hover',
+        text: 'text-ad-dim',
+        bg: 'bg-ad-hover border-ad-line'
       }
   }
 }
@@ -172,27 +173,27 @@ function irAPagina(pagina: number) {
     <!-- Toast de Notificación Copiado -->
     <div
       v-if="copiedNotice"
-      class="fixed bottom-6 right-6 z-50 flex items-center gap-2 rounded-xl border border-white/15 bg-[#141B2D] px-4 py-2.5 text-xs font-semibold text-white shadow-2xl shadow-black/90"
+      class="hud-panel fixed bottom-6 right-6 z-50 flex items-center gap-2 px-4 py-2.5 text-xs font-semibold text-ad-text"
     >
-      <Check class="size-4 text-emerald-400" />
+      <Check class="size-4 text-ad-ok" />
       <span>{{ copiedNotice }}</span>
     </div>
 
     <!-- Barra de Herramientas y Filtros -->
-    <div class="rounded-2xl border border-white/10 bg-gradient-to-b from-[#131A2E] to-[#0E1322] p-3.5 flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3 shadow-lg shadow-black/20">
+    <div class="rounded-2xl border border-ad-line to-[#0E1322] p-3.5 flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3">
       <!-- Buscador -->
       <div class="relative flex-1 max-w-md">
-        <Search class="absolute left-3 top-2.5 size-4 text-slate-400" />
+        <Search class="absolute left-3 top-2.5 size-4 text-ad-dim" />
         <input
           v-model="searchQuery"
           type="text"
           placeholder="Buscar por correo, plataforma o #ID..."
-          class="w-full rounded-xl border border-white/10 bg-[#0B0F19] pl-9 pr-8 py-2 text-xs text-white placeholder:text-slate-500 focus:border-cyan-400 focus:outline-none transition-colors"
+          class="w-full rounded-lg border border-ad-line bg-ad-panel pl-9 pr-8 py-2 text-xs text-ad-text placeholder:text-ad-faint focus:border-ad-accent focus:outline-none transition-colors"
         />
         <button
           v-if="searchQuery"
           type="button"
-          class="absolute right-2.5 top-2.5 text-slate-400 hover:text-white cursor-pointer"
+          class="absolute right-2.5 top-2.5 text-ad-dim hover:text-ad-text cursor-pointer"
           @click="searchQuery = ''"
         >
           <X class="size-3.5" />
@@ -204,7 +205,7 @@ function irAPagina(pagina: number) {
         <!-- Selector Plataforma -->
         <select
           v-model="plataformaFiltro"
-          class="rounded-xl border border-white/10 bg-[#0B0F19] px-3 py-2 text-xs text-slate-200 focus:border-cyan-400 focus:outline-none cursor-pointer"
+          class="rounded-xl border border-ad-line bg-ad-panel px-3 py-2 text-xs text-ad-text focus:border-ad-accent focus:outline-none cursor-pointer"
         >
           <option value="TODAS">Todas las plataformas ({{ props.cuentas.length }})</option>
           <option v-for="plat in plataformas" :key="plat.id" :value="plat.slug || plat.nombre">
@@ -215,7 +216,7 @@ function irAPagina(pagina: number) {
         <!-- Selector Estado -->
         <select
           v-model="estadoFiltro"
-          class="rounded-xl border border-white/10 bg-[#0B0F19] px-3 py-2 text-xs text-slate-200 focus:border-cyan-400 focus:outline-none cursor-pointer"
+          class="rounded-xl border border-ad-line bg-ad-panel px-3 py-2 text-xs text-ad-text focus:border-ad-accent focus:outline-none cursor-pointer"
         >
           <option value="TODOS">Todos los estados</option>
           <option value="DISPONIBLE">Disponibles</option>
@@ -226,7 +227,7 @@ function irAPagina(pagina: number) {
         <!-- Selector Orden -->
         <select
           v-model="sortBy"
-          class="rounded-xl border border-white/10 bg-[#0B0F19] px-3 py-2 text-xs text-slate-200 focus:border-cyan-400 focus:outline-none cursor-pointer"
+          class="rounded-xl border border-ad-line bg-ad-panel px-3 py-2 text-xs text-ad-text focus:border-ad-accent focus:outline-none cursor-pointer"
         >
           <option value="id-desc">Más recientes primero</option>
           <option value="disponibles-desc">Mayor stock libre</option>
@@ -234,17 +235,17 @@ function irAPagina(pagina: number) {
           <option value="plataforma">Nombre (A-Z)</option>
         </select>
 
-        <span class="text-slate-400 font-mono text-[11px] ml-1 hidden sm:inline">
+        <span class="text-ad-dim tabular-nums text-[11px] ml-1 hidden sm:inline">
           {{ cuentasFiltradas.length }} en total
         </span>
       </div>
     </div>
 
     <!-- TABLA DE INVENTARIO CON PROFUNDIDAD Y SIN EMOJIS -->
-    <div class="rounded-2xl border border-white/10 bg-[#0E1322] overflow-hidden shadow-xl shadow-black/30">
+    <div class="hud-panel">
       <div class="overflow-x-auto">
         <table class="w-full text-left text-xs border-collapse">
-          <thead class="bg-[#0B0F19] border-b border-white/10 text-slate-400 uppercase text-[11px] font-semibold tracking-wider">
+          <thead class="border-b border-ad-line bg-ad-raised/40 font-mono text-[10.5px] font-medium uppercase tracking-[0.12em] text-ad-dim">
             <tr>
               <th class="py-3.5 px-4 w-12 text-center">ID</th>
               <th class="py-3.5 px-4">Plataforma</th>
@@ -255,35 +256,27 @@ function irAPagina(pagina: number) {
             </tr>
           </thead>
 
-          <tbody class="divide-y divide-white/[0.06]">
+          <tbody class="divide-y divide-ad-line">
             <template v-for="cuenta in cuentasPaginadas" :key="cuenta.id">
               <tr
-                class="h-14 hover:bg-white/[0.03] transition-colors cursor-pointer group"
-                :class="{ 'bg-white/[0.04]': expandedAccounts[cuenta.id] }"
+                class="h-14 hover:bg-ad-hover transition-colors cursor-pointer group"
+                :class="{ 'bg-ad-hover': expandedAccounts[cuenta.id] }"
                 @click="toggleExpand(cuenta.id)"
               >
                 <!-- ID -->
-                <td class="py-3.5 px-4 text-center font-mono text-slate-400 text-xs font-semibold">
+                <td class="py-3.5 px-4 text-center tabular-nums text-ad-dim text-xs font-semibold">
                   #{{ cuenta.id }}
                 </td>
 
                 <!-- Plataforma -->
                 <td class="py-3.5 px-4 whitespace-nowrap">
-                  <div class="flex items-center gap-2.5">
-                    <div
-                      v-if="cuenta.plataforma?.coverUrl"
-                      class="size-7 rounded-lg overflow-hidden bg-black shrink-0 border border-white/15 shadow-sm"
-                    >
-                      <img :src="cuenta.plataforma.coverUrl" :alt="cuenta.plataforma.nombre" class="w-full h-full object-cover" />
-                    </div>
-                    <div
-                      v-else
-                      class="size-7 rounded-lg flex items-center justify-center text-[10px] font-bold text-white uppercase shrink-0 font-mono shadow-sm"
-                      :style="{ backgroundColor: cuenta.plataforma?.color || '#06b6d4' }"
-                    >
-                      {{ (cuenta.plataforma?.nombre || 'SS').slice(0, 2) }}
-                    </div>
-                    <span class="font-semibold text-white group-hover:text-cyan-300 transition-colors">
+                  <div class="flex items-center gap-3">
+                    <img
+                      :src="portadaPlataforma(cuenta.plataforma?.nombre, cuenta.plataforma?.slug, cuenta.plataforma?.coverUrl)"
+                      alt=""
+                      class="h-8 w-12 shrink-0 rounded-md border border-white/10 bg-black object-cover"
+                    />
+                    <span class="font-hud font-bold uppercase tracking-tight text-ad-text group-hover:text-ad-accent-text transition-colors">
                       {{ cuenta.plataforma?.nombre || 'Plataforma' }}
                     </span>
                   </div>
@@ -294,19 +287,19 @@ function irAPagina(pagina: number) {
                   <div class="flex items-center gap-2">
                     <span
                       v-if="cuenta.correo && !cuenta.correo.includes('pendiente')"
-                      class="font-mono text-slate-200 text-xs font-medium truncate max-w-xs"
+                      class="tabular-nums text-ad-text text-xs font-medium truncate max-w-xs"
                     >
                       {{ cuenta.correo }}
                     </span>
-                    <span v-else class="inline-flex items-center gap-1.5 rounded-lg bg-amber-400/10 border border-amber-400/20 text-amber-300 px-2.5 py-0.5 text-[11px] font-medium">
-                      <KeyRound class="size-3 text-amber-400 shrink-0" />
+                    <span v-else class="inline-flex items-center gap-1.5 rounded-lg bg-ad-warn/10 border border-ad-warn/20 text-ad-warn px-2.5 py-0.5 text-[11px] font-medium">
+                      <KeyRound class="size-3 text-ad-warn shrink-0" />
                       <span>Asignación automática post-compra</span>
                     </span>
 
                     <button
                       v-if="cuenta.correo && !cuenta.correo.includes('pendiente')"
                       type="button"
-                      class="text-slate-400 hover:text-white p-1 rounded-md transition-colors cursor-pointer"
+                      class="text-ad-dim hover:text-ad-text p-1 rounded-md transition-colors cursor-pointer"
                       title="Copiar correo"
                       @click.stop="copyText(cuenta.correo, 'Correo')"
                     >
@@ -317,13 +310,13 @@ function irAPagina(pagina: number) {
 
                 <!-- Capacidad / Pantallas -->
                 <td class="py-3.5 px-4 text-center whitespace-nowrap">
-                  <div class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg border font-mono"
+                  <div class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg border tabular-nums"
                     :class="[
                       cuenta.pantallasDisponibles === 0
-                        ? 'border-rose-500/20 bg-rose-500/10 text-rose-300'
+                        ? 'border-ad-err/20 bg-ad-err/10 text-ad-err'
                         : cuenta.pantallasDisponibles < cuenta.totalPantallas
-                        ? 'border-amber-500/20 bg-amber-500/10 text-amber-300'
-                        : 'border-emerald-500/20 bg-emerald-500/10 text-emerald-300'
+                        ? 'border-ad-warn/20 bg-ad-warn/10 text-ad-warn'
+                        : 'border-ad-ok/20 bg-ad-ok/10 text-ad-ok'
                     ]"
                   >
                     <Tv class="size-3" />
@@ -350,7 +343,7 @@ function irAPagina(pagina: number) {
                     <!-- Botón Ver Perfiles -->
                     <button
                       type="button"
-                      class="inline-flex items-center gap-1 text-slate-300 hover:text-white font-medium text-xs px-2.5 py-1 rounded-lg border border-white/10 bg-white/5 hover:bg-white/10 transition-colors cursor-pointer"
+                      class="inline-flex items-center gap-1 text-ad-text hover:text-ad-text font-medium text-xs px-2.5 py-1 rounded-lg border border-ad-line bg-ad-hover hover:bg-ad-hover transition-colors cursor-pointer"
                       @click.stop="toggleExpand(cuenta.id)"
                     >
                       <Eye class="size-3" />
@@ -364,30 +357,30 @@ function irAPagina(pagina: number) {
                     <!-- Botón Eliminar Cuenta -->
                     <button
                       type="button"
-                      class="text-slate-400 hover:text-rose-400 p-1.5 rounded-lg hover:bg-rose-500/10 transition-colors cursor-pointer"
+                      class="text-ad-dim hover:text-ad-err p-1.5 rounded-lg hover:bg-ad-err/10 transition-colors cursor-pointer"
                       title="Eliminar esta cuenta del inventario"
                       :disabled="deletingId === cuenta.id"
                       @click.stop="handleEliminarCuenta(cuenta)"
                     >
-                      <Trash2 class="size-3.5" :class="{ 'animate-pulse text-rose-400': deletingId === cuenta.id }" />
+                      <Trash2 class="size-3.5" :class="{ 'animate-pulse text-ad-err': deletingId === cuenta.id }" />
                     </button>
                   </div>
                 </td>
               </tr>
 
               <!-- Desglose de Perfiles en Fila Expandida -->
-              <tr v-if="expandedAccounts[cuenta.id]" class="bg-[#0B0F19]">
-                <td colspan="6" class="p-4 sm:p-5 border-t border-b border-white/[0.08]">
+              <tr v-if="expandedAccounts[cuenta.id]" class="bg-ad-panel">
+                <td colspan="6" class="p-4 sm:p-5 border-t border-b border-ad-line">
                   <div class="space-y-3">
                     <div class="flex items-center justify-between text-xs">
-                      <span class="font-bold text-white text-xs flex items-center gap-1.5">
-                        <KeyRound class="size-3.5 text-cyan-400" />
+                      <span class="font-bold text-ad-text text-xs flex items-center gap-1.5">
+                        <KeyRound class="size-3.5 text-ad-accent-text" />
                         <span>Perfiles Configurados en Cuenta #{{ cuenta.id }} ({{ cuenta.plataforma?.nombre }})</span>
                       </span>
                       <button
                         v-if="cuenta.correo"
                         type="button"
-                        class="text-cyan-400 hover:text-cyan-300 text-xs font-semibold flex items-center gap-1 cursor-pointer"
+                        class="text-ad-accent-text hover:text-ad-accent-text text-xs font-semibold flex items-center gap-1 cursor-pointer"
                         @click="copyText(`Plataforma: ${cuenta.plataforma?.nombre}\nCorreo: ${cuenta.correo}\nPerfiles Totales: ${cuenta.totalPantallas}`, 'Datos de Cuenta')"
                       >
                         <Copy class="size-3" />
@@ -400,35 +393,35 @@ function irAPagina(pagina: number) {
                       <div
                         v-for="p in cuenta.pantallas"
                         :key="p.id"
-                        class="rounded-xl border p-2.5 text-xs flex flex-col justify-between gap-1.5 shadow-sm"
+                        class="rounded-xl border p-2.5 text-xs flex flex-col justify-between gap-1.5"
                         :class="[
                           p.estado === 'DISPONIBLE'
-                            ? 'border-white/10 bg-[#0E1322]'
-                            : 'border-purple-500/30 bg-purple-950/20'
+                            ? 'border-ad-line bg-ad-panel'
+                            : 'border-ad-accent/30 bg-ad-accent/20'
                         ]"
                       >
                         <div class="flex items-center justify-between">
-                          <span class="font-mono text-slate-400 text-[10px] font-bold">
+                          <span class="tabular-nums text-ad-dim text-[10px] font-semibold">
                             Pantalla #{{ p.numero }}
                           </span>
                           <span
                             class="text-[10px] font-semibold"
-                            :class="p.estado === 'DISPONIBLE' ? 'text-emerald-400' : 'text-purple-300'"
+                            :class="p.estado === 'DISPONIBLE' ? 'text-ad-ok' : 'text-ad-accent-text'"
                           >
                             {{ p.estado === 'DISPONIBLE' ? 'Libre' : 'Asignada' }}
                           </span>
                         </div>
 
-                        <p class="font-medium text-white truncate text-xs">
+                        <p class="font-medium text-ad-text truncate text-xs">
                           {{ p.perfil }}
                         </p>
 
-                        <div class="flex items-center justify-between pt-1 border-t border-white/5 text-[11px]">
-                          <span class="text-slate-400">PIN: <strong class="font-mono text-white">{{ p.pin || 'Sin PIN' }}</strong></span>
+                        <div class="flex items-center justify-between pt-1 border-t border-ad-line text-[11px]">
+                          <span class="text-ad-dim">PIN: <strong class="tabular-nums text-ad-text">{{ p.pin || 'Sin PIN' }}</strong></span>
                           <button
                             v-if="p.pin"
                             type="button"
-                            class="text-slate-400 hover:text-white p-0.5 cursor-pointer"
+                            class="text-ad-dim hover:text-ad-text p-0.5 cursor-pointer"
                             title="Copiar PIN"
                             @click="copyText(p.pin, `PIN Pantalla #${p.numero}`)"
                           >
@@ -456,14 +449,14 @@ function irAPagina(pagina: number) {
       </div>
 
       <!-- Estado Vacío -->
-      <div v-if="cuentasFiltradas.length === 0" class="p-12 text-center text-slate-400 space-y-2">
-        <Layers class="size-8 mx-auto text-slate-600" />
-        <p class="text-sm font-semibold text-white">No hay cuentas que coincidan con los filtros</p>
+      <div v-if="cuentasFiltradas.length === 0" class="p-12 text-center text-ad-dim space-y-2">
+        <Layers class="size-8 mx-auto text-ad-faint" />
+        <p class="text-sm font-semibold text-ad-text">No hay cuentas que coincidan con los filtros</p>
         <p class="text-xs">Prueba restableciendo los filtros o busca con otro término.</p>
         <div class="pt-2">
           <button
             type="button"
-            class="text-xs text-cyan-400 hover:underline cursor-pointer"
+            class="text-xs text-ad-accent-text hover:underline cursor-pointer"
             @click="plataformaFiltro = 'TODAS'; estadoFiltro = 'TODOS'; searchQuery = ''"
           >
             Restablecer todos los filtros
@@ -475,12 +468,12 @@ function irAPagina(pagina: number) {
     <!-- BARRA DE PAGINACIÓN INTERACTIVA (< 1 2 3 4 >) -->
     <div
       v-if="cuentasFiltradas.length > 0"
-      class="rounded-2xl border border-white/10 bg-gradient-to-b from-[#131A2E] to-[#0E1322] px-4 py-3 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs shadow-lg shadow-black/20"
+      class="rounded-2xl border border-ad-line to-[#0E1322] px-4 py-3 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs"
     >
-      <div class="text-slate-400 font-mono text-[11px]">
-        Mostrando cuentas <strong class="text-white">{{ (currentPage - 1) * itemsPerPage + 1 }}</strong> a
-        <strong class="text-white">{{ Math.min(currentPage * itemsPerPage, cuentasFiltradas.length) }}</strong> de
-        <strong class="text-white">{{ cuentasFiltradas.length }}</strong>
+      <div class="text-ad-dim tabular-nums text-[11px]">
+        Mostrando cuentas <strong class="text-ad-text">{{ (currentPage - 1) * itemsPerPage + 1 }}</strong> a
+        <strong class="text-ad-text">{{ Math.min(currentPage * itemsPerPage, cuentasFiltradas.length) }}</strong> de
+        <strong class="text-ad-text">{{ cuentasFiltradas.length }}</strong>
       </div>
 
       <!-- Controles de Navegación de Página -->
@@ -488,7 +481,7 @@ function irAPagina(pagina: number) {
         <!-- Botón Anterior -->
         <button
           type="button"
-          class="size-8 rounded-xl border border-white/10 bg-[#0B0F19] hover:bg-white/10 text-slate-300 hover:text-white flex items-center justify-center transition-all cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed shadow-sm"
+          class="size-8 rounded-lg border border-ad-line bg-ad-panel hover:bg-ad-hover text-ad-text hover:text-ad-text flex items-center justify-center transition-all cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed"
           :disabled="currentPage === 1"
           title="Página anterior"
           @click="irAPagina(currentPage - 1)"
@@ -501,11 +494,11 @@ function irAPagina(pagina: number) {
           v-for="page in totalPages"
           :key="page"
           type="button"
-          class="size-8 rounded-xl font-mono text-xs font-bold transition-all cursor-pointer shadow-sm"
+          class="size-8 rounded-lg tabular-nums text-xs font-semibold transition-all cursor-pointer"
           :class="[
             currentPage === page
-              ? 'bg-cyan-500 text-white shadow-md shadow-cyan-500/30 border border-cyan-400'
-              : 'border border-white/10 bg-[#0B0F19] text-slate-400 hover:text-white hover:border-white/20'
+              ? 'bg-ad-accent text-ad-on-accent border border-ad-accent'
+              : 'border border-ad-line bg-ad-panel text-ad-dim hover:text-ad-text hover:border-ad-line'
           ]"
           @click="irAPagina(page)"
         >
@@ -515,7 +508,7 @@ function irAPagina(pagina: number) {
         <!-- Botón Siguiente -->
         <button
           type="button"
-          class="size-8 rounded-xl border border-white/10 bg-[#0B0F19] hover:bg-white/10 text-slate-300 hover:text-white flex items-center justify-center transition-all cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed shadow-sm"
+          class="size-8 rounded-lg border border-ad-line bg-ad-panel hover:bg-ad-hover text-ad-text hover:text-ad-text flex items-center justify-center transition-all cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed"
           :disabled="currentPage === totalPages"
           title="Página siguiente"
           @click="irAPagina(currentPage + 1)"

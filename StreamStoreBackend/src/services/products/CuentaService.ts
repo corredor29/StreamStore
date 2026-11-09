@@ -32,12 +32,16 @@ export class CuentaService {
         if (!plataforma) throw new HttpError("Plataforma no encontrada", 404)
         if (data.email && await this.repository.findByPlataformaEmail(data.plataforma_id, data.email))
             throw new HttpError("Ya existe esa cuenta en la plataforma", 409)
-        const total = plataforma.max_pantallas
+        const total = data.pantallas?.length ?? plataforma.max_pantallas
         const cantidad = data.cantidad ?? 1
         const ids = await withTransaction(async (t) => {
             const creadas: number[] = []
             for (let n = 0; n < cantidad; n++) {
-                const pantallas = Array.from({ length: total }, (_, i) => ({ numero: i + 1, perfil: `Perfil ${i + 1}`, pin: generarPin() }))
+                const pantallas = Array.from({ length: total }, (_, i) => ({
+                    numero: i + 1,
+                    perfil: data.pantallas?.[i]?.perfil ?? `Perfil ${i + 1}`,
+                    pin: data.pantallas?.[i]?.pin ?? generarPin()
+                }))
                 creadas.push(await this.repository.createConPantallas({
                     plataforma_id: data.plataforma_id,
                     email: data.email ?? null,

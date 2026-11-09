@@ -139,25 +139,25 @@ async function onSubmit() {
 <template>
   <div
     v-if="isOpen"
-    class="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/80 backdrop-blur-sm select-none"
+    class="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/60 select-none"
     role="dialog"
     aria-modal="true"
   >
-    <div class="w-full max-w-lg max-h-[92vh] overflow-y-auto rounded-xl border border-white/10 bg-[#0E1322] p-5 sm:p-7 shadow-2xl space-y-5">
+    <div class="hud-panel w-full max-w-lg max-h-[92vh] overflow-y-auto p-5 sm:p-7 space-y-5">
       <!-- Encabezado Paso 1 -->
-      <div class="flex items-start justify-between border-b border-white/10 pb-4">
+      <div class="flex items-start justify-between border-b border-ad-line pb-4">
         <div>
-          <h2 class="font-display text-lg font-bold text-white">
+          <h2 class="font-display text-lg font-semibold text-ad-text">
             Nueva Plataforma
           </h2>
-          <p class="text-xs text-slate-400 mt-0.5">
+          <p class="text-xs text-ad-dim mt-0.5">
             Nombre y portada del servicio (ej. Netflix, Disney+, Max).
           </p>
         </div>
 
         <button
           type="button"
-          class="text-slate-400 hover:text-white p-1 rounded-md transition-colors cursor-pointer"
+          class="text-ad-dim hover:text-ad-text p-1 rounded-md transition-colors cursor-pointer"
           @click="emit('close')"
         >
           <X class="size-5" />
@@ -171,35 +171,35 @@ async function onSubmit() {
       <form class="space-y-4" @submit.prevent="onSubmit">
         <!-- 1. Nombre de la Plataforma -->
         <div>
-          <label class="text-xs font-semibold text-slate-200 block mb-1">
+          <label class="text-xs font-semibold text-ad-text block mb-1">
             Nombre de la Plataforma / Servicio *
           </label>
           <input
             v-model="nombre"
             type="text"
             placeholder="ej. Netflix, Disney+, HBO Max, Star+..."
-            class="w-full rounded-lg border border-white/10 bg-[#141B2D] px-3.5 py-2 text-xs text-white placeholder:text-slate-400 focus:border-cyan-400 focus:outline-none"
+            class="w-full rounded-lg border border-ad-line bg-ad-raised px-3.5 py-2 text-xs text-ad-text placeholder:text-ad-dim focus:border-ad-accent focus:outline-none"
           />
-          <p v-if="yaExiste" class="text-[11px] text-amber-400 mt-1 font-medium">
+          <p v-if="yaExiste" class="text-[11px] text-ad-warn mt-1 font-medium">
             Aviso: Ya existe una plataforma con este nombre en el sistema.
           </p>
         </div>
 
         <!-- 2. Color Identificador -->
         <div>
-          <label class="text-xs font-semibold text-slate-200 block mb-1">
+          <label class="text-xs font-semibold text-ad-text block mb-1">
             Color de Identidad de Marca
           </label>
           <div class="flex items-center gap-2">
             <input
               v-model="color"
               type="color"
-              class="size-8 rounded border border-white/10 bg-transparent cursor-pointer"
+              class="size-8 rounded border border-ad-line bg-transparent cursor-pointer"
             />
             <input
               v-model="color"
               type="text"
-              class="w-28 rounded-lg border border-white/10 bg-[#141B2D] px-2.5 py-1.5 text-xs font-mono text-white focus:border-cyan-400 focus:outline-none"
+              class="w-28 rounded-lg border border-ad-line bg-ad-raised px-2.5 py-1.5 text-xs tabular-nums text-ad-text focus:border-ad-accent focus:outline-none"
             />
           </div>
 
@@ -209,7 +209,7 @@ async function onSubmit() {
               v-for="c in coloresSugeridos"
               :key="c.hex"
               type="button"
-              class="size-5 rounded-full border border-white/20 transition-transform hover:scale-110 cursor-pointer"
+              class="size-5 rounded-full border border-ad-line transition-transform hover:scale-110 cursor-pointer"
               :style="{ backgroundColor: c.hex }"
               :title="c.label"
               @click="color = c.hex"
@@ -218,18 +218,18 @@ async function onSubmit() {
         </div>
 
         <!-- 3. Subir Imagen de Portada (Local vs Link URL) -->
-        <div class="space-y-2 border-t border-white/10 pt-3">
+        <div class="space-y-2 border-t border-ad-line pt-3">
           <div class="flex items-center justify-between">
-            <label class="text-xs font-semibold text-slate-200">
+            <label class="text-xs font-semibold text-ad-text">
               Imagen de Portada / Logo de la Plataforma
             </label>
 
             <!-- Toggle Modo Subida -->
-            <div class="flex items-center gap-1 rounded bg-[#141B2D] p-0.5 border border-white/10 text-[11px]">
+            <div class="flex items-center gap-1 rounded bg-ad-raised p-0.5 border border-ad-line text-[11px]">
               <button
                 type="button"
                 class="px-2.5 py-1 rounded transition-colors cursor-pointer"
-                :class="coverMode === 'local' ? 'bg-cyan-500/20 text-cyan-300 font-bold' : 'text-slate-400 hover:text-white'"
+                :class="coverMode === 'local' ? 'bg-ad-accent/20 text-ad-accent-text font-semibold' : 'text-ad-dim hover:text-ad-text'"
                 @click="coverMode = 'local'"
               >
                 Subir Local
@@ -237,7 +237,7 @@ async function onSubmit() {
               <button
                 type="button"
                 class="px-2.5 py-1 rounded transition-colors cursor-pointer"
-                :class="coverMode === 'url' ? 'bg-cyan-500/20 text-cyan-300 font-bold' : 'text-slate-400 hover:text-white'"
+                :class="coverMode === 'url' ? 'bg-ad-accent/20 text-ad-accent-text font-semibold' : 'text-ad-dim hover:text-ad-text'"
                 @click="coverMode = 'url'"
               >
                 Pegar Link (URL)
@@ -246,7 +246,7 @@ async function onSubmit() {
           </div>
 
           <!-- Vista Previa si hay imagen -->
-          <div v-if="coverPreview" class="relative rounded-lg overflow-hidden border border-white/10 bg-black/40">
+          <div v-if="coverPreview" class="relative rounded-lg overflow-hidden border border-ad-line bg-black/60">
             <div class="aspect-video w-full max-h-40 overflow-hidden flex items-center justify-center bg-black/60">
               <img
                 :src="coverPreview"
@@ -256,7 +256,7 @@ async function onSubmit() {
             </div>
             <button
               type="button"
-              class="absolute top-2 right-2 p-1.5 rounded-md bg-black/70 hover:bg-rose-500 text-white transition-colors cursor-pointer"
+              class="absolute top-2 right-2 p-1.5 rounded-md bg-black/60 hover:bg-ad-err text-ad-text transition-colors cursor-pointer"
               title="Quitar imagen"
               @click="removeCover"
             >
@@ -268,7 +268,7 @@ async function onSubmit() {
           <div
             v-else-if="coverMode === 'local'"
             class="border-2 border-dashed rounded-lg p-5 text-center transition-colors cursor-pointer"
-            :class="isDragging ? 'border-cyan-400 bg-cyan-950/20' : 'border-white/10 hover:border-white/20 bg-[#121829]'"
+            :class="isDragging ? 'border-ad-accent bg-ad-accent/20' : 'border-ad-line hover:border-ad-line bg-ad-raised'"
             @dragover.prevent="isDragging = true"
             @dragleave.prevent="isDragging = false"
             @drop="onDrop"
@@ -281,9 +281,9 @@ async function onSubmit() {
               class="hidden"
               @change="handleFileChange"
             />
-            <Upload class="size-6 text-cyan-400 mx-auto mb-2" />
-            <p class="text-xs font-semibold text-white">Haz clic o arrastra la imagen aquí</p>
-            <p class="text-[10px] text-slate-400 mt-0.5">Soporta PNG, JPG o WEBP</p>
+            <Upload class="size-6 text-ad-accent-text mx-auto mb-2" />
+            <p class="text-xs font-semibold text-ad-text">Haz clic o arrastra la imagen aquí</p>
+            <p class="text-[10px] text-ad-dim mt-0.5">Soporta PNG, JPG o WEBP</p>
           </div>
 
           <!-- Opción B: Enlace URL -->
@@ -292,11 +292,11 @@ async function onSubmit() {
               v-model="coverUrl"
               type="url"
               placeholder="https://ejemplo.com/portada-netflix.jpg"
-              class="flex-1 rounded-lg border border-white/10 bg-[#141B2D] px-3 py-2 text-xs text-white placeholder:text-slate-400 focus:border-cyan-400 focus:outline-none"
+              class="flex-1 rounded-lg border border-ad-line bg-ad-raised px-3 py-2 text-xs text-ad-text placeholder:text-ad-dim focus:border-ad-accent focus:outline-none"
             />
             <button
               type="button"
-              class="px-3 py-2 rounded-lg bg-[#141B2D] hover:bg-white/10 text-xs font-semibold text-slate-200 border border-white/10 cursor-pointer"
+              class="px-3 py-2 rounded-lg bg-ad-raised hover:bg-ad-hover text-xs font-semibold text-ad-text border border-ad-line cursor-pointer"
               @click="applyUrl"
             >
               Cargar
@@ -305,17 +305,17 @@ async function onSubmit() {
         </div>
 
         <!-- Acciones Inferiores -->
-        <div class="flex items-center justify-end gap-2.5 border-t border-white/10 pt-4">
+        <div class="flex items-center justify-end gap-2.5 border-t border-ad-line pt-4">
           <button
             type="button"
-            class="px-3.5 py-2 rounded-lg text-xs font-semibold text-slate-300 hover:text-white hover:bg-white/5 transition-colors cursor-pointer"
+            class="px-3.5 py-2 rounded-lg text-xs font-semibold text-ad-text hover:text-ad-text hover:bg-ad-hover transition-colors cursor-pointer"
             @click="emit('close')"
           >
             Cancelar
           </button>
           <button
             type="submit"
-            class="px-4 py-2 rounded-lg bg-cyan-500 hover:bg-cyan-400 text-neutral-950 text-xs font-bold transition-colors cursor-pointer shadow-sm"
+            class="px-4 py-2 rounded-lg bg-ad-accent hover:bg-ad-accent text-neutral-950 text-xs font-semibold transition-colors cursor-pointer"
             :disabled="isSubmitting"
           >
             <span v-if="isSubmitting">Guardando plataforma...</span>

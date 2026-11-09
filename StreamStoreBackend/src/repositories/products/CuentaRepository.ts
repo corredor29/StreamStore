@@ -113,4 +113,39 @@ export class CuentaRepository {
         const definidos = Object.fromEntries(Object.entries(cambios).filter(([, v]) => v !== undefined))
         return pantalla.update(definidos, { transaction: t })
     }
+
+    // Inventario vivo (sin cuentas inactivas): una fila agregada calculada en MySQL
+    async resumenInventario() {
+        const [fila] = await sequelize.query<{
+            total: number | string | null
+            sin_vender: number | string | null
+            pantallas_totales: number | string | null
+            pantallas_libres: number | string | null
+            sin_credenciales: number | string | null
+        }>(
+            `SELECT COUNT(*) AS total,
+                    COALESCE(SUM(x.libres = x.total_pantallas AND x.total_pantallas > 0), 0) AS sin_vender,
+                    COALESCE(SUM(x.total_pantallas), 0) AS pantallas_totales,
+                    COALESCE(SUM(x.libres), 0) AS pantallas_libres,
+                    COALESCE(SUM(x.email IS NULL OR x.password_cifrada IS NULL), 0) AS sin_credenciales
+             FROM (
+                SELECT c.id, c.total_pantallas, c.email, c.password_cifrada,
+                       COALESCE(SUM(p.estado = 'disponible'), 0) AS libres
+                FROM cuentas c LEFT JOIN pantallas p ON p.cuenta_id = c.id
+                WHERE c.estado <> 'inactiva'
+                GROUP BY c.id, c.total_pantallas, c.email, c.password_cifrada
+             ) x`,
+            { type: QueryTypes.SELECT }
+        )
+        const total = Number(fila?.total ?? 0)
+        const sinVender = Number(fila?.sin_vender ?? 0)
+        return {
+            total,
+            sin_vender: sinVender,
+            vendidas: total - sinVender,
+            pantallas_totales: Number(fila?.pantallas_totales ?? 0),
+            pantallas_libres: Number(fila?.pantallas_libres ?? 0),
+            sin_credenciales: Number(fila?.sin_credenciales ?? 0)
+        }
+    }
 }

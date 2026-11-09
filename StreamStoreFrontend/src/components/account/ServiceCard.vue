@@ -98,6 +98,14 @@ async function copyToClipboard(text: string, fieldName: string) {
   }
 }
 
+// Todos los perfiles del servicio (cuenta completa = varios); los mocks antiguos solo traen perfil/pin sueltos
+const perfiles = computed(() => {
+  const lista = props.servicio.perfiles ?? []
+  if (lista.length) return lista
+  if (!props.servicio.perfil && !props.servicio.pin) return []
+  return [{ numero: 1, perfil: props.servicio.perfil || 'Principal', pin: props.servicio.pin || '' }]
+})
+
 function copyAllCredentials() {
   const parts = [
     `Plataforma: ${props.servicio.plataforma?.nombre || 'Streaming'}`,
@@ -105,8 +113,7 @@ function copyAllCredentials() {
     `Correo: ${props.servicio.correoAcceso}`,
     `Contraseña: ${props.servicio.passwordAcceso}`,
   ]
-  if (props.servicio.perfil) parts.push(`Perfil: ${props.servicio.perfil}`)
-  if (props.servicio.pin) parts.push(`PIN: ${props.servicio.pin}`)
+  for (const p of perfiles.value) parts.push(p.pin ? `Perfil: ${p.perfil} · PIN: ${p.pin}` : `Perfil: ${p.perfil}`)
   parts.push(`Vence: ${formatDate(props.servicio.fechaVencimiento)}`)
 
   copyToClipboard(parts.join('\n'), 'all')
@@ -252,32 +259,39 @@ function copyAllCredentials() {
           </div>
         </div>
 
-        <!-- Perfil y PIN si aplica -->
-        <div v-if="servicio.perfil || servicio.pin" class="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-1">
-          <!-- Perfil -->
-          <div v-if="servicio.perfil" class="flex items-center justify-between rounded-lg border border-white/10 bg-white/5 p-2.5">
-            <div class="flex items-center gap-1.5 min-w-0">
-              <User class="size-3 text-cyan-400 shrink-0" aria-hidden="true" />
-              <span class="truncate text-[11px] text-slate-200 font-medium">{{ servicio.perfil }}</span>
-            </div>
-          </div>
-
-          <!-- PIN -->
-          <div v-if="servicio.pin" class="flex items-center justify-between rounded-lg border border-white/10 bg-white/5 p-2.5">
-            <span class="text-[11px] text-slate-400">PIN:</span>
-            <span class="font-mono font-black text-cyan-300 tracking-widest text-xs px-2 py-0.5 rounded bg-cyan-950/40 border border-cyan-500/30">
-              {{ servicio.pin }}
-            </span>
-            <button
-              type="button"
-              class="text-slate-400 hover:text-cyan-300 p-1 rounded hover:bg-white/10 transition-colors cursor-pointer"
-              :aria-label="copiedField === 'pin' ? 'PIN copiado' : 'Copiar PIN'"
-              @click="copyToClipboard(servicio.pin!, 'pin')"
+        <!-- Perfiles y PIN: uno por pantalla (una cuenta completa trae todos) -->
+        <div v-if="perfiles.length" class="space-y-1.5 pt-1">
+          <p v-if="perfiles.length > 1" class="text-[10px] font-mono uppercase tracking-wider text-slate-400">
+            {{ perfiles.length }} perfiles incluidos
+          </p>
+          <ul class="space-y-1.5">
+            <li
+              v-for="p in perfiles"
+              :key="p.numero"
+              class="flex items-center justify-between gap-2 rounded-lg border border-white/10 bg-white/5 p-2.5"
             >
-              <Check v-if="copiedField === 'pin'" class="size-3.5 text-emerald-400" />
-              <Copy v-else class="size-3.5" />
-            </button>
-          </div>
+              <div class="flex items-center gap-1.5 min-w-0">
+                <User class="size-3 text-cyan-400 shrink-0" aria-hidden="true" />
+                <span class="truncate text-[11px] text-slate-200 font-medium">{{ p.perfil }}</span>
+              </div>
+              <div v-if="p.pin" class="flex items-center gap-1.5 shrink-0">
+                <span class="text-[11px] text-slate-400">PIN</span>
+                <span class="font-mono font-black text-cyan-300 tracking-widest text-xs px-2 py-0.5 rounded bg-cyan-950/40 border border-cyan-500/30">
+                  {{ p.pin }}
+                </span>
+                <button
+                  type="button"
+                  class="text-slate-400 hover:text-cyan-300 p-1 rounded hover:bg-white/10 transition-colors cursor-pointer"
+                  :aria-label="copiedField === `pin-${p.numero}` ? `PIN de ${p.perfil} copiado` : `Copiar PIN de ${p.perfil}`"
+                  @click="copyToClipboard(p.pin, `pin-${p.numero}`)"
+                >
+                  <Check v-if="copiedField === `pin-${p.numero}`" class="size-3.5 text-emerald-400" />
+                  <Copy v-else class="size-3.5" />
+                </button>
+              </div>
+              <span v-else class="text-[10px] text-slate-500 shrink-0">Sin PIN</span>
+            </li>
+          </ul>
         </div>
       </div>
     </div>
