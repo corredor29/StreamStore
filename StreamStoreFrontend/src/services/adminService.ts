@@ -55,6 +55,15 @@ function mockServicioAdmin(s: Servicio): ServicioAdmin {
   }
 }
 
+// El backend solo distingue disponible / vendida_completa / inactiva; «parcial» y «agotada» salen de las pantallas
+function estadoCuenta(raw: unknown, libres: number, total: number): CuentaAdmin['estado'] {
+  const e = String(raw ?? '').toLowerCase()
+  if (e === 'inactiva') return 'INACTIVA'
+  if (e === 'vendida_completa' || (total > 0 && libres === 0)) return 'VENDIDA'
+  if (total > 0 && libres < total) return 'PARCIAL'
+  return 'DISPONIBLE'
+}
+
 // El backend responde en snake_case y con DECIMAL como texto
 function normalizeCombo(raw: unknown): ComboPromo {
   const c = raw as Record<string, any>
@@ -212,8 +221,9 @@ export const adminService = {
             desdeServidor: true,
           }
         }
+        throw { status: 502, message: 'El servidor no devolvió el resumen.' }
       } catch (e) {
-        console.warn('Error al cargar resumen del backend, usando estadísticas integradas:', e)
+        throw normalizeError(e)
       }
     }
 
@@ -240,10 +250,12 @@ export const adminService = {
         headers: { 'Content-Type': 'multipart/form-data' },
       })
       const data = res.data?.data ?? res.data
-      return data?.url || data?.ruta || ''
+      const url = data?.url || data?.ruta
+      if (!url) throw { status: 502, message: 'El servidor no devolvió la dirección de la imagen.' }
+      return url
     } catch (err) {
-      console.warn('Error al subir imagen de portada al backend:', err)
-      return ''
+      const e = normalizeError(err)
+      throw { ...e, message: `No se pudo subir la portada: ${e.message}` }
     }
   },
 
@@ -278,15 +290,16 @@ export const adminService = {
               correo: c.email ?? c.correo ?? null,
               coverUrl: c.portada_url ?? platCover ?? c.coverUrl ?? null,
               credencialesPendientes: !c.email && !c.correo,
-              estado: (c.estado?.toUpperCase() as any) || 'DISPONIBLE',
+              estado: estadoCuenta(c.estado, libres, pantallas.length || Number(c.total_pantallas ?? 0)),
               totalPantallas: Number(c.total_pantallas ?? c.totalPantallas ?? (pantallas.length > 0 ? pantallas.length : 4)),
               pantallasDisponibles: Number(c.pantallas_disponibles ?? c.pantallasDisponibles ?? libres),
               pantallas,
             }
           })
         }
+        return []
       } catch (e) {
-        console.warn('Error al cargar cuentas de admin desde backend, usando inventario integrado:', e)
+        throw normalizeError(e)
       }
     }
     return mockDelay([...mockCuentasAdmin], 200)
@@ -312,18 +325,18 @@ export const adminService = {
           activo: true,
         })
         const data = res.data?.data ?? res.data
-        const nueva: Plataforma = {
-          id: Number(data.id || Math.floor(20 + Math.random() * 80)),
+        if (!data?.id) throw { status: 502, message: 'El servidor no confirmó la plataforma creada.' }
+        return {
+          id: Number(data.id),
           nombre: data.nombre || payload.nombre,
           slug: data.slug || slug,
           color: data.color || color,
           coverUrl: data.portada_url || portada,
           activa: true,
         }
-        mockPlataformas.push(nueva)
-        return nueva
       } catch (err) {
-        console.warn('Error al guardar plataforma en backend, agregando a lista integrada:', err)
+        // Mostrar el motivo real (p. ej. nombre repetido) en vez de inventar una plataforma local
+        throw normalizeError(err)
       }
     }
 
@@ -573,33 +586,37 @@ export const adminService = {
     return mockDelay(nuevaCuenta, 300)
   },
 
-  async eliminarCuenta(id: number): Promise<boolean> {
+  // El backend decide: borra (sin ventas), desactiva (con ventas vencidas) o rechaza (clientes con acceso vigente)
+  async eliminarCuenta(id: number): Promise<{ resultado: 'eliminada' | 'desactivada'; mensaje: string }> {
     if (!USE_MOCKS) {
       try {
-        await api.delete(`/admin/cuentas/${id}`)
+        const res = await api.delete<any>(`/admin/cuentas/${id}`)
+        const resultado = res.data?.resultado === 'desactivada' ? 'desactivada' : 'eliminada'
+        return {
+          resultado,
+          mensaje: resultado === 'eliminada'
+            ? 'Cuenta eliminada del inventario.'
+            : 'La cuenta tenía ventas anteriores: se desactivó y ya no se vende.',
+        }
       } catch (e) {
-        console.warn('Error al eliminar cuenta en backend, aplicando fallback en memoria:', e)
+        throw normalizeError(e)
       }
     }
     const idx = mockCuentasAdmin.findIndex((c) => c.id === id)
-    if (idx !== -1) {
-      mockCuentasAdmin.splice(idx, 1)
-      return mockDelay(true, 150)
-    }
-    return false
+    if (idx !== -1) mockCuentasAdmin.splice(idx, 1)
+    return mockDelay({ resultado: 'eliminada' as const, mensaje: 'Cuenta eliminada (modo demo).' }, 150)
   },
 
   async compras(): Promise<Compra[]> {
     if (!USE_MOCKS) {
+      // Con backend se muestran solo ventas reales: si no hay, la lista queda vacía
       try {
         const response = await api.get<any>('/admin/compras')
         const raw = response.data
         const list = Array.isArray(raw) ? raw : Array.isArray(raw?.data) ? raw.data : []
-        if (list.length > 0) {
-          return list.map(normalizeCompra)
-        }
+        return list.map(normalizeCompra)
       } catch (e) {
-        console.warn('Error al cargar compras de admin desde backend, usando histórico integrado:', e)
+        throw normalizeError(e)
       }
     }
     return mockDelay([...mockComprasRealizadas], 200)

@@ -1,122 +1,62 @@
-import { api, mockDelay, USE_MOCKS } from './api'
+import { api, mockDelay, normalizeError, USE_MOCKS } from './api'
 import type { AuthResponse, LoginPayload, RegisterPayload, Usuario } from '@/types'
 
-// Cuentas de demostración preconfiguradas compatibles con backend y frontend
-export const DEMO_ACCOUNTS = {
-  cliente: { email: 'cliente1@streamstore.test', password: 'Cliente123*', nombre: 'Laura Cliente', rol: 'cliente' as const },
-  admin: { email: 'admin@streamstore.test', password: 'Admin123*', nombre: 'Admin StreamStore', rol: 'admin' as const },
-  clienteLegacy: { email: 'cliente@streamstore.com', password: 'password123', nombre: 'Carlos Cliente', rol: 'cliente' as const },
-  adminLegacy: { email: 'admin@streamstore.com', password: 'adminpassword', nombre: 'Admin StreamStore', rol: 'admin' as const },
+// Con backend (lo normal) la sesión SOLO la da el servidor: si falla, se muestra el error.
+// Nunca se fabrica una sesión local, y menos de administrador.
+
+function sesionDesdeRespuesta(raw: any, fallbackEmail: string, fallbackNombre = 'Usuario'): AuthResponse {
+  const token = raw?.data?.token || raw?.token
+  const userObj = raw?.data?.user || raw?.data?.usuario || raw?.usuario || raw?.user
+  if (!token || !userObj) throw { status: 502, message: 'El servidor respondió sin una sesión válida. Intenta de nuevo.' }
+  return {
+    token,
+    usuario: {
+      id: userObj.id,
+      nombre: userObj.nombre || fallbackNombre,
+      email: userObj.email || fallbackEmail,
+      rol: userObj.rol === 'admin' ? 'admin' : 'cliente',
+    },
+  }
 }
+
+// Modo demo SIN servidor (solo si VITE_USE_MOCKS=true): el rol depende del correo exacto del seed
+const ADMIN_DEMO = 'admin@streamstore.test'
 
 export const authService = {
   async login(payload: LoginPayload): Promise<AuthResponse> {
-    const emailNorm = payload.email.trim().toLowerCase()
-
-    // 1. Intento de autenticación contra la API real si USE_MOCKS es falso
     if (!USE_MOCKS) {
       try {
         const response = await api.post<any>('/auth/login', payload)
-        const raw = response.data
-        const token = raw.data?.token || raw.token || 'jwt-' + Date.now()
-        const userObj = raw.data?.user || raw.data?.usuario || raw.usuario || raw.user
-        if (userObj) {
-          return {
-            token,
-            usuario: {
-              id: userObj.id || 1,
-              nombre: userObj.nombre || 'Usuario',
-              email: userObj.email || payload.email,
-              rol: (userObj.rol as any) || 'cliente',
-            },
-          }
-        }
-      } catch (err: any) {
-        // Si el backend responde con credenciales inválidas (401 o 400), lanzar el error normalmente
-        if (err?.status === 401 || err?.status === 400) {
-          throw err
-        }
-        // Si es un error de conexión (backend caído o MySQL no iniciado), permitimos fallback demo
-        console.warn('Backend no disponible, ejecutando en modo demo autónomo:', err?.message)
+        return sesionDesdeRespuesta(response.data, payload.email)
+      } catch (err) {
+        throw normalizeError(err)
       }
     }
 
-    // 2. Simulación / Fallback inmediato para permitir acceso demo garantizado
-    const isAdmin =
-      (emailNorm === DEMO_ACCOUNTS.admin.email.toLowerCase() && payload.password === DEMO_ACCOUNTS.admin.password) ||
-      (emailNorm === DEMO_ACCOUNTS.adminLegacy.email.toLowerCase() && payload.password === DEMO_ACCOUNTS.adminLegacy.password) ||
-      (emailNorm === 'admin@test.com' && payload.password === '123456') ||
-      (emailNorm.includes('admin') && payload.password.length >= 6)
-
-    if (isAdmin) {
-      return mockDelay<AuthResponse>({
-        token: 'mock-jwt-token-admin-' + Date.now(),
-        usuario: {
-          id: 2,
-          nombre: DEMO_ACCOUNTS.admin.nombre,
-          email: payload.email,
-          rol: 'admin',
-        },
-      }, 200)
+    const email = payload.email.trim().toLowerCase()
+    if (!email.includes('@') || payload.password.length < 6) {
+      throw { status: 401, message: 'Correo electrónico o contraseña incorrectos.' }
     }
-
-    const isCliente =
-      (emailNorm === DEMO_ACCOUNTS.cliente.email.toLowerCase() && payload.password === DEMO_ACCOUNTS.cliente.password) ||
-      (emailNorm === DEMO_ACCOUNTS.clienteLegacy.email.toLowerCase() && payload.password === DEMO_ACCOUNTS.clienteLegacy.password) ||
-      (emailNorm === 'cliente@test.com' && payload.password === '123456') ||
-      (!isAdmin && emailNorm.includes('@') && payload.password.length >= 6)
-
-    if (isCliente) {
-      return mockDelay<AuthResponse>({
-        token: 'mock-jwt-token-cliente-' + Date.now(),
-        usuario: {
-          id: 1,
-          nombre: DEMO_ACCOUNTS.cliente.nombre,
-          email: payload.email,
-          rol: 'cliente',
-        },
-      }, 200)
-    }
-
-    throw {
-      status: 401,
-      message: 'Correo electrónico o contraseña incorrectos.',
-    }
+    const esAdmin = email === ADMIN_DEMO
+    return mockDelay<AuthResponse>({
+      token: `mock-jwt-${esAdmin ? 'admin' : 'cliente'}-${Date.now()}`,
+      usuario: { id: esAdmin ? 2 : 1, nombre: esAdmin ? 'Admin StreamStore' : 'Cliente Demo', email, rol: esAdmin ? 'admin' : 'cliente' },
+    }, 200)
   },
 
   async register(payload: RegisterPayload): Promise<AuthResponse> {
     if (!USE_MOCKS) {
       try {
         const response = await api.post<any>('/auth/register', payload)
-        const raw = response.data
-        const token = raw.data?.token || raw.token || 'jwt-' + Date.now()
-        const userObj = raw.data?.user || raw.data?.usuario || raw.usuario || raw.user
-        if (userObj) {
-          return {
-            token,
-            usuario: {
-              id: userObj.id || Date.now(),
-              nombre: userObj.nombre || payload.nombre,
-              email: userObj.email || payload.email,
-              rol: (userObj.rol as any) || 'cliente',
-            },
-          }
-        }
-      } catch (err: any) {
-        if (err?.status === 409 || err?.status === 400) {
-          throw err
-        }
+        return sesionDesdeRespuesta(response.data, payload.email, payload.nombre)
+      } catch (err) {
+        throw normalizeError(err)
       }
     }
 
     return mockDelay<AuthResponse>({
-      token: 'mock-jwt-token-newuser-' + Date.now(),
-      usuario: {
-        id: Date.now(),
-        nombre: payload.nombre,
-        email: payload.email,
-        rol: 'cliente',
-      },
+      token: 'mock-jwt-nuevo-' + Date.now(),
+      usuario: { id: Date.now(), nombre: payload.nombre, email: payload.email, rol: 'cliente' },
     }, 200)
   },
 
@@ -125,22 +65,12 @@ export const authService = {
       try {
         const { data } = await api.get<any>('/auth/me')
         const userObj = data.data || data
-        return {
-          id: userObj.id,
-          nombre: userObj.nombre,
-          email: userObj.email,
-          rol: userObj.rol,
-        }
-      } catch {
-        // Fallback a demo si falla la conexión
+        return { id: userObj.id, nombre: userObj.nombre, email: userObj.email, rol: userObj.rol === 'admin' ? 'admin' : 'cliente' }
+      } catch (err) {
+        throw normalizeError(err)
       }
     }
 
-    return mockDelay<Usuario>({
-      id: 1,
-      nombre: DEMO_ACCOUNTS.cliente.nombre,
-      email: DEMO_ACCOUNTS.cliente.email,
-      rol: 'cliente',
-    }, 150)
+    return mockDelay<Usuario>({ id: 1, nombre: 'Cliente Demo', email: 'cliente@demo.local', rol: 'cliente' }, 150)
   },
 }

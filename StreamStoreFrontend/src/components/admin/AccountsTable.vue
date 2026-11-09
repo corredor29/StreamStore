@@ -57,13 +57,19 @@ async function copyText(text: string, label: string) {
 
 async function handleEliminarCuenta(cuenta: CuentaAdmin) {
   const nombre = cuenta.plataforma?.nombre || `Cuenta #${cuenta.id}`
-  if (!confirm(`¿Estás seguro de eliminar la ${nombre} (ID #${cuenta.id}) del inventario?`)) {
+  const vendidas = cuenta.totalPantallas - cuenta.pantallasDisponibles
+  const aviso = vendidas > 0
+    ? `\n\nTiene ${vendidas} pantalla(s) vendida(s): si algún cliente aún tiene acceso no se podrá eliminar, y si ya vencieron se desactivará para conservar el historial.`
+    : ''
+  if (!confirm(`¿Eliminar la cuenta ${nombre} #${cuenta.id} del inventario?${aviso}`)) {
     return
   }
 
   deletingId.value = cuenta.id
   try {
-    await adminService.eliminarCuenta(cuenta.id)
+    const res = await adminService.eliminarCuenta(cuenta.id)
+    copiedNotice.value = res.mensaje
+    setTimeout(() => (copiedNotice.value = null), 3500)
     emit('cuentaEliminada')
   } catch (err: any) {
     alert(err?.message || 'No se pudo eliminar la cuenta.')
