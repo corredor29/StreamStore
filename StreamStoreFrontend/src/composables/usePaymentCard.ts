@@ -10,10 +10,10 @@ export interface CardState {
 }
 
 export function usePaymentCard() {
-  const bankSkin = ref<CardBankSkin>('bancolombia')
+  const bankSkin = ref<CardBankSkin>('generica')
   const cardKind = ref<CardKind>('debito')
   // En Bancolombia los datos físicos están al reverso, por lo que inicia mostrando el reverso
-  const isFlipped = ref(bankSkin.value === 'bancolombia')
+  const isFlipped = ref(false)
 
   const card = reactive<CardState>({
     numero: '',
@@ -111,12 +111,8 @@ export function usePaymentCard() {
 
   function setBankSkin(skin: CardBankSkin) {
     bankSkin.value = skin
-    // En Bancolombia y Nu los números de tarjeta van impresos al reverso
-    if (skin === 'bancolombia' || skin === 'nu') {
-      isFlipped.value = true
-    } else {
-      isFlipped.value = false
-    }
+    // Todas las tarjetas siempre empiezan mostrando el frente
+    isFlipped.value = false
   }
 
   function setCardKind(kind: CardKind) {
@@ -132,7 +128,7 @@ export function usePaymentCard() {
       card.mes = '04'
       card.anio = '30'
       setCvv('654')
-      flipToBack()
+      flipToFront()
       return
     }
 
@@ -143,7 +139,7 @@ export function usePaymentCard() {
       card.mes = '03'
       card.anio = '29'
       setCvv('321')
-      flipToBack()
+      flipToFront()
       return
     }
 

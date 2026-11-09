@@ -49,26 +49,19 @@ const presentationImage = computed(() => {
   return props.producto.plataforma?.logoUrl || '/brand_logos/streamstore_icon.png'
 })
 
-const isWideGraphic = computed(() => {
-  const img = presentationImage.value
-  return img.includes('disneycard') || img.includes('prime_video') || img.includes('spotify_premiun')
-})
-
-const displayTitle = computed(() => {
-  const raw = props.producto.nombre || ''
-  return raw.toUpperCase()
-})
+// Las portadas de /targetyas/ son ilustraciones completas; el resto son logos que deben verse enteros
+const isCardArt = computed(() => presentationImage.value.includes('/targetyas/'))
 
 const tipoBadge = computed(() => {
   return props.producto.tipo === 'CUENTA_COMPLETA'
     ? {
-        label: 'Cuenta Completa',
+        label: 'Cuenta completa',
         icon: Users,
         cls: 'bg-purple-50 text-purple-700 border-purple-200',
         overlayCls: 'bg-purple-950/85 text-purple-200 border border-purple-400/50',
       }
     : {
-        label: '1 Pantalla (PIN)',
+        label: 'Pantalla con PIN',
         icon: Tv,
         cls: 'bg-cyan-50 text-cyan-800 border-cyan-200',
         overlayCls: 'bg-cyan-950/85 text-cyan-200 border border-cyan-400/50',
@@ -89,119 +82,81 @@ function onAgregar() {
 
 <template>
   <article
-    class="group relative flex flex-col justify-between overflow-hidden rounded-2xl bg-neutral-900/90 border border-white/10 shadow-xl hover:border-cyan-500/50 hover:shadow-[0_15px_35px_rgba(6,182,212,0.15)] transition-all duration-300 h-full backdrop-blur-xl"
-    :class="{ 'opacity-60 grayscale-[30%]': isAgotado }"
+    class="group relative flex h-full flex-col overflow-hidden rounded-2xl border border-white/12 bg-[#10142a] transition-colors duration-200 hover:border-white/30"
     :aria-labelledby="`product-title-${producto.id}`"
   >
-    <!-- TOP: PORTADA DE BORDE A BORDE (LLENA TODA LA CABECERA SIN ESPACIOS EN BLANCO) -->
+    <!-- Portada: la ilustración llena el área; un logo se muestra entero sobre fondo oscuro -->
     <RouterLink
       :to="`/producto/${producto.id}`"
-      class="relative h-44 sm:h-48 w-full overflow-hidden block select-none cursor-pointer bg-black group"
+      class="relative block aspect-[16/10] w-full overflow-hidden bg-[#0a0d1c]"
+      tabindex="-1"
+      aria-hidden="true"
     >
-      <!-- Tarjeta gráfica oficial ocupando el 100% del contenedor -->
       <img
         :src="presentationImage"
-        :alt="producto.nombre"
-        class="h-full w-full object-cover transition-transform duration-500 ease-out group-hover:scale-105 select-none"
+        alt=""
+        class="h-full w-full"
+        :class="[isCardArt ? 'object-cover' : 'object-contain p-8', { 'grayscale opacity-60': isAgotado }]"
         loading="lazy"
       />
-
-      <!-- Sutil gradiente oscuro para legibilidad óptima de badges -->
-      <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-black/30 pointer-events-none" />
-
-      <!-- Badges superiores flotantes con efecto glassmorphism -->
-      <div class="absolute top-2.5 left-2.5 z-10">
-        <span
-          class="inline-flex items-center gap-1 rounded-md px-2.5 py-1 text-[10px] font-mono font-bold uppercase tracking-wider shadow-md backdrop-blur-md"
-          :class="tipoBadge.overlayCls"
-        >
-          <component :is="tipoBadge.icon" class="size-3" aria-hidden="true" />
-          {{ tipoBadge.label }}
-        </span>
-      </div>
-
-      <div class="absolute top-2.5 right-2.5 z-10">
-        <span class="inline-flex items-center gap-1 rounded-md px-2.5 py-1 text-[10px] font-mono font-bold text-white bg-black/60 border border-white/20 shadow-md backdrop-blur-md">
-          <Clock class="size-3 text-cyan-300" />
-          {{ producto.duracionDias }}d
-        </span>
-      </div>
     </RouterLink>
 
-    <!-- CUERPO DE LA TARJETA (DARK MODE PREMIUM STREAMSTORE) -->
-    <div class="p-4 sm:p-5 flex-1 flex flex-col justify-between bg-neutral-900/60 space-y-3">
-      <div>
-        <h3
-          :id="`product-title-${producto.id}`"
-          class="font-display text-xs sm:text-sm font-bold text-slate-100 group-hover:text-cyan-300 transition-colors uppercase tracking-tight line-clamp-2 min-h-[2.5rem] leading-snug"
-        >
-          <RouterLink :to="`/producto/${producto.id}`">
-            {{ displayTitle }}
+    <div class="flex flex-1 flex-col gap-3 p-4 sm:p-5">
+      <div class="flex-1">
+        <span class="mb-2 inline-flex items-center gap-1 rounded-md px-2 py-1 text-xs font-bold" :class="tipoBadge.overlayCls">
+          <component :is="tipoBadge.icon" class="size-3.5" aria-hidden="true" />
+          {{ tipoBadge.label }}
+        </span>
+        <h3 :id="`product-title-${producto.id}`" class="font-display text-base font-bold leading-snug text-white line-clamp-2">
+          <RouterLink :to="`/producto/${producto.id}`" class="rounded hover:text-[#7ee8f8]">
+            {{ producto.nombre }}
           </RouterLink>
         </h3>
-
-        <!-- Precio prominente en negrita -->
-        <p class="font-display text-xl sm:text-2xl font-black text-white tracking-tight mt-1 flex items-baseline gap-1">
-          <span>{{ formatPrice(producto.precio) }}</span>
+        <p class="mt-1 flex items-center gap-1.5 text-sm text-[#a9b1cc]">
+          <Clock class="size-3.5" aria-hidden="true" />
+          {{ producto.duracionDias }} días
         </p>
 
-        <!-- Indicador de Stock -->
-        <div class="mt-1 flex items-center gap-1.5 text-xs font-semibold">
-          <template v-if="isAgotado">
-            <span class="text-rose-400 font-bold">Agotado</span>
-          </template>
-          <template v-else-if="producto.stock <= 3">
-            <span class="text-amber-400 font-bold">¡Últimas {{ producto.stock }} en stock!</span>
-          </template>
-          <template v-else>
-            <span class="text-emerald-400 font-medium">En stock</span>
-          </template>
-        </div>
+        <p class="font-display mt-3 text-2xl font-extrabold tracking-tight text-white">{{ formatPrice(producto.precio) }}</p>
+        <p class="mt-1 text-sm font-semibold">
+          <span v-if="isAgotado" class="text-[#ff9fb2]">Agotado</span>
+          <span v-else-if="producto.stock <= 3" class="text-amber-300">Quedan {{ producto.stock }}</span>
+          <span v-else class="text-emerald-300">Disponible</span>
+        </p>
       </div>
 
-      <!-- Fila de Agregar al Carrito -->
-      <div class="pt-3 border-t border-white/10 flex items-center gap-2">
-        <!-- Selector de cantidad -->
-        <div v-if="!isAgotado && maxSeleccionable > 1" class="w-16">
-          <label :for="`qty-${producto.id}`" class="sr-only">Cantidad</label>
+      <div class="flex items-center gap-2 border-t border-white/10 pt-3">
+        <div v-if="!isAgotado && maxSeleccionable > 1" class="w-[4.5rem] shrink-0">
+          <label :for="`qty-${producto.id}`" class="sr-only">Cantidad de {{ producto.nombre }}</label>
           <select
             :id="`qty-${producto.id}`"
             v-model.number="cantidad"
-            class="w-full rounded-lg border border-white/15 bg-white/5 px-2 py-2 text-xs font-mono font-bold text-white hover:border-white/30 focus:border-cyan-400 focus:outline-none cursor-pointer"
+            class="h-11 w-full rounded-lg border border-white/20 bg-[#0a0d1c] px-2 text-sm font-semibold text-white hover:border-white/40"
           >
-            <option v-for="n in maxSeleccionable" :key="n" :value="n" class="bg-neutral-900 text-white">
-              {{ n }} ud
-            </option>
+            <option v-for="n in maxSeleccionable" :key="n" :value="n">{{ n }}</option>
           </select>
         </div>
 
-        <!-- Botón de compra -->
         <button
           type="button"
-          class="flex-1 py-2 px-3 rounded-lg font-black text-xs uppercase tracking-wider flex items-center justify-center gap-1.5 transition-all shadow-md cursor-pointer active:scale-95 select-none"
-          :class="
-            isAgotado
-              ? 'cursor-not-allowed bg-white/5 text-slate-500 border border-white/10'
-              : agregado
-                ? 'bg-emerald-500 text-neutral-950 font-black shadow-[0_0_20px_rgba(16,185,129,0.4)]'
-                : 'bg-gradient-to-r from-cyan-400 to-blue-500 hover:from-cyan-300 hover:to-blue-400 text-neutral-950 font-black shadow-[0_0_20px_rgba(6,182,212,0.3)]'
-          "
+          class="ss-btn min-h-11 flex-1 !px-3 text-sm"
+          :class="isAgotado ? 'border border-white/10 bg-white/5 text-[#8a93b2]' : agregado ? 'bg-emerald-400 text-[#05230f]' : 'ss-btn-primary'"
           :disabled="isAgotado || agregado"
+          :aria-label="isAgotado ? `${producto.nombre} agotado` : `Agregar ${producto.nombre} al carrito`"
           @click="onAgregar"
         >
           <template v-if="agregado">
-            <Check class="size-4 stroke-[3]" aria-hidden="true" />
-            <span>¡Agregado!</span>
+            <Check class="size-4" aria-hidden="true" />
+            Agregado
           </template>
-          <template v-else-if="isAgotado">
-            <span>Agotado</span>
-          </template>
+          <template v-else-if="isAgotado">Agotado</template>
           <template v-else>
-            <ShoppingCart class="size-3.5" aria-hidden="true" />
-            <span>Agregar</span>
+            <ShoppingCart class="size-4" aria-hidden="true" />
+            Agregar
           </template>
         </button>
       </div>
     </div>
+    <span v-if="agregado" class="sr-only" role="status">{{ producto.nombre }} se agregó al carrito.</span>
   </article>
 </template>

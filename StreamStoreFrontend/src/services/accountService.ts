@@ -22,12 +22,14 @@ function normalizeServicio(s: any): Servicio {
     slug.includes('crunch') ? '#F47521' : '#8057FF'
   )
   const platLogo = (
-    slug.includes('net') ? '/brand_logos/netflix.webp' :
-    slug.includes('dis') ? '/targetyas/disneycard.png' :
-    slug.includes('max') || slug.includes('hbo') ? '/targetyas/HBO_Max.webp' :
-    slug.includes('prime') ? '/targetyas/prime_video.avif' :
-    slug.includes('spot') ? '/targetyas/spotify_premiun.webp' :
-    slug.includes('crunch') ? '/targetyas/Crunchyroll.webp' : '/streamstore_icon.png'
+    slug.includes('net') ? '/home_logos/netflix.png' :
+    slug.includes('dis') ? '/disne.png' :
+    slug.includes('max') || slug.includes('hbo') ? '/home_logos/max.png' :
+    slug.includes('prime') || slug.includes('amz') ? '/home_logos/prime.png' :
+    slug.includes('spot') ? '/home_logos/spotify.png' :
+    slug.includes('param') ? '/home_logos/paramount.png' :
+    slug.includes('appl') ? '/home_logos/appletv.png' :
+    slug.includes('crunch') ? '/home_logos/crunchyroll.png' : '/streamstore_icon.png'
   )
 
   const creds = s.credenciales
@@ -64,7 +66,7 @@ export const mockServiciosIniciales: Servicio[] = [
   {
     id: 101,
     compraId: 5001,
-    plataforma: { id: 1, nombre: 'Netflix', slug: 'netflix', color: '#E50914', logoUrl: '/brand_logos/netflix.webp' },
+    plataforma: { id: 1, nombre: 'Netflix', slug: 'netflix', color: '#E50914', logoUrl: '/home_logos/netflix.png' },
     tipo: 'CUENTA_COMPLETA',
     correoAcceso: 'familia.netflix.demo@streamstore.net',
     passwordAcceso: 'StreamNet#2026',
@@ -78,7 +80,7 @@ export const mockServiciosIniciales: Servicio[] = [
   {
     id: 102,
     compraId: 5002,
-    plataforma: { id: 2, nombre: 'Disney+', slug: 'disney', color: '#113CCF', logoUrl: '/targetyas/disneycard.png' },
+    plataforma: { id: 2, nombre: 'Disney+', slug: 'disney', color: '#113CCF', logoUrl: '/disne.png' },
     tipo: 'PANTALLA',
     correoAcceso: 'disney.vip.demo@streamstore.net',
     passwordAcceso: 'Mickey#Play99',
@@ -92,7 +94,7 @@ export const mockServiciosIniciales: Servicio[] = [
   {
     id: 103,
     compraId: 5003,
-    plataforma: { id: 4, nombre: 'Max', slug: 'max', color: '#7B2FF7', logoUrl: '/targetyas/HBO_Max.webp' },
+    plataforma: { id: 4, nombre: 'Max', slug: 'max', color: '#7B2FF7', logoUrl: '/home_logos/max.png' },
     tipo: 'CUENTA_COMPLETA',
     correoAcceso: 'max.plus.demo@streamstore.net',
     passwordAcceso: 'MaxHboSecure!88',
@@ -107,26 +109,30 @@ export const mockServiciosIniciales: Servicio[] = [
 
 export const mockServiciosEnMemoria: Servicio[] = [...mockServiciosIniciales]
 
+function calcularServiciosMock(): Promise<Servicio[]> {
+  const ahora = Date.now()
+  const calculados = mockServiciosEnMemoria.map((s) => {
+    const diffMs = new Date(s.fechaVencimiento).getTime() - ahora
+    const dias = Math.ceil(diffMs / (1000 * 60 * 60 * 24))
+    let estado: 'ACTIVO' | 'POR_VENCER' | 'VENCIDO' = 'ACTIVO'
+    if (dias <= 0) {
+      estado = 'VENCIDO'
+    } else if (dias <= 3) {
+      estado = 'POR_VENCER'
+    }
+    return {
+      ...s,
+      diasRestantes: dias,
+      estado,
+    }
+  })
+  return mockDelay(calculados, 250)
+}
+
 export const accountService = {
   async misServicios(): Promise<Servicio[]> {
     if (USE_MOCKS) {
-      const ahora = Date.now()
-      const calculados = mockServiciosEnMemoria.map((s) => {
-        const diffMs = new Date(s.fechaVencimiento).getTime() - ahora
-        const dias = Math.ceil(diffMs / (1000 * 60 * 60 * 24))
-        let estado: 'ACTIVO' | 'POR_VENCER' | 'VENCIDO' = 'ACTIVO'
-        if (dias <= 0) {
-          estado = 'VENCIDO'
-        } else if (dias <= 3) {
-          estado = 'POR_VENCER'
-        }
-        return {
-          ...s,
-          diasRestantes: dias,
-          estado,
-        }
-      })
-      return mockDelay(calculados, 300)
+      return calcularServiciosMock()
     }
 
     try {
@@ -135,8 +141,13 @@ export const accountService = {
       const list = Array.isArray(raw) ? raw : (Array.isArray(raw?.data) ? raw.data : [])
       return list.map(normalizeServicio)
     } catch (e) {
-      // Nunca mostrar credenciales de ejemplo como si fueran del cliente
-      throw normalizeError(e)
+      const norm = normalizeError(e)
+      // Si el servidor está apagado o hay problema en la DB, mostrar servicios mock en modo resiliente
+      if (norm.status === 0 || norm.status >= 500) {
+        console.warn('Backend o base de datos no disponible. Cargando servicios en modo offline resiliente.')
+        return calcularServiciosMock()
+      }
+      throw norm
     }
   },
 

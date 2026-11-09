@@ -130,9 +130,9 @@ export const CARD_BANKS: {
   hint: string
   accent: string
 }[] = [
-  { id: 'nu', label: 'NU', hint: 'Morada', accent: '#820AD1' },
-  { id: 'bancolombia', label: 'BANCOLOMBIA', hint: 'Amarilla', accent: '#FFDD00' },
   { id: 'generica', label: 'GENÉRICA', hint: 'Auto-detecta', accent: '#00ece0' },
+  { id: 'nu', label: 'NU BANK', hint: 'Morada', accent: '#820AD1' },
+  { id: 'bancolombia', label: 'BANCOLOMBIA', hint: 'Amarilla', accent: '#FFDD00' },
   { id: 'bbva', label: 'BBVA', hint: 'Azul', accent: '#004481' },
 ]
 

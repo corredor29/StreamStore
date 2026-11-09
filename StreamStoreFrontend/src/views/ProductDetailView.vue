@@ -8,7 +8,6 @@ import {
   Clock, 
   ShieldCheck, 
   ShoppingCart, 
-  Sparkles, 
   Tv, 
   Users 
 } from '@lucide/vue'
@@ -18,6 +17,10 @@ import { productService } from '@/services/productService'
 import { formatPrice } from '@/composables/useFormat'
 import { useCartStore } from '@/stores/cart'
 import type { Producto } from '@/types'
+import { useClientFonts } from '@/composables/useClientFonts'
+import '@/styles/client-ui.css'
+
+useClientFonts()
 
 const props = defineProps<{
   id: number
@@ -41,8 +44,8 @@ const maxSeleccionable = computed(() => {
 const tipoBadge = computed(() => {
   if (!producto.value) return { label: '', icon: Tv }
   return producto.value.tipo === 'CUENTA_COMPLETA'
-    ? { label: 'Cuenta Completa', icon: Users, desc: 'Adquieres la cuenta total con todas las pantallas disponibles.' }
-    : { label: 'Pantalla Individual', icon: Tv, desc: 'Adquieres un perfil exclusivo dentro de una cuenta compartida.' }
+    ? { label: 'Cuenta completa', icon: Users, desc: 'Adquieres la cuenta total con todas las pantallas disponibles.' }
+    : { label: 'Pantalla individual', icon: Tv, desc: 'Adquieres un perfil exclusivo dentro de una cuenta compartida.' }
 })
 
 // Imagen de presentación oficial del producto
@@ -85,6 +88,9 @@ const productImage = computed(() => {
   return producto.value.plataforma?.logoUrl || '/brand_logos/streamstore_icon.png'
 })
 
+// Portadas ilustradas (subidas o de /targetyas/) llenan el marco; los logos se muestran enteros
+const isCoverArt = computed(() => !!producto.value?.plataforma?.coverUrl || productImage.value.includes('/targetyas/'))
+
 async function fetchProducto() {
   loading.value = true
   error.value = null
@@ -102,7 +108,7 @@ function onAgregar() {
   const res = cart.addItem(producto.value, cantidad.value)
   if (res.success) {
     agregado.value = true
-    feedbackMsg.value = `¡${producto.value.nombre} agregado al carrito!`
+    feedbackMsg.value = `${producto.value.nombre} se agregó al carrito.`
     setTimeout(() => {
       agregado.value = false
       feedbackMsg.value = ''
@@ -128,236 +134,145 @@ watch(
 </script>
 
 <template>
-  <div class="container-app py-8 sm:py-12">
-    <!-- Enlace de regreso al catálogo -->
-    <RouterLink
-      to="/catalogo"
-      class="mb-6 inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-slate-400 transition-colors hover:text-cyan-400"
-    >
-      <ArrowLeft class="size-4" aria-hidden="true" />
-      <span>Volver al catálogo</span>
-    </RouterLink>
-
-    <AppLoader v-if="loading" label="Cargando detalles del producto..." />
-
-    <AppAlert v-else-if="error" variant="error" title="Producto no encontrado">
-      <p>{{ error }}</p>
-      <RouterLink to="/catalogo" class="btn-secondary mt-3 inline-flex text-xs">
-        Explorar otros productos
+  <div class="ss-page bg-[#05060d]">
+    <div class="container-app py-8 sm:py-12">
+      <RouterLink to="/catalogo" class="mb-6 inline-flex min-h-10 items-center gap-2 rounded-lg text-sm font-semibold text-[#a9b1cc] hover:text-white">
+        <ArrowLeft class="size-4" aria-hidden="true" />
+        Volver al catálogo
       </RouterLink>
-    </AppAlert>
 
-    <article v-else-if="producto" class="grid grid-cols-1 gap-8 lg:grid-cols-12 items-start">
-      <!-- Columna Izquierda: Foto y Detalles (7 columnas) -->
-      <div class="lg:col-span-7 space-y-6">
-        <!-- 1. FOTO / PORTADA CINEMÁTICA DEL PRODUCTO -->
-        <div class="relative overflow-hidden rounded-2xl border border-white/10 bg-[#0E1322] shadow-2xl group">
-          <!-- Fondo difuminado ambiental para profundidad cinemática -->
-          <div
-            class="absolute inset-0 bg-cover bg-center blur-3xl opacity-25 scale-125 pointer-events-none"
-            :style="{ backgroundImage: `url(${productImage})` }"
-          />
+      <AppLoader v-if="loading" label="Cargando el plan..." />
 
-          <!-- Contenedor de la Imagen Principal -->
-          <div class="relative h-64 sm:h-80 w-full flex items-center justify-center p-6 bg-black/50">
-            <img
-              :src="productImage"
-              :alt="producto.nombre"
-              class="max-h-full max-w-full object-contain rounded-xl shadow-2xl transition-transform duration-500 group-hover:scale-105 select-none"
-            />
-
-            <!-- Gradiente inferior para transición al contenido -->
-            <div class="absolute inset-0 bg-gradient-to-t from-[#0E1322] via-transparent to-transparent pointer-events-none" />
-
-            <!-- Badges flotantes superiores sobre la foto -->
-            <div class="absolute top-4 left-4 flex flex-wrap items-center gap-2 z-10">
-              <span
-                class="inline-flex items-center gap-1.5 rounded-lg px-3 py-1 text-xs font-mono font-bold uppercase tracking-wider text-white shadow-lg backdrop-blur-md border border-white/20"
-                :style="{ backgroundColor: producto.plataforma?.color || '#06b6d4' }"
-              >
-                {{ producto.plataforma?.nombre }}
-              </span>
-
-              <span
-                v-if="isAgotado"
-                class="rounded-lg bg-rose-500/80 border border-rose-400 text-white px-2.5 py-1 text-xs font-bold uppercase backdrop-blur-md"
-              >
-                Agotado
-              </span>
-              <span
-                v-else
-                class="rounded-lg bg-emerald-950/80 border border-emerald-500/40 text-emerald-300 px-2.5 py-1 text-xs font-semibold backdrop-blur-md"
-              >
-                {{ producto.stock }} en stock
-              </span>
-            </div>
-
-            <!-- Badge de Duración -->
-            <div class="absolute top-4 right-4 z-10">
-              <span class="inline-flex items-center gap-1.5 rounded-lg bg-black/70 border border-white/20 text-white px-2.5 py-1 text-xs font-mono font-bold backdrop-blur-md">
-                <Clock class="size-3.5 text-cyan-400" />
-                <span>{{ producto.duracionDias }} días</span>
-              </span>
-            </div>
-          </div>
+      <div v-else-if="error" class="ss-empty">
+        <h1 class="ss-title ss-h2 text-white">No pudimos cargar este plan</h1>
+        <p class="max-w-md text-sm text-[#a9b1cc]">{{ error }}</p>
+        <div class="mt-1 flex flex-wrap justify-center gap-3">
+          <button type="button" class="ss-btn ss-btn-primary" @click="fetchProducto">Reintentar</button>
+          <RouterLink to="/catalogo" class="ss-btn ss-btn-secondary">Ver el catálogo</RouterLink>
         </div>
+      </div>
 
-        <!-- 2. INFORMACIÓN Y CARACTERÍSTICAS -->
-        <div class="rounded-2xl border border-white/10 bg-[#0E1322] p-6 sm:p-8 shadow-xl space-y-6">
-          <div>
-            <div class="flex items-center gap-2 mb-2">
-              <span class="rounded bg-cyan-400/10 border border-cyan-400/20 px-2 py-0.5 text-[10px] font-mono font-bold text-cyan-300 uppercase tracking-widest">
-                Suscripción Oficial
-              </span>
-              <span class="text-xs text-slate-400 font-mono">Entrega Inmediata</span>
+      <article v-else-if="producto" class="grid grid-cols-1 items-start gap-8 lg:grid-cols-12 lg:gap-10">
+        <div class="space-y-8 lg:col-span-7">
+          <!-- Portada -->
+          <div class="relative overflow-hidden rounded-2xl border border-white/12 bg-[#0a0d1c]">
+            <div class="relative aspect-[16/9] w-full">
+              <img
+                :src="productImage"
+                :alt="`Portada de ${producto.plataforma?.nombre || producto.nombre}`"
+                class="h-full w-full"
+                :class="isCoverArt ? 'object-cover' : 'object-contain p-10 sm:p-16'"
+              />
             </div>
-            <h1 class="font-display text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
-              {{ producto.nombre }}
-            </h1>
-            <p class="mt-2 text-sm leading-relaxed text-slate-300">
+            <span
+              class="absolute left-4 top-4 inline-flex items-center rounded-lg px-3 py-1 text-sm font-bold text-white shadow-lg"
+              :style="{ backgroundColor: producto.plataforma?.color || '#0891b2' }"
+            >
+              {{ producto.plataforma?.nombre }}
+            </span>
+          </div>
+
+          <div>
+            <h1 class="ss-title ss-h1 text-white">{{ producto.nombre }}</h1>
+            <p class="ss-lead mt-3">
               {{ producto.descripcion || 'Disfruta de tus series, películas y eventos favoritos con acceso garantizado y soporte directo.' }}
             </p>
           </div>
 
-          <!-- Cuadrícula de Beneficios -->
-          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5 pt-4 border-t border-white/10">
-            <div class="flex items-start gap-3 rounded-xl border border-white/10 bg-[#0B0F19] p-3.5">
-              <component :is="tipoBadge.icon" class="mt-0.5 size-5 shrink-0 text-cyan-400" aria-hidden="true" />
+          <dl class="grid grid-cols-1 gap-x-8 gap-y-5 border-t border-white/10 pt-6 sm:grid-cols-2">
+            <div class="flex gap-3">
+              <component :is="tipoBadge.icon" class="mt-0.5 size-5 shrink-0 text-[#2dd4ef]" aria-hidden="true" />
               <div>
-                <h4 class="text-xs font-bold uppercase text-white">{{ tipoBadge.label }}</h4>
-                <p class="text-xs text-slate-400 mt-0.5">{{ tipoBadge.desc }}</p>
+                <dt class="text-sm font-bold text-white">{{ tipoBadge.label }}</dt>
+                <dd class="mt-0.5 text-sm text-[#a9b1cc]">{{ tipoBadge.desc }}</dd>
               </div>
             </div>
-
-            <div class="flex items-start gap-3 rounded-xl border border-white/10 bg-[#0B0F19] p-3.5">
-              <Clock class="mt-0.5 size-5 shrink-0 text-cyan-400" aria-hidden="true" />
+            <div class="flex gap-3">
+              <Clock class="mt-0.5 size-5 shrink-0 text-[#2dd4ef]" aria-hidden="true" />
               <div>
-                <h4 class="text-xs font-bold uppercase text-white">Duración del plan</h4>
-                <p class="text-xs text-slate-400 mt-0.5">{{ producto.duracionDias }} días continuos de servicio garantizado.</p>
+                <dt class="text-sm font-bold text-white">Duración</dt>
+                <dd class="mt-0.5 text-sm text-[#a9b1cc]">{{ producto.duracionDias }} días continuos de servicio.</dd>
               </div>
             </div>
-
-            <div class="flex items-start gap-3 rounded-xl border border-white/10 bg-[#0B0F19] p-3.5">
-              <ShieldCheck class="mt-0.5 size-5 shrink-0 text-emerald-400" aria-hidden="true" />
+            <div class="flex gap-3">
+              <ShieldCheck class="mt-0.5 size-5 shrink-0 text-emerald-300" aria-hidden="true" />
               <div>
-                <h4 class="text-xs font-bold uppercase text-white">Garantía completa</h4>
-                <p class="text-xs text-slate-400 mt-0.5">Soporte y reemplazo inmediato durante todo el período contratado.</p>
+                <dt class="text-sm font-bold text-white">Garantía</dt>
+                <dd class="mt-0.5 text-sm text-[#a9b1cc]">Soporte y reemplazo durante todo el periodo contratado.</dd>
               </div>
             </div>
-
-            <div class="flex items-start gap-3 rounded-xl border border-white/10 bg-[#0B0F19] p-3.5">
-              <CheckCircle2 class="mt-0.5 size-5 shrink-0 text-emerald-400" aria-hidden="true" />
+            <div class="flex gap-3">
+              <CheckCircle2 class="mt-0.5 size-5 shrink-0 text-emerald-300" aria-hidden="true" />
               <div>
-                <h4 class="text-xs font-bold uppercase text-white">Entrega automática</h4>
-                <p class="text-xs text-slate-400 mt-0.5">Credenciales y PINes visibles en tu panel una vez acreditado el pago.</p>
+                <dt class="text-sm font-bold text-white">Entrega</dt>
+                <dd class="mt-0.5 text-sm text-[#a9b1cc]">Las credenciales aparecen en Mi cuenta cuando se aprueba el pago.</dd>
               </div>
             </div>
-          </div>
+          </dl>
         </div>
-      </div>
 
-      <!-- Columna Derecha: Caja de Compra Flotante (5 columnas) -->
-      <div class="lg:col-span-5">
-        <div class="rounded-2xl border border-white/10 bg-[#0E1322] sticky top-24 p-6 sm:p-7 shadow-2xl space-y-5">
-          <!-- Mini preview visual con la foto del producto -->
-          <div class="flex items-center gap-3.5 pb-4 border-b border-white/10">
-            <div class="size-14 rounded-xl overflow-hidden bg-black/60 border border-white/10 shrink-0 p-1.5 flex items-center justify-center">
-              <img :src="productImage" :alt="producto.nombre" class="max-h-full max-w-full object-contain" />
-            </div>
-            <div class="truncate flex-1">
-              <span class="text-[10px] font-mono text-cyan-400 uppercase font-bold block">
-                {{ producto.plataforma?.nombre }}
-              </span>
-              <h3 class="text-xs sm:text-sm font-bold text-white truncate">
-                {{ producto.nombre }}
-              </h3>
-            </div>
-          </div>
-
-          <!-- Resumen de Precio -->
-          <div>
-            <span class="text-xs font-semibold uppercase tracking-wider text-slate-400 block">
-              Resumen de precio
-            </span>
-            <div class="mt-1.5 flex items-baseline gap-2">
-              <span class="font-display text-3xl sm:text-4xl font-extrabold text-white tracking-tight">
-                {{ formatPrice(producto.precio) }}
-              </span>
-              <span class="text-xs text-slate-400 font-mono">/ {{ producto.duracionDias }} días</span>
-            </div>
-          </div>
-
-          <!-- Cantidad y Botón de Agregar al Carrito -->
-          <div class="space-y-4 pt-2">
+        <!-- Caja de compra -->
+        <aside class="lg:col-span-5 lg:sticky lg:top-24" aria-label="Comprar este plan">
+          <div class="ss-panel space-y-5 p-6 sm:p-7">
             <div>
-              <label :for="`product-detail-qty-${producto.id}`" class="text-xs font-semibold text-slate-300 block mb-1.5">
-                Cantidad a comprar
-              </label>
-              <div class="flex items-center gap-3">
+              <p class="text-sm font-semibold text-[#a9b1cc]">Precio por {{ producto.duracionDias }} días</p>
+              <p class="font-display mt-1 text-4xl font-extrabold tracking-tight text-white">{{ formatPrice(producto.precio) }}</p>
+              <p class="mt-2 text-sm font-semibold">
+                <span v-if="isAgotado" class="text-[#ff9fb2]">Agotado por ahora</span>
+                <span v-else-if="producto.stock <= 3" class="text-amber-300">Quedan {{ producto.stock }} disponibles</span>
+                <span v-else class="text-emerald-300">{{ producto.stock }} disponibles</span>
+              </p>
+            </div>
+
+            <div class="ss-field">
+              <label :for="`product-detail-qty-${producto.id}`" class="ss-label">Cantidad</label>
+              <div class="flex flex-col gap-3 min-[420px]:flex-row">
                 <select
                   :id="`product-detail-qty-${producto.id}`"
                   v-model.number="cantidad"
                   :disabled="isAgotado"
-                  class="rounded-xl border border-white/10 bg-[#0B0F19] px-4 py-2.5 text-xs font-bold text-white focus:border-cyan-400 focus:outline-none cursor-pointer w-24 text-center"
+                  class="ss-input min-[420px]:!w-24"
                 >
-                  <option v-for="n in maxSeleccionable" :key="n" :value="n">
-                    {{ n }}
-                  </option>
+                  <option v-for="n in maxSeleccionable" :key="n" :value="n">{{ n }}</option>
                 </select>
-
                 <button
                   type="button"
-                  class="flex-1 py-3 px-5 rounded-xl text-xs font-bold uppercase tracking-wider inline-flex items-center justify-center gap-2 transition-all cursor-pointer shadow-lg"
-                  :class="[
-                    isAgotado
-                      ? 'cursor-not-allowed bg-slate-800 text-slate-500 border border-white/5'
-                      : agregado
-                        ? 'bg-emerald-500 hover:bg-emerald-600 text-black shadow-emerald-500/25'
-                        : 'btn-primary shadow-cyan-500/25'
-                  ]"
+                  class="ss-btn flex-1"
+                  :class="isAgotado ? 'border border-white/10 bg-white/5 text-[#8a93b2]' : agregado ? 'bg-emerald-400 text-[#05230f]' : 'ss-btn-primary'"
                   :disabled="isAgotado"
                   @click="onAgregar"
                 >
                   <template v-if="agregado">
                     <Check class="size-4" aria-hidden="true" />
-                    <span>¡Agregado al carrito!</span>
+                    Agregado al carrito
                   </template>
-                  <template v-else-if="isAgotado">
-                    <span>Producto Agotado</span>
-                  </template>
+                  <template v-else-if="isAgotado">Agotado</template>
                   <template v-else>
                     <ShoppingCart class="size-4" aria-hidden="true" />
-                    <span>Agregar al carrito</span>
+                    Agregar al carrito
                   </template>
                 </button>
               </div>
             </div>
 
-            <!-- Feedback temporal -->
             <div
               v-if="feedbackMsg"
               role="status"
               aria-live="polite"
-              class="rounded-lg p-2.5 text-center text-xs font-semibold animate-fade-in"
-              :class="agregado ? 'bg-emerald-500/10 text-emerald-300 border border-emerald-500/20' : 'bg-rose-500/10 text-rose-300 border border-rose-500/20'"
+              class="flex flex-wrap items-center justify-between gap-2 rounded-xl border px-4 py-3 text-sm font-semibold"
+              :class="agregado ? 'border-emerald-400/30 bg-emerald-400/10 text-emerald-200' : 'border-[#ff7a93]/30 bg-[#ff7a93]/10 text-[#ffc2ce]'"
             >
-              {{ feedbackMsg }}
+              <span>{{ feedbackMsg }}</span>
+              <RouterLink v-if="agregado" to="/carrito" class="ss-link">Ver carrito</RouterLink>
             </div>
 
-            <!-- Políticas / Notas de compra -->
-            <div class="rounded-xl border border-white/10 bg-[#0B0F19] p-3.5 text-xs text-slate-400 space-y-2">
-              <p class="flex items-start gap-1.5">
-                <span class="text-cyan-400 shrink-0">📌</span>
-                <span><strong>Regla de compra:</strong> Las credenciales y PINes se revelan inmediatamente en tu panel tras aprobarse el pago.</span>
-              </p>
-              <p class="flex items-start gap-1.5">
-                <span class="text-amber-400 shrink-0">⚡</span>
-                <span><strong>Inventario en vivo:</strong> El stock definitivo se valida y bloquea en tiempo real durante el checkout.</span>
-              </p>
-            </div>
+            <ul class="space-y-2 border-t border-white/10 pt-4 text-sm text-[#a9b1cc]">
+              <li>Las credenciales y PIN se muestran en tu cuenta tras aprobarse el pago.</li>
+              <li>El stock se confirma al pagar; si se agota antes, te avisamos en el checkout.</li>
+            </ul>
           </div>
-        </div>
-      </div>
-    </article>
+        </aside>
+      </article>
+    </div>
   </div>
 </template>

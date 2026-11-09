@@ -1,0 +1,236 @@
+/*
+ * Sistema visual de las pantallas públicas y del cliente (catálogo, detalle, carrito,
+ * checkout, cuenta, acceso y 404).
+ *
+ * Todas las reglas cuelgan de clases con prefijo `ss-`, que solo usan esas vistas.
+ * Así el inicio y la administración no cambian aunque este archivo se cargue.
+ */
+
+.ss-page {
+  --ss-base: #05060d;
+  --ss-surface: #10142a;
+  --ss-surface-2: #171c38;
+  --ss-line: rgba(255, 255, 255, 0.12);
+  --ss-line-strong: rgba(255, 255, 255, 0.24);
+  --ss-text: #f5f7ff;
+  --ss-muted: #a9b1cc;
+  --ss-action: #8b6cff;
+  --ss-action-hover: #9d83ff;
+  --ss-focus: #2dd4ef;
+  --ss-error: #ff7a93;
+  --ss-success: #4ade80;
+
+  font-family: 'Manrope', var(--font-sans);
+  color: var(--ss-text);
+}
+
+.ss-page .font-display,
+.ss-page .ss-title {
+  font-family: 'Sora', var(--font-display);
+  letter-spacing: -0.02em;
+}
+
+/* Títulos de página y de sección */
+.ss-title {
+  font-weight: 700;
+  line-height: 1.1;
+  text-wrap: balance;
+}
+.ss-h1 {
+  font-size: clamp(1.75rem, 1.3rem + 2vw, 2.75rem);
+}
+.ss-h2 {
+  font-size: clamp(1.25rem, 1.1rem + 0.8vw, 1.6rem);
+}
+.ss-lead {
+  color: var(--ss-muted);
+  font-size: 0.95rem;
+  line-height: 1.6;
+  max-width: 62ch;
+}
+
+/* Superficies */
+.ss-panel {
+  background: var(--ss-surface);
+  border: 1px solid var(--ss-line);
+  border-radius: 1.25rem;
+}
+
+/* Formularios */
+.ss-field {
+  display: grid;
+  gap: 0.4rem;
+}
+.ss-label {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--ss-text);
+}
+.ss-control {
+  position: relative;
+}
+.ss-input {
+  width: 100%;
+  min-height: 3rem;
+  border-radius: 0.75rem;
+  border: 1px solid var(--ss-line-strong);
+  background: #0a0d1c;
+  color: var(--ss-text);
+  padding: 0.75rem 1rem;
+  font-size: 1rem;
+  transition: border-color 150ms ease, box-shadow 150ms ease;
+}
+.ss-input.has-icon {
+  padding-left: 2.75rem;
+}
+.ss-input.has-action {
+  padding-right: 3rem;
+}
+.ss-input::placeholder {
+  color: #6f7896;
+}
+.ss-input:hover {
+  border-color: rgba(255, 255, 255, 0.36);
+}
+.ss-input:focus {
+  outline: none;
+  border-color: var(--ss-focus);
+  box-shadow: 0 0 0 3px rgba(45, 212, 239, 0.28);
+}
+.ss-input[aria-invalid='true'] {
+  border-color: var(--ss-error);
+}
+.ss-input[aria-invalid='true']:focus {
+  box-shadow: 0 0 0 3px rgba(255, 122, 147, 0.28);
+}
+.ss-input-icon {
+  position: absolute;
+  left: 0.95rem;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 1.1rem;
+  height: 1.1rem;
+  color: var(--ss-muted);
+  pointer-events: none;
+}
+.ss-input-action {
+  position: absolute;
+  right: 0.35rem;
+  top: 50%;
+  transform: translateY(-50%);
+  display: inline-grid;
+  place-items: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 0.6rem;
+  color: var(--ss-muted);
+}
+.ss-input-action:hover {
+  color: var(--ss-text);
+  background: rgba(255, 255, 255, 0.06);
+}
+.ss-help {
+  font-size: 0.8rem;
+  color: var(--ss-muted);
+}
+.ss-error {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--ss-error);
+}
+
+/* Botones */
+.ss-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  min-height: 2.875rem;
+  padding: 0.7rem 1.4rem;
+  border-radius: 0.8rem;
+  font-weight: 700;
+  font-size: 0.95rem;
+  line-height: 1.2;
+  text-align: center;
+  transition: background-color 150ms ease, border-color 150ms ease, color 150ms ease;
+  cursor: pointer;
+}
+.ss-btn:disabled,
+.ss-btn[aria-disabled='true'] {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+.ss-btn-primary {
+  background: var(--ss-action);
+  color: #fff;
+}
+.ss-btn-primary:hover:not(:disabled) {
+  background: var(--ss-action-hover);
+}
+.ss-btn-secondary {
+  background: transparent;
+  color: var(--ss-text);
+  border: 1px solid var(--ss-line-strong);
+}
+.ss-btn-secondary:hover:not(:disabled) {
+  border-color: rgba(255, 255, 255, 0.5);
+  background: rgba(255, 255, 255, 0.05);
+}
+.ss-btn-block {
+  width: 100%;
+}
+.ss-link {
+  color: var(--ss-focus);
+  font-weight: 700;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.ss-link:hover {
+  color: #7ee8f8;
+}
+
+.ss-page :where(a, button, input, select, textarea, [tabindex]):focus-visible {
+  outline: 2px solid var(--ss-focus);
+  outline-offset: 2px;
+}
+
+/* Spinner de carga */
+.ss-spinner {
+  width: 1rem;
+  height: 1rem;
+  border-radius: 9999px;
+  border: 2px solid currentColor;
+  border-top-color: transparent;
+  animation: ss-spin 0.8s linear infinite;
+}
+@keyframes ss-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Estado vacío reutilizable */
+.ss-empty {
+  display: grid;
+  justify-items: center;
+  gap: 0.75rem;
+  text-align: center;
+  padding: 3rem 1.5rem;
+  border: 1px dashed var(--ss-line-strong);
+  border-radius: 1.25rem;
+  background: rgba(16, 20, 42, 0.6);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ss-page *,
+  .ss-page *::before,
+  .ss-page *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+  .ss-spinner {
+    animation: ss-spin 1.6s linear infinite !important;
+  }
+}

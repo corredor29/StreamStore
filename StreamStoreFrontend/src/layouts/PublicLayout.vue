@@ -16,16 +16,27 @@ const isAuthPage = computed(() => {
     route.path === '/registro'
   )
 })
+
+const isNotFoundPage = computed(() => {
+  return (
+    route.name === 'not-found' ||
+    route.matched.some((r) => r.name === 'not-found')
+  )
+})
+
+const isStandalonePage = computed(() => {
+  return isAuthPage.value || isNotFoundPage.value
+})
 </script>
 
 <template>
   <div class="flex min-h-dvh flex-col bg-black text-fg">
     <SkipLink />
-    <AppHeader v-if="route.path !== '/' && !isAuthPage" />
+    <AppHeader v-if="route.path !== '/' && !isStandalonePage" />
     <main id="main" tabindex="-1" class="flex-1 outline-none">
       <RouterView />
     </main>
-    <AppFooter v-if="!isAuthPage" />
-    <WhatsAppButton v-if="!isAuthPage" />
+    <AppFooter v-if="!isStandalonePage" />
+    <WhatsAppButton v-if="!isStandalonePage" />
   </div>
 </template>

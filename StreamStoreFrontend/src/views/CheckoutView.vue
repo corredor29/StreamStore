@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
 import { RouterLink } from 'vue-router'
-import { ArrowLeft, CheckCircle2, ShieldCheck, ShoppingBag, Sparkles, Tv } from '@lucide/vue'
+import { ArrowLeft, CheckCircle2, ShieldCheck, ShoppingBag, Tv } from '@lucide/vue'
 import { useCartStore } from '@/stores/cart'
 import { useAuthStore } from '@/stores/auth'
 import { formatPrice } from '@/composables/useFormat'
@@ -10,6 +10,10 @@ import { purchaseService } from '@/services/purchaseService'
 import type { Compra, MetodoPago, PagoPayload, PagoResultado } from '@/types'
 import PaymentForm from '@/components/checkout/PaymentForm.vue'
 import AppAlert from '@/components/common/AppAlert.vue'
+import { useClientFonts } from '@/composables/useClientFonts'
+import '@/styles/client-ui.css'
+
+useClientFonts()
 
 const cart = useCartStore()
 const auth = useAuthStore()
@@ -70,236 +74,147 @@ async function onProcessPayment(payload: { metodo: MetodoPago; marca?: any; ulti
 </script>
 
 <template>
-  <div class="container-app py-8 sm:py-12">
-    <!-- ================= PANTALLA DE COMPRA EXITOSA ================= -->
-    <div
-      v-if="resultadoCompra"
-      class="card mx-auto max-w-xl p-8 sm:p-10 text-center relative overflow-hidden border-success/30 shadow-[0_0_50px_rgba(52,211,153,0.15)]"
-    >
-      <div class="absolute -right-16 -top-16 size-48 rounded-full bg-success/10 blur-3xl pointer-events-none" />
-
-      <div class="mx-auto grid size-20 place-items-center rounded-3xl bg-success/20 text-success border border-success/30 shadow-inner">
-        <CheckCircle2 class="size-11" aria-hidden="true" />
-      </div>
-
-      <span class="mt-5 inline-block text-[11px] font-mono uppercase tracking-[0.25em] text-success font-bold">
-        Transacción Exitosa
-      </span>
-
-      <h1 class="mt-1 font-display text-2xl font-black text-fg sm:text-3xl tracking-tight">
-        ¡Pago Aprobado y Activado!
-      </h1>
-      <p class="mt-2 text-sm text-muted">
-        Tu orden <strong class="text-cyan-300 font-mono">#{{ resultadoCompra.id }}</strong> ha sido confirmada en tiempo real. Tus pantallas y credenciales ya están generadas.
-      </p>
-
-      <div class="my-6 rounded-2xl border border-line bg-surface-2/60 p-5 text-left text-xs space-y-3 shadow-inner">
-        <div class="flex justify-between items-center pb-2 border-b border-line/60">
-          <span class="text-muted">Total abonado:</span>
-          <span class="font-mono font-bold text-fg text-base text-cyan-300">{{ formatPrice(resultadoCompra.total) }}</span>
+  <div class="ss-page bg-[#05060d]">
+    <div class="container-app py-8 sm:py-12">
+      <!-- Compra confirmada -->
+      <section v-if="resultadoCompra" class="ss-panel mx-auto max-w-xl p-8 text-center sm:p-10" aria-labelledby="titulo-compra-ok">
+        <div class="mx-auto grid size-16 place-items-center rounded-2xl bg-emerald-400/15 text-emerald-300">
+          <CheckCircle2 class="size-9" aria-hidden="true" />
         </div>
-        <div class="flex justify-between items-center pb-2 border-b border-line/60">
-          <span class="text-muted">Cliente:</span>
-          <span class="font-semibold text-fg">{{ auth.usuario?.nombre }}</span>
-        </div>
-        <div class="flex justify-between items-center">
-          <span class="text-muted">Estado del servicio:</span>
-          <span class="font-mono font-bold text-success uppercase flex items-center gap-1.5">
-            <span class="size-2 rounded-full bg-success animate-ping" />
-            ACTIVO INMEDIATO
-          </span>
-        </div>
-      </div>
-
-      <div class="flex flex-col sm:flex-row gap-3 justify-center pt-2">
-        <RouterLink to="/mi-cuenta" class="btn-primary py-3.5 px-6 shadow-lg shadow-brand-500/25">
-          <Tv class="size-4" />
-          <span>Ver Mis Servicios y Credenciales</span>
-        </RouterLink>
-        <RouterLink to="/catalogo" class="btn-secondary py-3.5 px-6">
-          Volver a la tienda
-        </RouterLink>
-      </div>
-    </div>
-
-    <!-- ================= PANTALLA PRINCIPAL DE CHECKOUT ================= -->
-    <div v-else class="space-y-8">
-      <!-- BREADCRUMB / STEPPER SUPERIOR -->
-      <nav aria-label="Progreso de compra" class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-line pb-6">
-        <div>
-          <RouterLink
-            to="/carrito"
-            class="inline-flex items-center gap-2 text-xs font-mono uppercase tracking-wider text-muted hover:text-cyan-300 transition-colors"
-          >
-            <ArrowLeft class="size-3.5" aria-hidden="true" />
-            <span>Volver al carrito</span>
-          </RouterLink>
-          <h1 class="mt-2 font-display text-2xl sm:text-4xl font-black uppercase tracking-tight text-fg">
-            Finalizar Suscripción
-          </h1>
-          <p class="mt-1 text-xs text-muted">
-            Sesión activa: <strong class="text-fg">{{ auth.usuario?.nombre }}</strong> ({{ auth.usuario?.email }})
-          </p>
-        </div>
-
-        <!-- Stepper visual estilo Cyberpunk -->
-        <div class="flex items-center gap-2 text-[11px] font-mono uppercase tracking-wider">
-          <span class="text-muted/60">01 Carrito</span>
-          <span class="text-muted/40">/</span>
-          <span class="text-cyan-300 font-bold px-2 py-1 rounded bg-cyan-950/40 border border-cyan-500/30">
-            02 Pasarela & Pago
-          </span>
-          <span class="text-muted/40">/</span>
-          <span class="text-muted/60">03 Activación</span>
-        </div>
-      </nav>
-
-      <!-- Alertas de Error o Rechazo -->
-      <AppAlert
-        v-if="pagoRechazadoMsg"
-        variant="error"
-        title="Pago Rechazado por el Emisor Simulado"
-      >
-        <p>{{ pagoRechazadoMsg }}</p>
-        <p class="mt-1 text-xs text-muted">
-          Tip: Haz clic en cualquiera de los botones de tarjeta aprobada (ej. Visa, Nu o Bancolombia) para simular una aprobación exitosa.
+        <h1 id="titulo-compra-ok" class="ss-title ss-h1 mt-5 text-white">Pago aprobado</h1>
+        <p class="ss-lead mx-auto mt-2">
+          Tu pedido #{{ resultadoCompra.id }} está confirmado. Las credenciales ya están en Mi cuenta.
         </p>
-      </AppAlert>
 
-      <AppAlert
-        v-if="orderError"
-        variant="error"
-        title="Error al procesar la orden"
-      >
-        <p>{{ orderError }}</p>
-      </AppAlert>
-
-      <!-- Estado Carrito Vacío -->
-      <div v-if="items.length === 0" class="card p-12 text-center max-w-md mx-auto">
-        <ShoppingBag class="size-12 mx-auto text-muted" aria-hidden="true" />
-        <h2 class="mt-4 font-display text-lg font-bold text-fg">No hay productos en el carrito</h2>
-        <p class="mt-1 text-xs text-muted">Agrega pantallas o cuentas de streaming para continuar.</p>
-        <RouterLink to="/catalogo" class="btn-primary mt-6">
-          Explorar catálogo
-        </RouterLink>
-      </div>
-
-      <!-- Cuadrícula Principal de Checkout -->
-      <div v-else class="grid grid-cols-1 gap-8 lg:grid-cols-12 items-start">
-        <!-- Columna Izquierda: Terminal y Formulario Estilo Screenshots (7 columnas) -->
-        <div class="lg:col-span-7">
-          <div class="card p-5 sm:p-7 bg-[#10152A] border border-gray-800/80 shadow-2xl">
-            <PaymentForm
-              :metodo="metodoSeleccionado"
-              :payment-card="paymentCard"
-              :is-processing="isProcessing"
-              :total-price="total"
-              @update:metodo="(m) => (metodoSeleccionado = m)"
-              @submit-payment="onProcessPayment"
-            />
+        <dl class="my-7 space-y-3 rounded-xl border border-white/10 p-5 text-left text-sm">
+          <div class="flex justify-between gap-4">
+            <dt class="text-[#a9b1cc]">Total pagado</dt>
+            <dd class="font-bold text-white">{{ formatPrice(resultadoCompra.total) }}</dd>
           </div>
+          <div class="flex justify-between gap-4">
+            <dt class="text-[#a9b1cc]">Cliente</dt>
+            <dd class="truncate font-semibold text-white">{{ auth.usuario?.nombre }}</dd>
+          </div>
+          <div class="flex justify-between gap-4">
+            <dt class="text-[#a9b1cc]">Estado</dt>
+            <dd class="font-semibold text-emerald-300">Activo</dd>
+          </div>
+        </dl>
+
+        <div class="flex flex-col justify-center gap-3 sm:flex-row">
+          <RouterLink to="/mi-cuenta" class="ss-btn ss-btn-primary">
+            <Tv class="size-4" aria-hidden="true" />
+            Ver mis servicios
+          </RouterLink>
+          <RouterLink to="/catalogo" class="ss-btn ss-btn-secondary">Seguir comprando</RouterLink>
+        </div>
+      </section>
+
+      <div v-else class="space-y-8">
+        <header class="flex flex-col gap-5 border-b border-white/10 pb-6 md:flex-row md:items-end md:justify-between">
+          <div>
+            <RouterLink to="/carrito" class="inline-flex min-h-10 items-center gap-2 rounded-lg text-sm font-semibold text-[#a9b1cc] hover:text-white">
+              <ArrowLeft class="size-4" aria-hidden="true" />
+              Volver al carrito
+            </RouterLink>
+            <h1 class="ss-title ss-h1 mt-1 text-white">Pago</h1>
+            <p class="mt-1 text-sm text-[#a9b1cc]">
+              Compras como <strong class="text-white">{{ auth.usuario?.nombre }}</strong> ({{ auth.usuario?.email }})
+            </p>
+          </div>
+
+          <!-- Pasos reales del proceso de compra -->
+          <ol class="flex flex-wrap items-center gap-x-2 gap-y-1 text-sm" aria-label="Progreso de compra">
+            <li class="text-[#a9b1cc]">1. Carrito</li>
+            <li class="text-[#5d6688]" aria-hidden="true">/</li>
+            <li class="rounded-md bg-[#8b6cff]/20 px-2 py-0.5 font-bold text-white" aria-current="step">2. Pago</li>
+            <li class="text-[#5d6688]" aria-hidden="true">/</li>
+            <li class="text-[#a9b1cc]">3. Activación</li>
+          </ol>
+        </header>
+
+        <AppAlert v-if="pagoRechazadoMsg" variant="error" title="El pago fue rechazado">
+          <p>{{ pagoRechazadoMsg }}</p>
+          <p class="mt-1 text-sm text-[#c9cfe4]">Revisa los datos o prueba con otro medio de pago. No se hizo ningún cobro.</p>
+        </AppAlert>
+
+        <AppAlert v-if="orderError" variant="error" title="No se pudo procesar el pedido">
+          <p>{{ orderError }}</p>
+        </AppAlert>
+
+        <div v-if="items.length === 0" class="ss-empty mx-auto max-w-md">
+          <ShoppingBag class="size-10 text-[#a9b1cc]" aria-hidden="true" />
+          <h2 class="ss-title ss-h2 text-white">No hay nada que pagar</h2>
+          <p class="text-sm text-[#a9b1cc]">Tu carrito está vacío. Agrega un plan para continuar.</p>
+          <RouterLink to="/catalogo" class="ss-btn ss-btn-primary mt-1">Ver el catálogo</RouterLink>
         </div>
 
-        <!-- Columna Derecha: Pre-Factura Digital Streaming (5 columnas) -->
-        <div class="lg:col-span-5 sticky top-24">
-          <aside
-            aria-label="Pre-factura digital"
-            class="relative overflow-hidden rounded-2xl border border-line bg-surface shadow-2xl"
-          >
-            <!-- Acento Holográfico Superior -->
-            <div class="h-2 w-full bg-gradient-to-r from-brand-500 via-cyan-400 to-emerald-400" />
+        <div v-else class="grid grid-cols-1 items-start gap-8 lg:grid-cols-12">
+          <div class="min-w-0 lg:col-span-7">
+            <div class="ss-panel p-5 sm:p-7">
+              <PaymentForm
+                :metodo="metodoSeleccionado"
+                :payment-card="paymentCard"
+                :is-processing="isProcessing"
+                :total-price="total"
+                @update:metodo="(m) => (metodoSeleccionado = m)"
+                @submit-payment="onProcessPayment"
+              />
+            </div>
+          </div>
 
-            <div class="p-6">
-              <!-- Encabezado de la Pre-factura (Stitch Board 4) -->
-              <div class="flex items-start justify-between border-b border-line/80 pb-4">
-                <div>
-                  <div class="flex items-center gap-1.5">
-                    <Sparkles class="size-3.5 text-cyan-400" />
-                    <span class="text-[10px] font-mono uppercase tracking-[0.25em] text-cyan-400 font-bold">
-                      Pre-Factura Digital
-                    </span>
-                  </div>
-                  <h3 class="font-display text-lg font-black tracking-tight text-fg mt-0.5">
-                    Resumen de Compra
-                  </h3>
-                  <span class="text-[9px] font-mono text-muted/70 block mt-0.5">
-                    StreamStore S.A.S. · NIT 901.234.567-8 · Bogotá
-                  </span>
-                </div>
-
-                <div class="text-right">
-                  <span class="block text-[9px] font-mono uppercase text-muted">Referencia</span>
-                  <span class="font-mono text-xs font-bold text-fg">{{ refFactura }}</span>
-                  <span class="block text-[10px] font-mono text-muted mt-0.5">{{ fechaFactura }}</span>
-                </div>
-              </div>
-
-              <!-- Lista de Ítems del Pedido -->
-              <div class="divide-y divide-line/40 my-4 max-h-72 overflow-y-auto pr-1">
-                <div
-                  v-for="item in items"
-                  :key="item.id"
-                  class="py-3 flex items-start justify-between text-xs gap-3"
-                >
-                  <div class="min-w-0 flex-1">
-                    <p class="font-bold text-fg truncate text-sm">
-                      {{ item.producto.nombre }}
-                    </p>
-                    <div class="flex items-center gap-2 mt-1 text-[11px] text-muted">
-                      <span class="px-1.5 py-0.5 rounded bg-surface-2 border border-line font-mono text-[10px]">
-                        {{ item.producto.tipo === 'CUENTA_COMPLETA' ? 'Cuenta Completa' : '1 Pantalla' }}
-                      </span>
-                      <span>{{ item.cantidad }}x · {{ item.producto.duracionDias }} días</span>
-                    </div>
-                  </div>
-
-                  <span class="font-mono font-bold text-cyan-300 shrink-0 text-sm">
-                    {{ formatPrice(item.subtotal) }}
-                  </span>
-                </div>
-              </div>
-
-              <!-- Desglose de Precios (Línea punteada de ticket) -->
-              <div class="space-y-2 border-t-2 border-dashed border-line pt-4 text-xs">
-                <div class="flex justify-between text-muted">
-                  <span>Subtotal ({{ count }} productos):</span>
-                  <span class="font-mono text-fg font-semibold">{{ formatPrice(total) }}</span>
-                </div>
-                <div class="flex justify-between text-muted">
-                  <span>Impuestos (IVA 0% - Digital):</span>
-                  <span class="font-mono text-fg font-semibold">$0 COP</span>
-                </div>
-                <div class="flex justify-between text-muted items-center">
-                  <span>Entrega de credenciales:</span>
-                  <span class="font-semibold text-success flex items-center gap-1.5 font-mono text-[11px]">
-                    <span class="size-1.5 rounded-full bg-success animate-ping" />
-                    Inmediata (en 5s)
-                  </span>
-                </div>
-              </div>
-
-              <!-- Total a Pagar -->
-              <div class="my-5 flex items-baseline justify-between border-t border-line/80 pt-4">
-                <div>
-                  <span class="block font-display text-sm font-bold uppercase tracking-wider text-fg">
-                    Total a Pagar
-                  </span>
-                  <span class="text-[10px] text-muted font-mono">Pesos Colombianos (COP)</span>
-                </div>
-                <span class="font-display text-3xl font-black text-fg tracking-tight text-white drop-shadow">
-                  {{ formatPrice(total) }}
-                </span>
-              </div>
-
-              <!-- Garantías del Servicio -->
-              <div class="space-y-2">
-                <div class="rounded-xl border border-emerald-500/20 bg-emerald-950/20 p-3 text-[11px] text-emerald-200/90 flex items-start gap-2.5">
-                  <ShieldCheck class="size-4 shrink-0 text-emerald-400 mt-0.5" aria-hidden="true" />
+          <aside aria-label="Resumen del pedido" class="min-w-0 lg:col-span-5 lg:sticky lg:top-24">
+            <div class="ss-panel overflow-hidden">
+              <div class="h-1.5 bg-gradient-to-r from-[#8b6cff] to-[#2dd4ef]" aria-hidden="true" />
+              <div class="p-6">
+                <div class="flex items-start justify-between gap-4 border-b border-white/10 pb-4">
                   <div>
-                    <strong class="font-semibold text-emerald-300">Garantía StreamStore:</strong>
-                    Recibirás correo, clave y PIN asignado de forma instantánea en tu panel de cliente al aprobar la transacción.
+                    <h2 class="ss-title ss-h2 text-white">Tu pedido</h2>
+                    <p class="mt-1 text-xs text-[#8a93b2]">StreamStore S.A.S. · NIT 901.234.567-8 · Bogotá</p>
+                  </div>
+                  <div class="shrink-0 text-right text-xs text-[#a9b1cc]">
+                    <p>Referencia</p>
+                    <p class="font-bold text-white">{{ refFactura }}</p>
+                    <p class="mt-0.5">{{ fechaFactura }}</p>
                   </div>
                 </div>
+
+                <ul class="my-4 max-h-72 divide-y divide-white/10 overflow-y-auto pr-1">
+                  <li v-for="item in items" :key="item.id" class="flex items-start justify-between gap-3 py-3">
+                    <div class="min-w-0">
+                      <p class="text-sm font-bold leading-snug text-white">{{ item.producto.nombre }}</p>
+                      <p class="mt-0.5 text-xs text-[#a9b1cc]">
+                        {{ item.producto.tipo === 'CUENTA_COMPLETA' ? 'Cuenta completa' : 'Pantalla con PIN' }} · {{ item.cantidad }} × {{ item.producto.duracionDias }} días
+                      </p>
+                    </div>
+                    <span class="shrink-0 text-sm font-bold text-white">{{ formatPrice(item.subtotal) }}</span>
+                  </li>
+                </ul>
+
+                <dl class="space-y-2 border-t border-dashed border-white/20 pt-4 text-sm">
+                  <div class="flex justify-between gap-4">
+                    <dt class="text-[#a9b1cc]">Subtotal ({{ count }} {{ count === 1 ? 'unidad' : 'unidades' }})</dt>
+                    <dd class="font-semibold text-white">{{ formatPrice(total) }}</dd>
+                  </div>
+                  <div class="flex justify-between gap-4">
+                    <dt class="text-[#a9b1cc]">IVA (servicio digital)</dt>
+                    <dd class="font-semibold text-white">$0</dd>
+                  </div>
+                  <div class="flex justify-between gap-4">
+                    <dt class="text-[#a9b1cc]">Entrega</dt>
+                    <dd class="font-semibold text-emerald-300">Al aprobarse el pago</dd>
+                  </div>
+                </dl>
+
+                <div class="mt-5 flex items-baseline justify-between gap-4 border-t border-white/10 pt-4">
+                  <span class="font-bold text-white">Total (COP)</span>
+                  <span class="font-display text-3xl font-extrabold tracking-tight text-white">{{ formatPrice(total) }}</span>
+                </div>
+
+                <p class="mt-5 flex items-start gap-2.5 text-sm text-[#a9b1cc]">
+                  <ShieldCheck class="mt-0.5 size-4 shrink-0 text-emerald-300" aria-hidden="true" />
+                  Correo, clave y PIN aparecen en Mi cuenta en cuanto se aprueba el pago.
+                </p>
               </div>
             </div>
           </aside>

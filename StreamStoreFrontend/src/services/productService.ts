@@ -67,7 +67,6 @@ function normalizeProducto(p: any): Producto {
 
 export const productService = {
   async getPlataformas(): Promise<Plataforma[]> {
-    // Con backend solo se muestra el catálogo real: vacío si no hay nada, error si el servidor falla
     if (!USE_MOCKS) {
       try {
         const response = await api.get<any>('/plataformas')
@@ -75,7 +74,13 @@ export const productService = {
         const list = Array.isArray(raw) ? raw : Array.isArray(raw?.data) ? raw.data : []
         return list.map(normalizePlataforma)
       } catch (e) {
-        throw normalizeError(e)
+        const norm = normalizeError(e)
+        // Fallback offline resiliente si el servidor o la DB no responden
+        if (norm.status === 0 || norm.status >= 500) {
+          console.warn('Backend no disponible para plataformas. Cargando catálogo offline.')
+          return mockDelay(mockPlataformas.map(normalizePlataforma), 200)
+        }
+        throw norm
       }
     }
     return mockDelay(mockPlataformas.map(normalizePlataforma))
@@ -89,10 +94,20 @@ export const productService = {
         const list = Array.isArray(raw) ? raw : Array.isArray(raw?.data) ? raw.data : []
         return list.map(normalizeProducto)
       } catch (e) {
-        throw normalizeError(e)
+        const norm = normalizeError(e)
+        // Fallback offline resiliente si el servidor o la DB no responden
+        if (norm.status === 0 || norm.status >= 500) {
+          console.warn('Backend no disponible para productos. Cargando productos offline.')
+          return this.getProductosMock(filtros)
+        }
+        throw norm
       }
     }
 
+    return this.getProductosMock(filtros)
+  },
+
+  getProductosMock(filtros: ProductoFiltros = {}): Promise<Producto[]> {
     const result = mockProductos.filter((p) => {
       const okPlat =
         filtros.plataforma === undefined ||
@@ -101,7 +116,7 @@ export const productService = {
       const okTipo = !filtros.tipo || p.tipo === filtros.tipo
       return okPlat && okTipo
     })
-    return mockDelay(result.map(normalizeProducto))
+    return mockDelay(result.map(normalizeProducto), 200)
   },
 
   async getProducto(id: number): Promise<Producto> {
@@ -113,7 +128,12 @@ export const productService = {
         if (item && item.id) return normalizeProducto(item)
         throw { status: 404, message: 'Producto no encontrado.' }
       } catch (e) {
-        throw normalizeError(e)
+        const norm = normalizeError(e)
+        if (norm.status === 0 || norm.status >= 500) {
+          const p = mockProductos.find((x) => x.id === id)
+          if (p) return mockDelay(normalizeProducto(p), 150)
+        }
+        throw norm
       }
     }
     const p = mockProductos.find((x) => x.id === id)

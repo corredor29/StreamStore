@@ -4,12 +4,13 @@ import { RouterLink } from 'vue-router'
 import { 
   AlertTriangle, 
   CheckCircle2, 
-  Filter, 
+  Layers,
   Receipt, 
   RefreshCw, 
   Search, 
   ShoppingBag, 
   Tv, 
+  X,
   XCircle 
 } from '@lucide/vue'
 import { accountService } from '@/services/accountService'
@@ -19,6 +20,10 @@ import ServiceCard from '@/components/account/ServiceCard.vue'
 import PurchaseHistory from '@/components/account/PurchaseHistory.vue'
 import AppLoader from '@/components/common/AppLoader.vue'
 import AppAlert from '@/components/common/AppAlert.vue'
+import { useClientFonts } from '@/composables/useClientFonts'
+import '@/styles/client-ui.css'
+
+useClientFonts()
 
 const activeTab = ref<'servicios' | 'compras'>('servicios')
 const estadoFiltro = ref<string>('TODOS')
@@ -76,28 +81,32 @@ const conteoEstados = computed(() => {
   return { activos, porVencer, vencidos, total: servicios.value.length }
 })
 
+function toggleFiltroEstado(estado: string) {
+  if (estadoFiltro.value === estado) {
+    estadoFiltro.value = 'TODOS'
+  } else {
+    estadoFiltro.value = estado
+  }
+}
+
 onMounted(() => {
   loadData()
 })
 </script>
 
 <template>
-  <div class="space-y-6">
-    <!-- ENCABEZADO DIRECTO Y LIMPIO -->
-    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-white/10">
+  <div class="ss-page space-y-8 pb-10">
+    <!-- ================= ENCABEZADO PRINCIPAL DE MI CUENTA ================= -->
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-5 border-b border-white/10">
       <div>
-        <h1 class="font-display text-2xl sm:text-3xl font-black text-white tracking-tight">
-          Mis Servicios
-        </h1>
-        <p class="text-xs text-slate-400 mt-1">
-          Accede a tus cuentas, credenciales de streaming y PIN de perfiles activos.
-        </p>
+        <h1 class="ss-title ss-h1 text-white">Mi cuenta</h1>
+        <p class="ss-lead mt-1">Tus servicios con sus credenciales y PIN, y el historial de compras.</p>
       </div>
 
-      <div class="flex items-center gap-2.5">
+      <div class="grid grid-cols-2 gap-3 sm:flex sm:items-center">
         <button
           type="button"
-          class="inline-flex items-center gap-2 rounded-xl border border-white/15 bg-white/5 hover:bg-white/10 text-white text-xs font-semibold px-3.5 py-2 transition-all cursor-pointer"
+          class="ss-btn ss-btn-secondary whitespace-nowrap text-sm"
           :disabled="loading"
           @click="loadData"
         >
@@ -107,23 +116,23 @@ onMounted(() => {
 
         <RouterLink
           to="/catalogo"
-          class="inline-flex items-center gap-2 rounded-xl bg-cyan-400 hover:bg-cyan-300 text-neutral-950 text-xs font-black px-4 py-2 transition-all shadow-md"
+          class="ss-btn ss-btn-primary whitespace-nowrap text-sm"
         >
           <ShoppingBag class="size-3.5" />
-          <span>Comprar más planes</span>
+          <span>Comprar planes</span>
         </RouterLink>
       </div>
     </div>
 
-    <!-- Pestañas de Navegación del Panel -->
-    <div role="tablist" aria-label="Secciones del panel" class="flex border-b border-white/10 gap-3">
+    <!-- ================= PESTAÑAS DE NAVEGACIÓN ================= -->
+    <div role="tablist" aria-label="Secciones del panel" class="flex gap-1 border-b border-white/10 sm:gap-3">
       <button
         id="tab-servicios"
         type="button"
         role="tab"
         :aria-selected="activeTab === 'servicios'"
         aria-controls="panel-servicios"
-        class="flex items-center gap-2.5 border-b-2 px-5 py-3.5 text-xs sm:text-sm font-black transition-all cursor-pointer focus:outline-none"
+        class="flex min-h-12 flex-1 items-center justify-center gap-2 whitespace-nowrap border-b-2 px-2 py-3 text-sm font-bold transition-colors cursor-pointer sm:flex-none sm:px-5"
         :class="[
           activeTab === 'servicios'
             ? 'border-cyan-400 text-cyan-300'
@@ -132,10 +141,10 @@ onMounted(() => {
         @click="activeTab = 'servicios'"
       >
         <Tv class="size-4" aria-hidden="true" />
-        <span>Mis Servicios</span>
+        <span>Servicios<span class="hidden sm:inline"> activos y vencidos</span></span>
         <span
-          class="rounded-full px-2 py-0.5 text-xs font-bold"
-          :class="activeTab === 'servicios' ? 'bg-cyan-500 text-neutral-950 font-black' : 'bg-white/10 text-slate-300'"
+          class="rounded-full px-2.5 py-0.5 text-xs font-black transition-colors"
+          :class="activeTab === 'servicios' ? 'bg-cyan-500 text-neutral-950' : 'bg-white/10 text-slate-300'"
         >
           {{ servicios.length }}
         </span>
@@ -147,7 +156,7 @@ onMounted(() => {
         role="tab"
         :aria-selected="activeTab === 'compras'"
         aria-controls="panel-compras"
-        class="flex items-center gap-2.5 border-b-2 px-5 py-3.5 text-xs sm:text-sm font-black transition-all cursor-pointer focus:outline-none"
+        class="flex min-h-12 flex-1 items-center justify-center gap-2 whitespace-nowrap border-b-2 px-2 py-3 text-sm font-bold transition-colors cursor-pointer sm:flex-none sm:px-5"
         :class="[
           activeTab === 'compras'
             ? 'border-cyan-400 text-cyan-300'
@@ -156,10 +165,10 @@ onMounted(() => {
         @click="activeTab = 'compras'"
       >
         <Receipt class="size-4" aria-hidden="true" />
-        <span>Historial de Compras</span>
+        <span><span class="hidden sm:inline">Historial de </span>Compras</span>
         <span
-          class="rounded-full px-2 py-0.5 text-xs font-bold"
-          :class="activeTab === 'compras' ? 'bg-cyan-500 text-neutral-950 font-black' : 'bg-white/10 text-slate-300'"
+          class="rounded-full px-2.5 py-0.5 text-xs font-black transition-colors"
+          :class="activeTab === 'compras' ? 'bg-cyan-500 text-neutral-950' : 'bg-white/10 text-slate-300'"
         >
           {{ compras.length }}
         </span>
@@ -170,7 +179,7 @@ onMounted(() => {
     <AppLoader v-if="loading && servicios.length === 0" label="Cargando tus servicios y compras..." />
 
     <!-- Alerta de Error -->
-    <AppAlert v-else-if="error" variant="error" title="Problema al cargar datos" class="mb-6">
+    <AppAlert v-else-if="error" variant="error" title="No pudimos cargar tu cuenta" class="mb-6">
       <p>{{ error }}</p>
       <button type="button" class="btn-secondary mt-3 text-xs" @click="loadData">
         Reintentar
@@ -185,92 +194,146 @@ onMounted(() => {
       aria-labelledby="tab-servicios"
       class="space-y-6"
     >
-      <!-- Barra de Filtros y Búsqueda -->
-      <div class="rounded-2xl border border-white/10 bg-neutral-900/60 p-4 flex flex-col md:flex-row items-stretch md:items-center justify-between gap-4 backdrop-blur-xl">
-        <!-- Filtros por estado -->
-        <div class="flex flex-wrap items-center gap-2">
-          <span class="mr-1 flex items-center gap-1.5 text-xs font-mono font-bold uppercase tracking-wider text-slate-400">
-            <Filter class="size-3.5" aria-hidden="true" />
-            Estado:
-          </span>
+      <!-- ================= 4 TARJETAS MÉTRICAS / KPIS RESUMEN (FILTRABLES) ================= -->
+      <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        <!-- 1. Total Servicios -->
+        <button
+          type="button"
+          class="rounded-2xl border p-4.5 text-left transition-all duration-300 cursor-pointer backdrop-blur-xl relative overflow-hidden group"
+          :class="[
+            estadoFiltro === 'TODOS'
+              ? 'border-cyan-400/50 bg-gradient-to-br from-cyan-950/40 via-neutral-900/90 to-black/95 shadow-[0_0_25px_rgba(6,182,212,0.15)] ring-1 ring-cyan-400/30'
+              : 'border-white/10 bg-neutral-900/60 hover:border-white/25 hover:bg-neutral-900/80'
+          ]"
+          :aria-pressed="estadoFiltro === 'TODOS'"
+          @click="toggleFiltroEstado('TODOS')"
+        >
+          <div class="flex items-center justify-between">
+            <span class="text-sm text-slate-400 font-bold">Suscripciones</span>
+            <div class="hidden size-8 shrink-0 rounded-xl bg-white/5 border border-white/10 sm:flex items-center justify-center text-cyan-400">
+              <Layers class="size-4" />
+            </div>
+          </div>
+          <div class="mt-3 flex items-baseline gap-2">
+            <span class="font-display text-3xl font-black text-white">{{ conteoEstados.total }}</span>
+            <span class="text-xs text-slate-300 font-medium">contratados</span>
+          </div>
+          <p class="text-xs text-cyan-400 mt-1">Ver todos</p>
+        </button>
 
-          <!-- Todos -->
-          <button
-            type="button"
-            class="rounded-full px-3.5 py-1.5 text-xs font-bold transition-all cursor-pointer"
-            :class="[
-              estadoFiltro === 'TODOS'
-                ? 'bg-white text-neutral-950 shadow-md'
-                : 'border border-white/15 bg-white/5 text-slate-400 hover:text-white'
-            ]"
-            @click="estadoFiltro = 'TODOS'"
-          >
-            Todos ({{ conteoEstados.total }})
-          </button>
+        <!-- 2. Activos -->
+        <button
+          type="button"
+          class="rounded-2xl border p-4.5 text-left transition-all duration-300 cursor-pointer backdrop-blur-xl relative overflow-hidden group"
+          :class="[
+            estadoFiltro === 'ACTIVO'
+              ? 'border-emerald-400/50 bg-gradient-to-br from-emerald-950/40 via-neutral-900/90 to-black/95 shadow-[0_0_25px_rgba(16,185,129,0.18)] ring-1 ring-emerald-400/30'
+              : 'border-white/10 bg-neutral-900/60 hover:border-emerald-500/30 hover:bg-neutral-900/80'
+          ]"
+          :aria-pressed="estadoFiltro === 'ACTIVO'"
+          @click="toggleFiltroEstado('ACTIVO')"
+        >
+          <div class="flex items-center justify-between">
+            <span class="text-sm text-emerald-400 font-bold">Activos</span>
+            <div class="hidden size-8 shrink-0 rounded-xl bg-emerald-500/10 border border-emerald-500/30 sm:flex items-center justify-center text-emerald-400">
+              <CheckCircle2 class="size-4" />
+            </div>
+          </div>
+          <div class="mt-3 flex items-baseline gap-2">
+            <span class="font-display text-3xl font-black text-emerald-400">{{ conteoEstados.activos }}</span>
+            <span class="text-xs text-slate-300 font-medium">en línea</span>
+          </div>
+          <p class="text-xs text-emerald-400 mt-1">Funcionando</p>
+        </button>
 
-          <!-- Activos (Verde) -->
-          <button
-            type="button"
-            class="flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-xs font-bold transition-all cursor-pointer"
-            :class="[
-              estadoFiltro === 'ACTIVO'
-                ? 'bg-emerald-400 text-neutral-950 shadow-md'
-                : 'border border-emerald-500/30 bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/20'
-            ]"
-            @click="estadoFiltro = 'ACTIVO'"
-          >
-            <CheckCircle2 class="size-3" aria-hidden="true" />
-            Activos ({{ conteoEstados.activos }})
-          </button>
+        <!-- 3. Por Vencer -->
+        <button
+          type="button"
+          class="rounded-2xl border p-4.5 text-left transition-all duration-300 cursor-pointer backdrop-blur-xl relative overflow-hidden group"
+          :class="[
+            estadoFiltro === 'POR_VENCER'
+              ? 'border-amber-400/50 bg-gradient-to-br from-amber-950/40 via-neutral-900/90 to-black/95 shadow-[0_0_25px_rgba(245,158,11,0.2)] ring-1 ring-amber-400/30'
+              : 'border-white/10 bg-neutral-900/60 hover:border-amber-500/30 hover:bg-neutral-900/80'
+          ]"
+          :aria-pressed="estadoFiltro === 'POR_VENCER'"
+          @click="toggleFiltroEstado('POR_VENCER')"
+        >
+          <div class="flex items-center justify-between">
+            <span class="text-sm text-amber-400 font-bold">Por vencer</span>
+            <div class="hidden size-8 shrink-0 rounded-xl bg-amber-500/10 border border-amber-500/30 sm:flex items-center justify-center text-amber-400">
+              <AlertTriangle class="size-4" />
+            </div>
+          </div>
+          <div class="mt-3 flex items-baseline gap-2">
+            <span class="font-display text-3xl font-black text-amber-400">{{ conteoEstados.porVencer }}</span>
+            <span class="text-xs text-slate-300 font-medium">próximos</span>
+          </div>
+          <p class="text-xs text-amber-400 mt-1">Vencen en menos de 3 días</p>
+        </button>
 
-          <!-- Por vencer (Amarillo) -->
-          <button
-            type="button"
-            class="flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-xs font-bold transition-all cursor-pointer"
-            :class="[
-              estadoFiltro === 'POR_VENCER'
-                ? 'bg-amber-400 text-neutral-950 shadow-md'
-                : 'border border-amber-500/30 bg-amber-500/10 text-amber-400 hover:bg-amber-500/20'
-            ]"
-            @click="estadoFiltro = 'POR_VENCER'"
-          >
-            <AlertTriangle class="size-3" aria-hidden="true" />
-            Por Vencer ({{ conteoEstados.porVencer }})
-          </button>
+        <!-- 4. Vencidos -->
+        <button
+          type="button"
+          class="rounded-2xl border p-4.5 text-left transition-all duration-300 cursor-pointer backdrop-blur-xl relative overflow-hidden group"
+          :class="[
+            estadoFiltro === 'VENCIDO'
+              ? 'border-rose-400/50 bg-gradient-to-br from-rose-950/40 via-neutral-900/90 to-black/95 shadow-[0_0_25px_rgba(244,63,94,0.18)] ring-1 ring-rose-400/30'
+              : 'border-white/10 bg-neutral-900/60 hover:border-rose-500/30 hover:bg-neutral-900/80'
+          ]"
+          :aria-pressed="estadoFiltro === 'VENCIDO'"
+          @click="toggleFiltroEstado('VENCIDO')"
+        >
+          <div class="flex items-center justify-between">
+            <span class="text-sm text-rose-400 font-bold">Vencidos</span>
+            <div class="hidden size-8 shrink-0 rounded-xl bg-rose-500/10 border border-rose-500/30 sm:flex items-center justify-center text-rose-400">
+              <XCircle class="size-4" />
+            </div>
+          </div>
+          <div class="mt-3 flex items-baseline gap-2">
+            <span class="font-display text-3xl font-black text-rose-400">{{ conteoEstados.vencidos }}</span>
+            <span class="text-xs text-slate-300 font-medium">a renovar</span>
+          </div>
+          <p class="text-xs text-rose-400 mt-1">Requieren renovación</p>
+        </button>
+      </div>
 
-          <!-- Vencidos (Rojo) -->
-          <button
-            type="button"
-            class="flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-xs font-bold transition-all cursor-pointer"
-            :class="[
-              estadoFiltro === 'VENCIDO'
-                ? 'bg-rose-500 text-white shadow-md'
-                : 'border border-rose-500/30 bg-rose-500/10 text-rose-400 hover:bg-rose-500/20'
-            ]"
-            @click="estadoFiltro = 'VENCIDO'"
-          >
-            <XCircle class="size-3" aria-hidden="true" />
-            Vencidos ({{ conteoEstados.vencidos }})
-          </button>
-        </div>
-
-        <!-- Búsqueda rápida -->
-        <div class="relative md:w-64">
+      <!-- ================= BARRA DE FILTROS Y BÚSQUEDA RÁPIDA ================= -->
+      <div class="flex justify-end">
+        <!-- Búsqueda rápida con botón de limpiar -->
+        <div class="ss-control w-full md:w-80">
+          <label for="buscar-servicios" class="sr-only">Buscar servicios</label>
+          <Search class="ss-input-icon" aria-hidden="true" />
           <input
+            id="buscar-servicios"
             v-model="searchQuery"
             type="search"
-            placeholder="Buscar por plataforma o correo..."
-            class="w-full rounded-full border border-white/15 bg-black/50 py-2 pl-9 pr-3 text-xs text-white placeholder:text-slate-500 focus:border-cyan-400 focus:outline-none"
-            aria-label="Buscar servicios"
+            placeholder="Buscar por plataforma, correo o perfil"
+            class="ss-input has-icon has-action !min-h-11 text-sm"
           />
-          <Search class="absolute left-3 top-2.5 size-3.5 text-slate-500" aria-hidden="true" />
+          <button v-if="searchQuery" type="button" class="ss-input-action" aria-label="Borrar búsqueda" @click="searchQuery = ''">
+            <X class="size-4" aria-hidden="true" />
+          </button>
         </div>
       </div>
 
-      <!-- Cuadrícula de Servicios -->
+      <!-- Indicador de resultados activos -->
+      <div v-if="estadoFiltro !== 'TODOS' || searchQuery" class="flex items-center justify-between text-xs text-slate-400 px-1">
+        <span>
+          Mostrando <strong class="text-white">{{ serviciosFiltrados.length }}</strong> de {{ servicios.length }} servicios
+        </span>
+        <button
+          type="button"
+          class="text-cyan-400 hover:underline font-medium cursor-pointer"
+          @click="estadoFiltro = 'TODOS'; searchQuery = ''"
+        >
+          Limpiar filtros
+        </button>
+      </div>
+
+      <!-- ================= CUADRÍCULA DE SERVICIOS REDISTRIBUIDA (3 COLUMNAS EN XL) ================= -->
       <div
         v-if="serviciosFiltrados.length > 0"
-        class="grid grid-cols-1 lg:grid-cols-2 gap-6"
+        class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6"
       >
         <ServiceCard
           v-for="servicio in serviciosFiltrados"
@@ -288,10 +351,10 @@ onMounted(() => {
           <Tv class="size-7" aria-hidden="true" />
         </div>
         <h2 class="font-display text-lg font-black text-white">
-          No hay servicios con los filtros aplicados
+          {{ servicios.length === 0 ? 'Todavía no tienes servicios' : 'Ningún servicio coincide' }}
         </h2>
         <p class="mt-1 text-xs text-slate-400 leading-relaxed">
-          {{ servicios.length === 0 ? 'Aún no tienes suscripciones o cuentas activas.' : 'Prueba cambiando o limpiando los filtros de búsqueda.' }}
+          {{ servicios.length === 0 ? 'Cuando compres un plan, sus credenciales aparecerán aquí.' : 'Cambia el filtro o borra la búsqueda.' }}
         </p>
         <div class="mt-6 flex items-center justify-center gap-3">
           <button
@@ -306,30 +369,11 @@ onMounted(() => {
             to="/catalogo"
             class="rounded-full bg-white hover:bg-slate-200 text-neutral-950 font-black text-xs px-5 py-2 shadow-lg"
           >
-            Explorar catálogo de planes
+            Ver el catálogo
           </RouterLink>
         </div>
       </div>
 
-      <!-- Banner Inferior de Catálogo -->
-      <div class="rounded-3xl border border-cyan-500/20 bg-gradient-to-r from-cyan-950/40 via-neutral-900/60 to-[#8057FF]/10 p-6 sm:p-8 flex flex-col sm:flex-row items-center justify-between gap-4 backdrop-blur-xl">
-        <div class="flex items-center gap-4">
-          <div class="grid size-12 place-items-center rounded-2xl bg-cyan-500/20 text-cyan-300 font-bold shrink-0">
-            <Sparkles class="size-6" />
-          </div>
-          <div>
-            <h3 class="font-display text-base font-black text-white">¿Necesitas otra pantalla o suscripción?</h3>
-            <p class="text-xs text-slate-400">Entrega automática inmediata en menos de 10 segundos tras confirmar tu pago.</p>
-          </div>
-        </div>
-
-        <RouterLink
-          to="/catalogo"
-          class="inline-flex items-center justify-center rounded-full bg-white hover:bg-slate-200 text-neutral-950 font-black text-xs px-6 py-3 transition-all shrink-0 shadow-[0_0_25px_rgba(255,255,255,0.25)] hover:scale-105 active:scale-95"
-        >
-          <span>Ir al Catálogo Oficial</span>
-        </RouterLink>
-      </div>
     </section>
 
     <!-- ================= CONTENIDO PESTAÑA: HISTORIAL DE COMPRAS ================= -->
@@ -351,15 +395,15 @@ onMounted(() => {
         <div class="grid size-14 place-items-center rounded-2xl bg-white/5 text-slate-400 mx-auto mb-4">
           <ShoppingBag class="size-7" aria-hidden="true" />
         </div>
-        <h2 class="font-display text-lg font-black text-white">No tienes compras registradas</h2>
+        <h2 class="font-display text-lg font-black text-white">Aún no tienes compras</h2>
         <p class="mt-1 text-xs text-slate-400 leading-relaxed">
-          Tus órdenes y comprobantes de pago aparecerán en esta sección cuando realices una orden.
+          Tus pedidos y comprobantes aparecerán aquí después de tu primera compra.
         </p>
         <RouterLink
           to="/catalogo"
           class="inline-flex rounded-full bg-white hover:bg-slate-200 text-neutral-950 font-black text-xs px-5 py-2 mt-6 shadow-lg"
         >
-          Comprar un plan ahora
+          Ver el catálogo
         </RouterLink>
       </div>
     </section>
