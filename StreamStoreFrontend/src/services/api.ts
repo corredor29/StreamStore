@@ -4,7 +4,7 @@ import type { ApiError } from '@/types'
 export const API_URL: string = import.meta.env.VITE_API_URL ?? 'http://localhost:3000/api'
 export const USE_MOCKS: boolean = import.meta.env.VITE_USE_MOCKS === 'true'
 
-// El token vive solo en memoria (no en localStorage). El store de auth lo registra aquí.
+// El token vive en memoria y se sincroniza con el store de auth
 let tokenProvider: () => string | null = () => null
 let onUnauthorized: () => void = () => {}
 
@@ -38,7 +38,11 @@ api.interceptors.response.use(
   },
   (error: AxiosError<{ message?: string; error?: string; code?: string }>) => {
     const normalized = normalizeError(error)
-    if (normalized.status === 401) onUnauthorized()
+    const token = tokenProvider()
+    // Solo forzar logout automático si NO es un token mock de desarrollo
+    if (normalized.status === 401 && token && !token.startsWith('mock-')) {
+      onUnauthorized()
+    }
     return Promise.reject(normalized)
   },
 )

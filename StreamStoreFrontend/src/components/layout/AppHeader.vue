@@ -118,7 +118,7 @@ onUnmounted(() => {
             <div class="size-5 rounded-full bg-cyan-400/20 text-cyan-300 flex items-center justify-center font-black text-[10px]">
               {{ (auth.usuario?.nombre || 'U').charAt(0).toUpperCase() }}
             </div>
-            <span>{{ auth.isAdmin ? 'Admin' : auth.usuario?.nombre.split(' ')[0] }}</span>
+            <span>{{ auth.isAdmin ? 'Admin' : (auth.usuario?.nombre || 'Usuario').split(' ')[0] }}</span>
             <ChevronDown class="size-3.5 text-slate-400 transition-transform duration-200" :class="{ 'rotate-180': userMenuOpen }" />
           </button>
 

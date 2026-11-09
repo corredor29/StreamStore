@@ -356,6 +356,9 @@ const sectionProgress = ref<number[]>(scrollyPlatforms.map(() => 0.5))
 // Valores objetivo y suavizados para interpolación continua (LERP)
 const targetProgress = scrollyPlatforms.map(() => 0.5)
 const currentProgress = scrollyPlatforms.map(() => 0.5)
+const planesIntroProgress = ref(0.5)
+let targetPlanesIntro = 0.5
+let currentPlanesIntro = 0.5
 let rafId: number | null = null
 let isAnimating = false
 
@@ -378,6 +381,14 @@ function updateScrollTargets() {
   if (typeof window === 'undefined') return
   scrollY.value = window.scrollY
   const windowHeight = window.innerHeight || 800
+
+  const planesEl = document.getElementById('planes-intro')
+  if (planesEl) {
+    const rect = planesEl.getBoundingClientRect()
+    const totalTravel = windowHeight + rect.height
+    const currentTravel = windowHeight - rect.top
+    targetPlanesIntro = Math.min(1.25, Math.max(-0.25, currentTravel / totalTravel))
+  }
 
   scrollyPlatforms.forEach((sp, idx) => {
     const el = document.getElementById(`plataforma-${sp.slug}`)
@@ -404,6 +415,15 @@ function startPhysicsLoop() {
   const step = () => {
     let hasMotion = false
     const lerpFactor = 0.12 // 12% por fotograma para amortiguación sedosa estilo Apple
+
+    const diffPlanes = targetPlanesIntro - currentPlanesIntro
+    if (Math.abs(diffPlanes) > 0.0004) {
+      currentPlanesIntro += diffPlanes * lerpFactor
+      hasMotion = true
+    } else {
+      currentPlanesIntro = targetPlanesIntro
+    }
+    planesIntroProgress.value = currentPlanesIntro
 
     for (let i = 0; i < scrollyPlatforms.length; i++) {
       const diff = targetProgress[i] - currentProgress[i]
@@ -460,7 +480,29 @@ const heroDarkenStyle = computed(() => {
   }
 })
 
-// ================= ANIMACIONES FLUIDAS CON FÍSICA CINEMÁTICA =================
+// ================= ANIMACIONES DE DESVANECER Y APARECER CINEMÁTICO =================
+const planesIntroStyle = computed(() => {
+  if (prefersReducedMotion.value) return {}
+  const p = planesIntroProgress.value
+  let opacity = 1
+  let translateY = 0
+  if (p < 0.45) {
+    const t = Math.max(0, Math.min(1, (p - 0.15) / 0.30))
+    const eased = easeOutCubic(t)
+    opacity = eased
+    translateY = (1 - eased) * 45
+  } else if (p > 0.55) {
+    const t = Math.max(0, Math.min(1, (p - 0.55) / 0.30))
+    const eased = easeInCubic(t)
+    opacity = Math.max(0, 1 - eased)
+    translateY = -eased * 45
+  }
+  return {
+    opacity: opacity.toFixed(2),
+    transform: `translate3d(0, ${translateY.toFixed(1)}px, 0)`,
+  }
+})
+
 function getCardStyle(idx: number, color: string) {
   const p = sectionProgress.value[idx] ?? 0.5
   const restShadow = `0 25px 60px -15px rgba(0,0,0,0.9), 0 0 30px -10px ${color}40, inset 0 1px 0 rgba(255,255,255,0.15)`
@@ -468,14 +510,14 @@ function getCardStyle(idx: number, color: string) {
     return { boxShadow: restShadow }
   }
 
-  // 1. Entrada fluida con impulso ascendente y profundidad (siempre visible, sin vacíos)
-  if (p < 0.44) {
-    const t = Math.max(0, Math.min(1, (p - 0.05) / 0.39))
+  // 1. Entrada desde el negro (Aparece suavemente desde 0 a 1)
+  if (p < 0.45) {
+    const t = Math.max(0, Math.min(1, (p - 0.15) / 0.30))
     const eased = easeOutCubic(t)
-    const translateY = (1 - eased) * 50
-    const rotateX = ((1 - eased) * 8).toFixed(1)
+    const translateY = (1 - eased) * 45
+    const rotateX = ((1 - eased) * 6).toFixed(1)
     const scale = (0.94 + eased * 0.06).toFixed(3)
-    const opacity = (0.25 + eased * 0.75).toFixed(2)
+    const opacity = eased.toFixed(2)
 
     return {
       transform: `perspective(1200px) rotateX(${rotateX}deg) translate3d(0, ${translateY.toFixed(1)}px, 0) scale(${scale})`,
@@ -484,12 +526,12 @@ function getCardStyle(idx: number, color: string) {
     }
   }
 
-  // 2. Punto focal cinemático (Flotación suave y halo reactivo en el centro)
-  if (p <= 0.56) {
-    const centerNorm = (p - 0.44) / 0.12
+  // 2. Centro de la pantalla (100% visible, halo y microflotación)
+  if (p <= 0.55) {
+    const centerNorm = (p - 0.45) / 0.10
     const wave = Math.sin(centerNorm * Math.PI)
-    const scale = (1.0 + wave * 0.025).toFixed(3)
-    const translateY = -(wave * 6).toFixed(1)
+    const scale = (1.0 + wave * 0.02).toFixed(3)
+    const translateY = -(wave * 5).toFixed(1)
     const glowAlpha = Math.round((0.50 + wave * 0.40) * 255).toString(16).padStart(2, '0')
 
     return {
@@ -499,13 +541,13 @@ function getCardStyle(idx: number, color: string) {
     }
   }
 
-  // 3. Salida suave y progresiva hacia arriba (sin desaparecer de golpe)
-  const t = Math.max(0, Math.min(1, (p - 0.56) / 0.38))
+  // 3. Salida hacia el negro (Se desvanece suavemente desde 1 a 0)
+  const t = Math.max(0, Math.min(1, (p - 0.55) / 0.30))
   const eased = easeInCubic(t)
-  const translateY = -eased * 50
-  const rotateX = (-eased * 8).toFixed(1)
+  const translateY = -eased * 45
+  const rotateX = (-eased * 6).toFixed(1)
   const scale = (1.0 - eased * 0.05).toFixed(3)
-  const opacity = Math.max(0.20, 1 - eased * 0.80).toFixed(2)
+  const opacity = Math.max(0, 1 - eased).toFixed(2)
 
   return {
     transform: `perspective(1200px) rotateX(${rotateX}deg) translate3d(0, ${translateY.toFixed(1)}px, 0) scale(${scale})`,
@@ -518,26 +560,31 @@ function getInfoStyle(idx: number) {
   if (prefersReducedMotion.value) return {}
   const p = sectionProgress.value[idx] ?? 0.5
 
-  if (p < 0.44) {
-    const t = Math.max(0, Math.min(1, (p - 0.05) / 0.39))
+  // 1. Entrada desde el negro (Aparecer)
+  if (p < 0.45) {
+    const t = Math.max(0, Math.min(1, (p - 0.15) / 0.30))
     const eased = easeOutCubic(t)
     return {
       transform: `translate3d(0, ${((1 - eased) * 40).toFixed(1)}px, 0)`,
-      opacity: (0.30 + eased * 0.70).toFixed(2),
+      opacity: eased.toFixed(2),
     }
   }
-  if (p <= 0.56) {
-    const wave = Math.sin(((p - 0.44) / 0.12) * Math.PI)
+
+  // 2. Centro
+  if (p <= 0.55) {
+    const wave = Math.sin(((p - 0.45) / 0.10) * Math.PI)
     return {
       transform: `translate3d(0, -${(wave * 4).toFixed(1)}px, 0)`,
       opacity: '1',
     }
   }
-  const t = Math.max(0, Math.min(1, (p - 0.56) / 0.38))
+
+  // 3. Salida hacia el negro (Desvanecer)
+  const t = Math.max(0, Math.min(1, (p - 0.55) / 0.30))
   const eased = easeInCubic(t)
   return {
     transform: `translate3d(0, ${(-eased * 40).toFixed(1)}px, 0)`,
-    opacity: Math.max(0.25, 1 - eased * 0.75).toFixed(2),
+    opacity: Math.max(0, 1 - eased).toFixed(2),
   }
 }
 
@@ -545,26 +592,36 @@ function getInfoStyle(idx: number) {
 function getHaloStyle(idx: number, color: string) {
   const p = prefersReducedMotion.value ? 0.5 : (sectionProgress.value[idx] ?? 0.5)
   const dist = Math.abs(p - 0.50)
-  const eased = smoothstep(0, 1, Math.max(0, 1 - dist / 0.38))
+  const eased = smoothstep(0, 1, Math.max(0, 1 - dist / 0.30))
   return {
     backgroundColor: color,
-    opacity: (0.15 + eased * 0.40).toFixed(2),
-    transform: `scale(${(0.90 + eased * 0.20).toFixed(2)})`,
+    opacity: (eased * 0.55).toFixed(2),
+    transform: `scale(${(0.85 + eased * 0.25).toFixed(2)})`,
   }
 }
 
-// ================= PARALLAX FLUIDO DEL FONDO =================
+// ================= PARALLAX Y DESVANECIMIENTO DEL FONDO =================
 function getBgParallax(idx: number, bgImage: string) {
   if (prefersReducedMotion.value) {
     return { backgroundImage: `url('${bgImage}')` }
   }
   const p = sectionProgress.value[idx] ?? 0.5
+  let fade = 1
+  if (p < 0.45) {
+    const t = Math.max(0, Math.min(1, (p - 0.15) / 0.30))
+    fade = easeOutCubic(t)
+  } else if (p > 0.55) {
+    const t = Math.max(0, Math.min(1, (p - 0.55) / 0.30))
+    fade = Math.max(0, 1 - easeInCubic(t))
+  }
   const panY = Math.max(-20, Math.min(20, (p - 0.5) * 35))
   return {
     backgroundImage: `url('${bgImage}')`,
+    opacity: (fade * 0.90).toFixed(2),
     transform: `translate3d(0, ${panY.toFixed(1)}px, 0) scale(1.05)`,
   }
 }
+
 
 // Barra de progreso del capítulo: avanza al bajar y retrocede al subir
 function getChapterProgress(idx: number) {
@@ -931,22 +988,12 @@ const formatCOP = (val: number) => {
     </section>
 
 
-    <!-- ================= CONECTOR CINEMÁTICO FLUIDO ================= -->
-    <div
-      class="relative h-20 sm:h-28 bg-black flex items-center justify-center overflow-hidden pointer-events-none select-none"
-      aria-hidden="true"
-    >
-      <!-- Haz anamórfico central -->
-      <div class="w-full max-w-2xl h-[1px] bg-gradient-to-r from-transparent via-[#8057FF]/40 via-50% via-[#06B6D4]/40 to-transparent" />
-      <div class="absolute size-36 rounded-full bg-cyan-400/10 blur-3xl" />
-    </div>
-
     <!-- ================= 2. CABECERA: ELIGE EL MEJOR PLAN PARA TI ================= -->
     <section id="planes-intro" class="relative bg-black pt-16 pb-12 text-center overflow-hidden">
       <!-- Resplandor ambiental superior -->
       <div class="absolute top-0 left-1/2 -translate-x-1/2 w-3/4 max-w-3xl h-32 bg-gradient-to-b from-[#8057FF]/20 via-[#06B6D4]/15 to-transparent blur-3xl pointer-events-none" />
 
-      <div class="container-app relative z-10 max-w-3xl mx-auto space-y-5">
+      <div class="container-app relative z-10 max-w-3xl mx-auto space-y-5" :style="planesIntroStyle">
         <h2 class="font-display text-4xl sm:text-6xl font-extrabold uppercase tracking-tight leading-[1.05] drop-shadow-2xl">
           <span class="title-metal">Elige el mejor</span><br />
           <span class="bg-gradient-to-r from-[#9B7BFF] via-[#B26BFF] to-[#22D3EE] bg-clip-text text-transparent">
@@ -1059,15 +1106,6 @@ const formatCOP = (val: number) => {
 
       <!-- SECCIONES DE PLATAFORMAS (SCROLLYTELLING) -->
       <template v-for="(sp, idx) in scrollyPlatforms" :key="sp.id">
-        <!-- Divisor sutil y elegante entre plataformas -->
-        <div
-          v-if="idx > 0"
-          class="relative h-12 sm:h-16 flex items-center justify-center overflow-hidden pointer-events-none select-none"
-          aria-hidden="true"
-        >
-          <div class="w-full max-w-lg h-[1px] bg-gradient-to-r from-transparent via-white/10 to-transparent" />
-        </div>
-
         <section
           :id="'plataforma-' + sp.slug"
         class="relative min-h-[95vh] flex items-center justify-center overflow-hidden py-16 sm:py-24 bg-black scroll-mt-20"

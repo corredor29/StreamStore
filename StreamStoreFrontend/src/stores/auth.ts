@@ -7,9 +7,30 @@ import type { LoginPayload, RegisterPayload, Usuario } from '@/types'
 const TOKEN_KEY = 'streamstore_token'
 const USER_KEY = 'streamstore_user'
 
+function getSavedToken(): string | null {
+  try {
+    if (typeof localStorage !== 'undefined') {
+      const local = localStorage.getItem(TOKEN_KEY)
+      if (local) return local
+    }
+    if (typeof sessionStorage !== 'undefined') {
+      return sessionStorage.getItem(TOKEN_KEY)
+    }
+    return null
+  } catch {
+    return null
+  }
+}
+
 function getSavedUser(): Usuario | null {
   try {
-    const saved = typeof sessionStorage !== 'undefined' ? sessionStorage.getItem(USER_KEY) : null
+    let saved: string | null = null
+    if (typeof localStorage !== 'undefined') {
+      saved = localStorage.getItem(USER_KEY)
+    }
+    if (!saved && typeof sessionStorage !== 'undefined') {
+      saved = sessionStorage.getItem(USER_KEY)
+    }
     return saved ? JSON.parse(saved) : null
   } catch {
     return null
@@ -17,8 +38,8 @@ function getSavedUser(): Usuario | null {
 }
 
 export const useAuthStore = defineStore('auth', () => {
-  // Inicialización desde sessionStorage para persistir navegación de pestaña activa
-  const token = ref<string | null>(typeof sessionStorage !== 'undefined' ? sessionStorage.getItem(TOKEN_KEY) : null)
+  // Inicialización persistente desde localStorage y sessionStorage
+  const token = ref<string | null>(getSavedToken())
   const usuario = ref<Usuario | null>(getSavedUser())
 
   const isAuthenticated = computed(() => !!token.value && !!usuario.value)
@@ -28,16 +49,28 @@ export const useAuthStore = defineStore('auth', () => {
     token.value = newToken
     usuario.value = user
     try {
+      localStorage.setItem(TOKEN_KEY, newToken)
+      localStorage.setItem(USER_KEY, JSON.stringify(user))
+    } catch {
+      // Manejo silencioso en caso de bloqueo de storage
+    }
+    try {
       sessionStorage.setItem(TOKEN_KEY, newToken)
       sessionStorage.setItem(USER_KEY, JSON.stringify(user))
     } catch {
-      // Manejo silencioso en caso de bloqueo de storage
+      // Manejo silencioso
     }
   }
 
   function logout(): void {
     token.value = null
     usuario.value = null
+    try {
+      localStorage.removeItem(TOKEN_KEY)
+      localStorage.removeItem(USER_KEY)
+    } catch {
+      // Ignorar
+    }
     try {
       sessionStorage.removeItem(TOKEN_KEY)
       sessionStorage.removeItem(USER_KEY)
