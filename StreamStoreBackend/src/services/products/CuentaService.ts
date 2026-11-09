@@ -26,6 +26,24 @@ export class CuentaService {
         return conEstadoCredenciales(cuenta)
     }
 
+    // Sin ventas: se borra con sus pantallas. Con ventas ya vencidas: se desactiva para conservar el historial.
+    // Con clientes con acceso vigente: no se toca.
+    async eliminar(id: number): Promise<{ resultado: "eliminada" | "desactivada" }> {
+        return withTransaction(async (t) => {
+            const cuenta = await this.repository.lockById(id, t)
+            if (!cuenta) throw new HttpError("Cuenta no encontrada", 404)
+            const { total, vigentes } = await this.repository.contarServicios(id, t)
+            if (vigentes > 0)
+                throw new HttpError(`No se puede eliminar: ${vigentes} cliente(s) tienen acceso vigente con esta cuenta`, 409, { vigentes })
+            if (total > 0) {
+                if (cuenta.estado !== "inactiva") await this.repository.desactivar(cuenta, t)
+                return { resultado: "desactivada" as const }
+            }
+            await this.repository.eliminarConPantallas(id, t)
+            return { resultado: "eliminada" as const }
+        })
+    }
+
     // Una cuenta con credenciales, o `cantidad` cuentas pendientes de asignación
     async create(data: CreateCuentaInput) {
         const plataforma = await this.plataformaRepository.findById(data.plataforma_id)

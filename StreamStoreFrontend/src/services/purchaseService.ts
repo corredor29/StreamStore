@@ -1,4 +1,4 @@
-import { api, mockDelay, USE_MOCKS } from './api'
+import { api, mockDelay, normalizeError, USE_MOCKS } from './api'
 import type { Compra, MetodoPago, PagoPayload, PagoResultado, CarritoItem } from '@/types'
 import { accountService } from './accountService'
 
@@ -221,8 +221,8 @@ export const purchaseService = {
       const list = Array.isArray(raw) ? raw : (Array.isArray(raw?.data) ? raw.data : [])
       return list.map(normalizeCompra)
     } catch (e) {
-      console.warn('Fallo al obtener compras del backend, usando datos en memoria:', e)
-      return mockComprasRealizadas
+      // Nunca mostrar compras de ejemplo como si fueran del cliente
+      throw normalizeError(e)
     }
   },
 

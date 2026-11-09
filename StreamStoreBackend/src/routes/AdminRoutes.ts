@@ -45,6 +45,7 @@ AdminRoutes.delete("/productos/:id", id, ProductoController.desactivar)
 AdminRoutes.get("/cuentas", validateSchema(listCuentasQuerySchema, "query"), CuentaController.list)
 AdminRoutes.get("/cuentas/:id", id, CuentaController.getById)
 AdminRoutes.post("/cuentas", validateSchema(createCuentaSchema), CuentaController.create)
+AdminRoutes.delete("/cuentas/:id", id, CuentaController.eliminar)
 
 AdminRoutes.get("/compras", validateSchema(listComprasQuerySchema, "query"), CompraController.listTodas)
 AdminRoutes.get("/resumen", CompraController.resumen)

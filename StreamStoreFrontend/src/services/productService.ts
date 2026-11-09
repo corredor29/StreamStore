@@ -1,4 +1,4 @@
-import { api, mockDelay, USE_MOCKS } from './api'
+import { api, mockDelay, normalizeError, USE_MOCKS } from './api'
 import { mockPlataformas, mockProductos } from '@/mocks/mockData'
 import type { Plataforma, Producto, ProductoFiltros } from '@/types'
 
@@ -67,16 +67,15 @@ function normalizeProducto(p: any): Producto {
 
 export const productService = {
   async getPlataformas(): Promise<Plataforma[]> {
+    // Con backend solo se muestra el catálogo real: vacío si no hay nada, error si el servidor falla
     if (!USE_MOCKS) {
       try {
         const response = await api.get<any>('/plataformas')
         const raw = response.data
         const list = Array.isArray(raw) ? raw : Array.isArray(raw?.data) ? raw.data : []
-        if (list.length > 0) {
-          return list.map(normalizePlataforma)
-        }
+        return list.map(normalizePlataforma)
       } catch (e) {
-        console.warn('Fallo al obtener plataformas del backend, cargando catálogo integrado:', e)
+        throw normalizeError(e)
       }
     }
     return mockDelay(mockPlataformas.map(normalizePlataforma))
@@ -88,11 +87,9 @@ export const productService = {
         const response = await api.get<any>('/productos', { params: filtros })
         const raw = response.data
         const list = Array.isArray(raw) ? raw : Array.isArray(raw?.data) ? raw.data : []
-        if (list.length > 0) {
-          return list.map(normalizeProducto)
-        }
+        return list.map(normalizeProducto)
       } catch (e) {
-        console.warn('Fallo al obtener productos del backend, cargando productos integrados:', e)
+        throw normalizeError(e)
       }
     }
 
@@ -113,11 +110,10 @@ export const productService = {
         const response = await api.get<any>(`/productos/${id}`)
         const raw = response.data
         const item = raw?.data ?? raw
-        if (item && item.id) {
-          return normalizeProducto(item)
-        }
+        if (item && item.id) return normalizeProducto(item)
+        throw { status: 404, message: 'Producto no encontrado.' }
       } catch (e) {
-        console.warn('Fallo al obtener producto del backend, buscando en catálogo integrado:', e)
+        throw normalizeError(e)
       }
     }
     const p = mockProductos.find((x) => x.id === id)

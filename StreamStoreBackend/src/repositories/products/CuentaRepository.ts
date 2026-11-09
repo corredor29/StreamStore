@@ -3,6 +3,7 @@ import { sequelize } from "../../config/database"
 import { Cuenta } from "../../models/products/Cuenta"
 import { Pantalla } from "../../models/products/Pantalla"
 import { Plataforma } from "../../models/products/Plataforma"
+import { Servicio } from "../../models/orders/Servicio"
 import { CambiosPantalla, NuevaCuenta, NuevaPantalla } from "../../interfaces/products/Cuenta"
 
 const includeInventario = [
@@ -112,6 +113,28 @@ export class CuentaRepository {
     actualizarPantalla(pantalla: Pantalla, cambios: CambiosPantalla, t: Transaction) {
         const definidos = Object.fromEntries(Object.entries(cambios).filter(([, v]) => v !== undefined))
         return pantalla.update(definidos, { transaction: t })
+    }
+
+    // Servicios de clientes ligados a la cuenta: los vigentes impiden borrarla, los vencidos son historial
+    async contarServicios(cuentaId: number, t: Transaction) {
+        const [total, vigentes] = await Promise.all([
+            Servicio.count({ where: { cuenta_id: cuentaId }, transaction: t }),
+            Servicio.count({ where: { cuenta_id: cuentaId, estado: "activo", fecha_vencimiento: { [Op.gt]: new Date() } }, transaction: t })
+        ])
+        return { total, vigentes }
+    }
+
+    lockById(id: number, t: Transaction) {
+        return Cuenta.findByPk(id, { attributes: ["id", "estado"], transaction: t, lock: t.LOCK.UPDATE })
+    }
+
+    desactivar(cuenta: Cuenta, t: Transaction) {
+        return cuenta.update({ estado: "inactiva" }, { transaction: t })
+    }
+
+    async eliminarConPantallas(cuentaId: number, t: Transaction) {
+        await Pantalla.destroy({ where: { cuenta_id: cuentaId }, transaction: t })
+        await Cuenta.destroy({ where: { id: cuentaId }, transaction: t })
     }
 
     // Inventario vivo (sin cuentas inactivas): una fila agregada calculada en MySQL

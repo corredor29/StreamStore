@@ -26,6 +26,19 @@ export class CuentaController {
         }
     }
 
+    static async eliminar(_req: Request, res: Response) {
+        try {
+            const { id } = res.locals.params as IdParam
+            const data = await service.eliminar(id)
+            const mensaje = data.resultado === "eliminada"
+                ? "Cuenta eliminada"
+                : "La cuenta tiene ventas anteriores: se desactivó para conservar el historial"
+            return ApiResponse.success(res, mensaje, data)
+        } catch (error) {
+            return ApiResponse.error(res, error)
+        }
+    }
+
     static async create(req: Request, res: Response) {
         try {
             const creadas = await service.create(req.body)

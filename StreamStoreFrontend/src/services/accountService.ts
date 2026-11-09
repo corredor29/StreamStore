@@ -1,4 +1,4 @@
-import { api, mockDelay, USE_MOCKS } from './api'
+import { api, mockDelay, normalizeError, USE_MOCKS } from './api'
 import type { Servicio, TipoProducto, Compra } from '@/types'
 
 function normalizeServicio(s: any): Servicio {
@@ -135,8 +135,8 @@ export const accountService = {
       const list = Array.isArray(raw) ? raw : (Array.isArray(raw?.data) ? raw.data : [])
       return list.map(normalizeServicio)
     } catch (e) {
-      console.warn('Fallo al obtener servicios del backend, usando datos en memoria:', e)
-      return mockServiciosEnMemoria
+      // Nunca mostrar credenciales de ejemplo como si fueran del cliente
+      throw normalizeError(e)
     }
   },
 

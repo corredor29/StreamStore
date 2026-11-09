@@ -1,11 +1,10 @@
 <script setup lang="ts">
 import { computed, onMounted, ref, watch } from 'vue'
-import { useRoute, useRouter } from 'vue-router'
+import { RouterLink, useRoute, useRouter } from 'vue-router'
 import { CheckCircle2, Clock, Film, Plus, RefreshCw, ShieldAlert } from '@lucide/vue'
 import { useAuthStore } from '@/stores/auth'
 import { adminService } from '@/services/adminService'
 import { productService } from '@/services/productService'
-import { DEMO_ACCOUNTS } from '@/services/authService'
 import type { Compra, CuentaAdmin, Plataforma, ResumenAdmin, ServicioAdmin } from '@/types'
 import DeliverCredentialsModal from '@/components/admin/DeliverCredentialsModal.vue'
 import AdminSummaryCards from '@/components/admin/AdminSummaryCards.vue'
@@ -127,39 +126,29 @@ async function loadAdminData() {
   loading.value = true
   error.value = null
   try {
-    let servidorRespondio = true
+    // Cada bloque falla por separado: lo que cargó se muestra y lo que no, se avisa (nunca datos inventados)
+    const fallos: string[] = []
+    const seguro = <T,>(p: Promise<T>, que: string, vacio: T) =>
+      p.catch((e: any) => {
+        fallos.push(`${que}: ${e?.message || 'error desconocido'}`)
+        return vacio
+      })
     const [res, cuents, plats, comps, servs] = await Promise.all([
-      adminService.resumen().catch(() => null),
-      adminService.cuentas().catch(() => []),
-      productService.getPlataformas().catch(() => []),
-      adminService.compras().catch(() => []),
-      adminService.servicios().catch(() => {
-        servidorRespondio = false
-        return []
-      }),
+      seguro(adminService.resumen(), 'Resumen', null as ResumenAdmin | null),
+      seguro(adminService.cuentas(), 'Cuentas', [] as CuentaAdmin[]),
+      seguro(productService.getPlataformas(), 'Plataformas', [] as Plataforma[]),
+      seguro(adminService.compras(), 'Ventas', [] as Compra[]),
+      seguro(adminService.servicios(), 'Clientes y entregas', [] as ServicioAdmin[]),
     ])
-    conectado.value = servidorRespondio && res !== null
+    conectado.value = fallos.length === 0
     ultimaSync.value = new Date()
+    if (fallos.length) error.value = `No se pudo cargar parte del panel. ${fallos.join(' · ')}`
 
-    cuentas.value = Array.isArray(cuents) && cuents.length > 0 ? cuents : []
-    plataformas.value = Array.isArray(plats) && plats.length > 0 ? plats : []
-    compras.value = Array.isArray(comps) && comps.length > 0 ? comps : []
-    servicios.value = Array.isArray(servs) && servs.length > 0 ? servs : []
-
-    if (res) {
-      resumen.value = res
-    } else {
-      const disponibles = cuentas.value.filter((c) => c.estado === 'DISPONIBLE').length
-      const pantallasLibres = cuentas.value.reduce((acc, c) => acc + c.pantallasDisponibles, 0)
-      resumen.value = {
-        ventasHoy: 75000,
-        ventasMes: 450000,
-        totalCuentas: cuentas.value.length || 4,
-        cuentasDisponibles: disponibles || 2,
-        pantallasDisponibles: pantallasLibres || 8,
-        serviciosActivos: servicios.value.filter((s) => s.estado === 'ACTIVO').length || 2,
-      }
-    }
+    cuentas.value = cuents
+    plataformas.value = plats
+    compras.value = comps
+    servicios.value = servs
+    if (res) resumen.value = res
   } catch (err: any) {
     console.error('Error cargando datos de administración:', err)
   } finally {
@@ -184,16 +173,9 @@ async function onEjecutarCron() {
   }
 }
 
-async function switchToAdminDemo() {
-  await auth.login({
-    email: DEMO_ACCOUNTS.admin.email,
-    password: DEMO_ACCOUNTS.admin.password,
-  })
-  await loadAdminData()
-}
-
 onMounted(() => {
-  loadAdminData()
+  // Sin rol admin no se piden datos administrativos (el backend respondería 403 igualmente)
+  if (auth.isAdmin) loadAdminData()
 })
 </script>
 
@@ -212,16 +194,18 @@ onMounted(() => {
           Acceso de Administrador Requerido
         </h2>
         <p class="mt-1.5 text-[13px] text-ad-dim leading-relaxed">
-          Has iniciado sesión como <strong class="text-ad-text">{{ auth.usuario?.email || 'visitante' }}</strong>. Para acceder a la consola necesitas privilegios de administrador.
+          <template v-if="auth.usuario">
+            Has iniciado sesión como <strong class="text-ad-text">{{ auth.usuario.email }}</strong>, que no tiene permisos de administrador.
+          </template>
+          <template v-else>Inicia sesión con una cuenta de administrador para entrar a la consola.</template>
         </p>
       </div>
-      <button
-        type="button"
-        class="btn-primary w-full text-[13px] py-2 cursor-pointer"
-        @click="switchToAdminDemo"
-      >
-        <span>Iniciar como Administrador Demo</span>
-      </button>
+      <div class="flex flex-col gap-2 sm:flex-row">
+        <RouterLink v-if="!auth.usuario" :to="{ path: '/login', query: { redirect: '/admin' } }" class="btn-ad h-9 flex-1">
+          Iniciar sesión
+        </RouterLink>
+        <RouterLink to="/" class="btn-ad-ghost h-9 flex-1">Volver a la tienda</RouterLink>
+      </div>
     </div>
 
     <!-- Panel Administrativo Completo -->

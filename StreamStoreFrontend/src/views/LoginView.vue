@@ -14,7 +14,6 @@ import {
   UserCheck 
 } from '@lucide/vue'
 import { useAuthStore } from '@/stores/auth'
-import { DEMO_ACCOUNTS } from '@/services/authService'
 import { loginSchema } from '@/utils/validators'
 import AppAlert from '@/components/common/AppAlert.vue'
 
@@ -189,7 +188,20 @@ function validateField(field: 'email' | 'password') {
   }
 }
 
-function fillDemoAccount(type: 'cliente' | 'admin') {
+// Accesos demo solo en desarrollo: en el build de producción este código y las contraseñas no existen
+const demoDisponible = import.meta.env.DEV
+
+function avisarRecuperacion() {
+  serverError.value = null
+  demoNotification.value = 'Escríbenos por WhatsApp y te ayudamos a recuperar tu contraseña.'
+  setTimeout(() => {
+    demoNotification.value = null
+  }, 3500)
+}
+
+async function fillDemoAccount(type: 'cliente' | 'admin') {
+  if (!import.meta.env.DEV) return
+  const { DEMO_ACCOUNTS } = await import('@/services/demoAccounts')
   const acc = DEMO_ACCOUNTS[type]
   form.email = acc.email
   form.password = acc.password
@@ -395,7 +407,7 @@ async function onSubmit() {
                 <button
                   type="button"
                   class="text-xs text-neutral-400 hover:text-cyan-300 transition-colors"
-                  @click="fillDemoAccount('cliente')"
+                  @click="avisarRecuperacion"
                 >
                   ¿Olvidaste tu contraseña?
                 </button>
@@ -440,8 +452,9 @@ async function onSubmit() {
                 <span>Recordar mi sesión</span>
               </label>
 
-              <!-- Acceso rápido Demo interactivo -->
+              <!-- Acceso rápido Demo interactivo (solo desarrollo) -->
               <button
+                v-if="demoDisponible"
                 type="button"
                 class="inline-flex items-center gap-1 text-[11px] font-mono text-cyan-400 hover:text-cyan-300 transition-colors"
                 @click="showDemoQuickAccess = !showDemoQuickAccess"
@@ -453,7 +466,7 @@ async function onSubmit() {
 
             <!-- Panel desplegable con cápsulas animadas de Demo -->
             <div
-              v-if="showDemoQuickAccess"
+              v-if="demoDisponible && showDemoQuickAccess"
               class="rounded-xl border border-white/10 bg-white/5 p-2.5 transition-all flex items-center justify-between gap-2"
             >
               <button
