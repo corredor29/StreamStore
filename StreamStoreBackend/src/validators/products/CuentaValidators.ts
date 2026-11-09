@@ -5,7 +5,12 @@ export const createCuentaSchema = z.object({
     plataforma_id: z.coerce.number().int().positive(),
     email: z.email().max(150).optional(),
     password: z.string().min(4).max(120).optional(),
-    cantidad: z.coerce.number().int().min(1).max(50).optional()
+    cantidad: z.coerce.number().int().min(1).max(50).optional(),
+    // Perfiles de la cuenta en orden (#1, #2…). Sin esto se usan los de la plataforma con PIN aleatorio
+    pantallas: z.array(z.object({
+        perfil: z.string().trim().min(1).max(60).optional(),
+        pin: z.string().trim().regex(/^\d{4,6}$/, "El PIN debe tener de 4 a 6 dígitos").optional()
+    })).min(1).max(10).optional()
 })
     .refine((d) => (d.email === undefined) === (d.password === undefined), {
         message: "Envía email y password juntos, o ninguno para dejar la cuenta pendiente de asignación", path: ["password"]

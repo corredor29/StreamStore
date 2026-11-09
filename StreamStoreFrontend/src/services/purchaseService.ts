@@ -9,9 +9,11 @@ export const METODOS_PAGO: ReadonlyArray<{ id: MetodoPago; label: string; descri
   { id: 'DAVIPLATA', label: 'Daviplata', descripcion: 'Billetera digital (simulada)' },
 ]
 
-function normalizeCompra(c: any): Compra {
+export function normalizeCompra(c: any): Compra {
   const items = c.items || c.detalles || []
   return {
+    referenciaPago: c.referencia_pago ?? c.referenciaPago ?? null,
+    cliente: c.usuario ? { nombre: c.usuario.nombre, email: c.usuario.email } : (c.cliente ?? null),
     id: Number(c.id),
     usuarioId: Number(c.usuario_id ?? c.usuarioId ?? 1),
     fecha: c.createdAt || c.fecha || new Date().toISOString(),

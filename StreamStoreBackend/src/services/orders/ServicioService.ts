@@ -47,6 +47,17 @@ const credenciales = (s: Servicio): CredencialesServicio | null => {
 
 const detalle = (s: Servicio, renovado: boolean) => ({ ...resumen(s), renovado, credenciales: credenciales(s) })
 
+// Vista del admin: credenciales si ya se entregaron, y lo que hace falta saber para entregarlas
+const detalleAdmin = (s: Servicio) => ({
+    ...resumen(s),
+    cuenta_id: s.cuenta_id,
+    cuenta_tiene_credenciales: Boolean(s.cuenta?.email && s.cuenta?.password_cifrada),
+    pantallas_cuenta: s.pantalla_id
+        ? (s.pantalla ? [{ numero: s.pantalla.numero, perfil: s.pantalla.perfil, pin: s.pantalla.pin }] : [])
+        : [...(s.cuenta?.pantallas ?? [])].sort((a, b) => a.numero - b.numero).map((p) => ({ numero: p.numero, perfil: p.perfil, pin: p.pin })),
+    credenciales: credenciales(s)
+})
+
 export class ServicioService {
     constructor(
         private readonly repository: ServicioRepository,
@@ -60,7 +71,7 @@ export class ServicioService {
     }
 
     async listTodos(entrega?: EstadoEntrega) {
-        return (await this.repository.findAllConUsuario(entrega)).map(resumen)
+        return (await this.repository.findAllConUsuario(entrega)).map(detalleAdmin)
     }
 
     async getById(usuarioId: number, id: number, esAdmin: boolean) {

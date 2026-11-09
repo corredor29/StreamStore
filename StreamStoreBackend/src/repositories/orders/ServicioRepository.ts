@@ -32,8 +32,8 @@ export class ServicioRepository {
     findAllConUsuario(entrega?: EstadoEntrega) {
         return Servicio.findAll({
             where: entrega ? { estado_entrega: entrega } : {},
-            include: [...includeResumen, { model: Usuario, attributes: ["id", "nombre", "email"] }],
-            order: [["fecha_vencimiento", "ASC"]]
+            include: [...includeCredenciales, { model: Usuario, attributes: ["id", "nombre", "email"] }],
+            order: [["id", "DESC"]]
         })
     }
 
@@ -83,5 +83,15 @@ export class ServicioRepository {
 
     marcarAlerta(servicio: Servicio, flags: FlagsAlerta) {
         return servicio.update(flags)
+    }
+
+    // Suscripciones vigentes (no vencidas) y cuántas de ellas esperan credenciales
+    async resumenSuscripciones() {
+        const vigentes = { estado: "activo" as const, fecha_vencimiento: { [Op.gt]: new Date() } }
+        const [activas, porEntregar] = await Promise.all([
+            Servicio.count({ where: vigentes }),
+            Servicio.count({ where: { ...vigentes, estado_entrega: "pendiente_asignacion" } })
+        ])
+        return { activas, por_entregar: porEntregar }
     }
 }

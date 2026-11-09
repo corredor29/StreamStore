@@ -99,6 +99,8 @@ export interface Compra {
   total: number
   estado: EstadoCompra
   metodoPago?: string | null
+  referenciaPago?: string | null
+  cliente?: { nombre: string; email: string } | null
   detalles: CompraDetalle[]
 }
 
@@ -171,10 +173,49 @@ export interface Servicio {
   passwordAcceso: string
   perfil?: string | null
   pin?: string | null
+  perfiles?: { numero: number; perfil: string; pin: string }[]
   fechaCompra: string
   fechaVencimiento: string
   diasRestantes: number
   estado: EstadoServicio
+}
+
+// ---------- Entregas (admin) ----------
+
+export type EstadoEntrega = 'ENTREGADO' | 'PENDIENTE'
+
+export interface PantallaCredencial {
+  numero: number
+  perfil: string
+  pin: string
+}
+
+export interface ServicioAdmin {
+  id: number
+  compraId: number
+  tipo: TipoProducto
+  estado: EstadoServicio
+  estadoEntrega: EstadoEntrega
+  entregadoAt: string | null
+  fechaInicio: string
+  fechaVencimiento: string
+  diasRestantes: number
+  producto: string
+  plataforma: string
+  cliente: { id: number; nombre: string; email: string } | null
+  cuentaId: number
+  cuentaTieneCredenciales: boolean
+  pantallasCuenta: PantallaCredencial[]
+  credenciales: { email: string; password: string; pantallas: PantallaCredencial[] } | null
+}
+
+export interface EntregarCredencialesPayload {
+  email?: string
+  password?: string
+  pin?: string
+  perfil?: string
+  pantallas?: { numero: number; pin?: string; perfil?: string }[]
+  notificar: boolean
 }
 
 // ---------- Administración ----------
@@ -211,6 +252,14 @@ export interface CrearPlataformaPayload {
   maxPantallas?: number
 }
 
+export interface ProductoCatalogo {
+  id: number
+  precio: number
+  duracionDias: number
+  nombre: string
+  activo: boolean
+}
+
 export interface CrearCuentaPayload {
   plataformaId?: number
   nombrePlataforma?: string
@@ -218,7 +267,10 @@ export interface CrearCuentaPayload {
   coverFile?: File
   correo?: string
   password?: string
+  /** Precio del producto «cuenta completa» */
   precio?: number
+  /** Precio del producto «1 pantalla» */
+  precioPantalla?: number
   duracionDias?: number
   totalPantallas?: number
   pantallas?: Array<{ perfil: string; pin?: string }>
@@ -229,6 +281,11 @@ export interface CrearCuentaPayload {
 }
 
 export interface ResumenAdmin {
+  pantallasTotales?: number
+  cuentasSinCredenciales?: number
+  entregasPendientes?: number
+  /** true si las cifras vienen del backend (fuente de verdad) */
+  desdeServidor?: boolean
   ventasHoy: number
   ventasMes: number
   totalCuentas: number

@@ -147,13 +147,15 @@ export class CompraService {
         const ahora = new Date()
         const inicioDia = new Date(ahora.getFullYear(), ahora.getMonth(), ahora.getDate())
         const inicioMes = new Date(ahora.getFullYear(), ahora.getMonth(), 1)
-        const [hoy, mes, historico, pendientes, ventasPorProducto, productos] = await Promise.all([
+        const [hoy, mes, historico, pendientes, ventasPorProducto, productos, inventario, suscripciones] = await Promise.all([
             this.repository.totalPagadas(inicioDia),
             this.repository.totalPagadas(inicioMes),
             this.repository.totalPagadas(),
             this.repository.contarPorEstado("pendiente"),
             this.repository.ventasPorProducto(),
-            this.productoRepository.findAll({})
+            this.productoRepository.findAll({}),
+            this.cuentaRepository.resumenInventario(),
+            this.servicioRepository.resumenSuscripciones()
         ])
         const ventas = new Map(ventasPorProducto.map((v) => [Number(v.producto_id), v]))
         const stock = await this.productoRepository.stockMap(productos.map((p) => p.id))
@@ -172,6 +174,11 @@ export class CompraService {
             })
             porPlataforma.set(p.plataforma_id, entry)
         }
-        return { hoy, mes, historico, pendientes, por_plataforma: [...porPlataforma.values()] }
+        return {
+            hoy, mes, historico, pendientes,
+            cuentas: inventario,
+            suscripciones,
+            por_plataforma: [...porPlataforma.values()]
+        }
     }
 }

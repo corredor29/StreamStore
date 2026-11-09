@@ -48,6 +48,10 @@ function normalizeServicio(s: any): Servicio {
     passwordAcceso: creds?.password || s.passwordAcceso || '••••••••',
     perfil: pantalla0?.perfil || s.perfil || (s.tipo === 'pantalla' ? `Pantalla ${pantalla0?.numero || 1}` : 'Cuenta Completa (Todas las pantallas)'),
     pin: pantalla0?.pin || s.pin || null,
+    // Una cuenta completa trae todos sus perfiles; una pantalla, solo el suyo
+    perfiles: Array.isArray(creds?.pantallas)
+      ? creds.pantallas.map((p: any) => ({ numero: Number(p.numero), perfil: p.perfil ?? `Perfil ${p.numero}`, pin: p.pin ?? '' }))
+      : [],
     fechaCompra: s.fecha_inicio || s.fechaCompra || new Date().toISOString(),
     fechaVencimiento: s.fecha_vencimiento || s.fechaVencimiento || new Date().toISOString(),
     diasRestantes: Number(s.dias_restantes ?? s.diasRestantes ?? 0),
