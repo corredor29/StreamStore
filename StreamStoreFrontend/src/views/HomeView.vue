@@ -14,7 +14,9 @@ export interface ScrollyPlatform {
   logoPlate?: 'light'
   logoFilter?: string
   color: string
-  bgImage: string
+    bgImage: string
+  bgVideo?: string
+  familyHappinessTag?: string
   badge: string
   headline: string
   desc: string
@@ -68,6 +70,8 @@ const scrollyPlatforms: ScrollyPlatform[] = [
     logoFilter: 'drop-shadow(0 4px 18px rgba(229,9,20,0.7))',
     color: '#E50914',
     bgImage: '/watching_netflix.jpg',
+    bgVideo: '/videos/familia%201.mp4',
+    familyHappinessTag: 'Familia feliz · Noche de cine y estrenos',
     badge: 'PLAN DESTACADO',
     headline: 'El catálogo más grande del mundo en Ultra HD.',
     desc: 'Disfruta de series exclusivas, películas taquilleras y documentales en 4K Ultra HD con audio espacial y perfiles protegidos.',
@@ -94,6 +98,8 @@ const scrollyPlatforms: ScrollyPlatform[] = [
     logoFilter: 'none',
     color: '#113CCF',
     bgImage: '/watching_disney.jpg',
+    bgVideo: '/videos/familia%203.mp4',
+    familyHappinessTag: 'Familia feliz · Magia y niños en casa',
     badge: 'FAMILIAR & KIDS',
     headline: 'Tus mundos favoritos juntos en un solo lugar.',
     desc: 'Todo el universo de Disney, Pixar, Marvel, Star Wars y National Geographic, además de deportes en vivo de ESPN, con la máxima calidad de imagen.',
@@ -121,6 +127,8 @@ const scrollyPlatforms: ScrollyPlatform[] = [
     logoFilter: 'drop-shadow(0 4px 20px rgba(123,47,247,0.85)) drop-shadow(0 0 10px rgba(255,255,255,0.4))',
     color: '#7B2FF7',
     bgImage: '/watching_max.jpg',
+    bgVideo: '/videos/familia%202.mp4',
+    familyHappinessTag: 'Familia feliz · Maratón de series y risas',
     badge: 'SERIES EXCLUSIVAS',
     headline: 'Historias extraordinarias que definen la cultura.',
     desc: 'Desde La Casa del Dragón y The Last of Us hasta los grandes clásicos de Warner Bros., DC y HBO, en 4K Ultra HD.',
@@ -174,6 +182,8 @@ const scrollyPlatforms: ScrollyPlatform[] = [
     logoFilter: 'drop-shadow(0 4px 20px rgba(0,100,255,0.85)) drop-shadow(0 0 10px rgba(255,255,255,0.4))',
     color: '#0064FF',
     bgImage: '/hero_cinema_wall.jpg',
+    bgVideo: '/videos/familia%204.mp4',
+    familyHappinessTag: 'Familia feliz · Cine de estreno y deportes',
     badge: 'CINE DE ESTRENO',
     headline: 'Cine de estreno, series y fútbol en vivo.',
     desc: 'Estrenos de Paramount Pictures, el catálogo completo de Showtime y transmisiones exclusivas en vivo.',
@@ -200,6 +210,8 @@ const scrollyPlatforms: ScrollyPlatform[] = [
     logoFilter: 'drop-shadow(0 4px 20px rgba(244,117,33,0.85)) drop-shadow(0 0 10px rgba(255,255,255,0.4))',
     color: '#F47521',
     bgImage: '/hero_cinema_wall.jpg',
+    bgVideo: '/videos/familia%205.mp4',
+    familyHappinessTag: 'Familia feliz · Emoción y diversión juntos',
     badge: 'SIMULCAST GLOBAL',
     headline: 'El catálogo definitivo de anime sin anuncios.',
     desc: 'Estrenos en simulcast una hora después de su emisión en Japón, doblajes exclusivos al español y la biblioteca de anime más grande del mundo.',
@@ -608,6 +620,26 @@ function getHaloStyle(idx: number, color: string) {
 }
 
 // ================= PARALLAX Y DESVANECIMIENTO DEL FONDO =================
+function getVideoParallax(idx: number) {
+  if (prefersReducedMotion.value) {
+    return { opacity: '0.88' }
+  }
+  const p = sectionProgress.value[idx] ?? 0.5
+  let fade = 1
+  if (p < 0.45) {
+    const t = Math.max(0, Math.min(1, (p - 0.15) / 0.30))
+    fade = easeOutCubic(t)
+  } else if (p > 0.55) {
+    const t = Math.max(0, Math.min(1, (p - 0.55) / 0.30))
+    fade = Math.max(0, 1 - easeInCubic(t))
+  }
+  const panY = Math.max(-20, Math.min(20, (p - 0.5) * 35))
+  return {
+    opacity: (fade * 0.90).toFixed(2),
+    transform: `translate3d(0, ${panY.toFixed(1)}px, 0) scale(1.05)`,
+  }
+}
+
 function getBgParallax(idx: number, bgImage: string) {
   if (prefersReducedMotion.value) {
     return { backgroundImage: `url('${bgImage}')` }
@@ -1258,8 +1290,20 @@ function seekMainVideo(event: MouseEvent) {
         class="relative min-h-[95vh] flex items-center justify-center overflow-hidden py-16 sm:py-24 bg-black scroll-mt-20"
         :aria-labelledby="'titulo-' + sp.slug"
       >
-        <!-- FOTO DE REFERENCIA CINEMÁTICA DE FONDO -->
+        <!-- VIDEO O FOTO DE REFERENCIA CINEMÁTICA DE FONDO -->
+        <video
+          v-if="sp.bgVideo"
+          :src="sp.bgVideo"
+          autoplay
+          loop
+          muted
+          playsinline
+          preload="auto"
+          class="absolute inset-0 w-full h-full object-cover opacity-85 sm:opacity-90 saturate-[1.12] contrast-[1.06] brightness-[0.92] pointer-events-none"
+          :style="getVideoParallax(idx)"
+        />
         <div
+          v-else
           class="absolute inset-0 bg-cover bg-center opacity-85 sm:opacity-90 saturate-[1.12] contrast-[1.06] brightness-[0.92] pointer-events-none"
           :style="getBgParallax(idx, sp.bgImage)"
         />
@@ -1311,9 +1355,18 @@ function seekMainVideo(event: MouseEvent) {
 
               <!-- Título e impacto -->
               <div class="space-y-3">
-                <p class="font-mono text-[11px] sm:text-xs font-bold uppercase tracking-[0.2em]" :style="{ color: getAccentText(sp.color) }">
-                  {{ sp.tag }}
-                </p>
+                <div class="flex flex-wrap items-center gap-2">
+                  <p class="font-mono text-[11px] sm:text-xs font-bold uppercase tracking-[0.2em]" :style="{ color: getAccentText(sp.color) }">
+                    {{ sp.tag }}
+                  </p>
+                  <span
+                    v-if="sp.familyHappinessTag"
+                    class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full border border-emerald-400/30 bg-emerald-950/60 text-[10px] font-mono text-emerald-300 font-semibold backdrop-blur-md"
+                  >
+                    <span class="size-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                    {{ sp.familyHappinessTag }}
+                  </span>
+                </div>
                 <h3
                   :id="'titulo-' + sp.slug"
                   class="font-display text-[2rem] sm:text-5xl lg:text-[3.5rem] font-extrabold uppercase tracking-tight leading-[1.02] drop-shadow-[0_10px_30px_rgba(0,0,0,0.95)] text-balance"
