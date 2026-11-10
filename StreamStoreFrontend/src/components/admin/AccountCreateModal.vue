@@ -5,7 +5,7 @@ import {
   Coins, 
   Eye, 
   EyeOff, 
-  Flame, 
+  
   KeyRound, 
   Layers, 
   Lock, 
@@ -103,14 +103,7 @@ const pantallasList = ref<Array<{ numero: number; perfil: string; pin: string }>
   { numero: 4, perfil: 'Perfil 4', pin: '' },
 ])
 
-// Modo Combo integrado (desplegable)
-const esCombo = ref(false)
-const comboPlataformasSeleccionadas = ref<number[]>([])
-const comboNombre = ref('')
-const comboPrecioPromo = ref<number>(32000)
-const comboPrecioRegular = ref<number>(48000)
-const comboEtiqueta = ref('COMBO 2X1')
-const comboDescripcion = ref('')
+
 
 const isSubmitting = ref(false)
 const serverError = ref<string | null>(null)
@@ -164,28 +157,7 @@ function adjustScreens(count: number) {
   pantallasList.value = current
 }
 
-// Alternar plataforma en el combo
-function toggleComboPlat(id: number) {
-  const idx = comboPlataformasSeleccionadas.value.indexOf(id)
-  if (idx !== -1) {
-    comboPlataformasSeleccionadas.value.splice(idx, 1)
-  } else {
-    comboPlataformasSeleccionadas.value.push(id)
-  }
-  autoGenerarNombreCombo()
-}
 
-function autoGenerarNombreCombo() {
-  const platPrincipal = plataformaActual.value?.nombre || 'Plataforma'
-  const otras = comboPlataformasSeleccionadas.value
-    .map((id) => props.plataformas.find((p) => p.id === id)?.nombre)
-    .filter(Boolean) as string[]
-
-  const todos = [platPrincipal, ...otras]
-  if (todos.length > 1) {
-    comboNombre.value = `Combo ${todos.length === 2 ? 'Dúo' : todos.length === 3 ? 'Trío' : 'Especial'}: ${todos.join(' + ')}`
-  }
-}
 
 // Reset al abrir el modal
 watch(
@@ -200,13 +172,6 @@ watch(
       precioPantalla.value = 12000
       duracionDias.value = 30
       adjustScreens(4)
-      esCombo.value = false
-      comboPlataformasSeleccionadas.value = []
-      comboNombre.value = ''
-      comboPrecioPromo.value = 32000
-      comboPrecioRegular.value = 48000
-      comboEtiqueta.value = 'COMBO 2X1'
-      comboDescripcion.value = ''
 
       if (props.initialPlataformaId) {
         plataformaId.value = props.initialPlataformaId
@@ -229,16 +194,7 @@ watch(
   }
 )
 
-watch(esCombo, (activo) => {
-  if (activo) {
-    // Si activa combo y no hay plataformas secundarias seleccionadas, pre-seleccionar la primera diferente
-    if (comboPlataformasSeleccionadas.value.length === 0) {
-      const otra = props.plataformas.find((p) => p.id !== plataformaId.value)
-      if (otra) comboPlataformasSeleccionadas.value.push(otra.id)
-    }
-    autoGenerarNombreCombo()
-  }
-})
+
 
 async function onSubmit() {
   serverError.value = null
@@ -276,10 +232,7 @@ async function onSubmit() {
     return
   }
 
-  if (esCombo.value && comboPlataformasSeleccionadas.value.length === 0) {
-    serverError.value = 'Activaste el Modo Combo: debes seleccionar al menos una plataforma secundaria para armar el paquete.'
-    return
-  }
+
 
   isSubmitting.value = true
 
@@ -298,33 +251,10 @@ async function onSubmit() {
         perfil: p.perfil.trim() || `Perfil ${p.numero}`,
         pin: p.pin.trim() || undefined,
       })),
-      esCombo: esCombo.value,
-      comboPlataformaIds: esCombo.value ? comboPlataformasSeleccionadas.value : undefined,
-      comboNombre: esCombo.value ? comboNombre.value.trim() : undefined,
-      comboPrecio: esCombo.value ? Number(comboPrecioPromo.value) : undefined,
     }
 
     // 1. Guardar la cuenta de streaming
     await adminService.crearCuenta(payload)
-
-    // 2. Si se activó combo, asegurar registro en la entidad de combos
-    if (esCombo.value) {
-      const comboIds = Array.from(new Set([plataformaId.value, ...comboPlataformasSeleccionadas.value]))
-      const comboPayload: CrearComboPayload = {
-        nombre: comboNombre.value.trim() || `Combo ${platObj?.nombre || 'Especial'}`,
-        descripcion: comboDescripcion.value.trim() || `Paquete multi-servicio que incluye perfiles de streaming con entrega rápida.`,
-        plataformaIds: comboIds,
-        precioPromo: Number(comboPrecioPromo.value) || 32000,
-        precioRegular: Number(comboPrecioRegular.value) || 48000,
-        pantallasPorPlataforma: 1,
-        duracionDias: Number(duracionDias.value) || 30,
-        etiquetaPromo: comboEtiqueta.value.trim() || 'COMBO OFERTA',
-        activo: true,
-      }
-      await adminService.crearCombo(comboPayload).catch((err) => {
-        console.warn('Aviso: no se pudo registrar el combo secundario:', err)
-      })
-    }
 
     emit('created')
     emit('close')
@@ -721,124 +651,6 @@ async function onSubmit() {
           </div>
         </div>
 
-        <!-- SECCIÓN 5: BOTÓN Y DESPLEGABLE DE MODO COMBOS -->
-        <div class="border-t border-ad-line pt-4 space-y-3">
-          <!-- Botón Switch Combos -->
-          <div class="hud-panel flex items-center justify-between p-3">
-            <div class="flex items-center gap-2.5">
-              <div class="size-8 rounded-lg bg-ad-warn/10 border border-ad-warn/20 flex items-center justify-center text-ad-warn">
-                <Flame class="size-4" />
-              </div>
-              <div>
-                <span class="text-xs font-semibold text-ad-text block">Modo Combo Promocional</span>
-                <span class="text-[11px] text-ad-dim block">
-                  Activa para asociar esta cuenta con otras plataformas existentes (ej. Netflix + Max).
-                </span>
-              </div>
-            </div>
-
-            <!-- Toggle Switch -->
-            <button
-              type="button"
-              role="switch"
-              :aria-checked="esCombo"
-              class="relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none"
-              :class="esCombo ? 'bg-ad-accent' : 'bg-ad-hover'"
-              @click="esCombo = !esCombo"
-            >
-              <span
-                class="pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out"
-                :class="esCombo ? 'translate-x-5' : 'translate-x-0'"
-              />
-            </button>
-          </div>
-
-          <!-- Contenido Desplegable cuando 'esCombo' está activo -->
-          <div
-            v-if="esCombo"
-            class="rounded-xl border border-ad-accent/30 bg-ad-accent/20 p-4 space-y-4 animate-fade-in"
-          >
-            <div>
-              <div class="flex items-center gap-1.5 mb-1">
-                <span class="text-xs font-semibold text-ad-accent-text">
-                  Selecciona las cuentas/plataformas que integran el combo
-                </span>
-              </div>
-              <p class="text-[11px] text-ad-dim">
-                Marca qué otros servicios se venderán conjuntamente con esta cuenta:
-              </p>
-            </div>
-
-            <!-- Listado de plataformas existentes con Checkbox -->
-            <div class="grid grid-cols-2 sm:grid-cols-3 gap-2">
-              <button
-                v-for="plat in plataformas.filter((p) => p.id !== plataformaId)"
-                :key="plat.id"
-                type="button"
-                class="flex items-center gap-2 p-2 rounded-lg border text-left text-xs transition-all cursor-pointer"
-                :class="[
-                  comboPlataformasSeleccionadas.includes(plat.id)
-                    ? 'border-ad-accent bg-ad-accent/20 text-ad-text font-semibold'
-                    : 'border-ad-line bg-ad-panel text-ad-dim hover:text-ad-text'
-                ]"
-                @click="toggleComboPlat(plat.id)"
-              >
-                <div
-                  class="size-5 rounded flex items-center justify-center tabular-nums text-[10px] text-ad-text shrink-0"
-                  :style="{ backgroundColor: plat.color || '#06b6d4' }"
-                >
-                  {{ plat.nombre.slice(0, 2).toUpperCase() }}
-                </div>
-                <span class="truncate flex-1">{{ plat.nombre }}</span>
-                <Check v-if="comboPlataformasSeleccionadas.includes(plat.id)" class="size-3.5 text-ad-accent-text shrink-0" />
-              </button>
-            </div>
-
-            <!-- Parámetros del Combo -->
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2 border-t border-ad-line">
-              <div>
-                <label class="text-[11px] font-semibold text-ad-text block mb-1">Nombre Comercial del Combo</label>
-                <input
-                  v-model="comboNombre"
-                  type="text"
-                  placeholder="ej. Combo Dúo: Netflix + Max"
-                  class="w-full rounded-lg border border-ad-line bg-ad-panel px-3 py-1.5 text-xs text-ad-text focus:border-ad-accent focus:outline-none"
-                />
-              </div>
-
-              <div>
-                <label class="text-[11px] font-semibold text-ad-text block mb-1">Insignia / Badge de Oferta</label>
-                <input
-                  v-model="comboEtiqueta"
-                  type="text"
-                  placeholder="ej. COMBO 2X1, AHORRA 30%"
-                  class="w-full rounded-lg border border-ad-line bg-ad-panel px-3 py-1.5 text-xs text-ad-text focus:border-ad-accent focus:outline-none"
-                />
-              </div>
-
-              <div>
-                <label class="text-[11px] font-semibold text-ad-accent-text block mb-1">Precio Combo Promocional (COP)</label>
-                <input
-                  v-model.number="comboPrecioPromo"
-                  type="number"
-                  step="500"
-                  class="w-full rounded-lg border border-ad-line bg-ad-panel px-3 py-1.5 text-xs tabular-nums font-semibold text-ad-text focus:border-ad-accent focus:outline-none"
-                />
-              </div>
-
-              <div>
-                <label class="text-[11px] font-semibold text-ad-dim block mb-1">Precio de Referencia (Tachado)</label>
-                <input
-                  v-model.number="comboPrecioRegular"
-                  type="number"
-                  step="500"
-                  class="w-full rounded-lg border border-ad-line bg-ad-panel px-3 py-1.5 text-xs tabular-nums text-ad-dim focus:border-ad-accent focus:outline-none"
-                />
-              </div>
-            </div>
-          </div>
-        </div>
-
         <!-- Acciones del Modal -->
         <div class="flex items-center justify-end gap-3 border-t border-ad-line pt-4">
           <button
@@ -856,7 +668,7 @@ async function onSubmit() {
           >
             <span v-if="isSubmitting">Cargando al catálogo...</span>
             <span v-else>
-              {{ esCombo ? 'Guardar Cuenta y Activar Combo' : 'Guardar Cuenta al Catálogo' }}
+              Guardar Cuenta al Catálogo
             </span>
           </button>
         </div>

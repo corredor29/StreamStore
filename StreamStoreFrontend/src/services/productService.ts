@@ -137,37 +137,7 @@ export const productService = {
   },
 
   async getProducto(id: number): Promise<Producto> {
-    if (id >= 100000) {
-      const comboId = id - 100000
-      const promos = await this.getPromociones()
-      const found = promos.find((x) => x.id === comboId)
-      if (found) {
-        const platPrincipal = found.plataformas[0]
-        return {
-          id,
-          plataformaId: platPrincipal?.id || 1,
-          plataforma: {
-            id: platPrincipal?.id || 1,
-            nombre: found.plataformas.map((p) => p.nombre).join(' + '),
-            slug: platPrincipal?.slug || 'combo',
-            color: platPrincipal?.color || '#8b6cff',
-            logoUrl: platPrincipal?.logoUrl || null,
-            coverUrl: found.imagenUrl || (platPrincipal as any)?.coverUrl || null,
-          },
-          nombre: found.nombre,
-          tipo: 'COMBO' as TipoProducto,
-          esCombo: true,
-          etiquetaPromo: found.etiquetaPromo || 'COMBO 2X1',
-          precioRegular: Number(found.precioRegular),
-          duracionDias: found.duracionDias,
-          precio: Number(found.precioPromo),
-          stock: 10,
-          activo: found.activo,
-          descripcion: found.descripcion || 'Acceso multi-servicio garantizado con entrega inmediata.',
-          plataformasCombo: found.plataformas,
-        }
-      }
-    }
+    
     if (!USE_MOCKS) {
       try {
         const response = await api.get<any>(`/productos/${id}`)

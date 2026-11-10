@@ -47,24 +47,13 @@ const presentationImage = computed(() => {
   if (slug.includes('apple') || slug.includes('appletv') || name.includes('apple')) {
     return '/brand_logos/appletv.webp'
   }
-  if (props.producto.esCombo || props.producto.tipo === 'COMBO') {
-    return props.producto.plataforma?.coverUrl || '/hbo_max_mosaic_bg.jpg'
-  }
-  return props.producto.plataforma?.coverUrl || props.producto.plataforma?.logoUrl || '/brand_logos/streamstore_icon.png'
+return props.producto.plataforma?.coverUrl || props.producto.plataforma?.logoUrl || '/brand_logos/streamstore_icon.png'
 })
 
 // Las portadas de /targetyas/ son ilustraciones completas; el resto son logos que deben verse enteros
-const isCardArt = computed(() => props.producto.esCombo || !!props.producto.plataforma?.coverUrl || presentationImage.value.includes('/targetyas/'))
+const isCardArt = computed(() => !!props.producto.plataforma?.coverUrl || presentationImage.value.includes('/targetyas/'))
 
 const tipoBadge = computed(() => {
-  if (props.producto.esCombo || props.producto.tipo === 'COMBO') {
-    return {
-      label: props.producto.etiquetaPromo || 'Combo Promocional',
-      icon: Flame,
-      cls: 'bg-red-500/20 text-red-300 border-red-500/40',
-      overlayCls: 'bg-red-950/90 text-red-200 border border-red-500/60 font-black uppercase text-[10px] tracking-wider',
-    }
-  }
   return props.producto.tipo === 'CUENTA_COMPLETA'
     ? {
         label: 'Cuenta completa',
@@ -129,26 +118,7 @@ function onAgregar() {
           {{ producto.duracionDias }} días
         </p>
 
-        <!-- Plataformas incluidas en caso de combo -->
-        <div v-if="producto.plataformasCombo?.length" class="flex flex-wrap items-center gap-1 mt-1.5">
-          <span
-            v-for="plat in producto.plataformasCombo"
-            :key="plat.id"
-            class="inline-flex items-center rounded-md border border-white/15 bg-white/5 px-2 py-0.5 text-[10px] font-bold text-cyan-300"
-          >
-            {{ plat.nombre }}
-          </span>
-        </div>
-
-        <!-- Precio regular tachado y badge de ahorro -->
-        <div v-if="producto.precioRegular && producto.precioRegular > producto.precio" class="flex items-center gap-2 mt-2">
-          <span class="text-xs text-slate-500 line-through">
-            {{ formatPrice(producto.precioRegular) }}
-          </span>
-          <span class="rounded bg-emerald-500/20 border border-emerald-500/40 px-1.5 py-0.5 text-[10px] font-mono font-bold text-emerald-300">
-            -{{ Math.round(((producto.precioRegular - producto.precio) / producto.precioRegular) * 100) }}% OFF
-          </span>
-        </div>
+        
 
         <p class="font-display mt-1 text-2xl font-extrabold tracking-tight text-white">{{ formatPrice(producto.precio) }}</p>
         <p class="mt-1 text-sm font-semibold">

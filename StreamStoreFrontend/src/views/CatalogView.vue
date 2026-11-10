@@ -42,7 +42,7 @@ const precioMin = ref('')
 const precioMax = ref('')
 const ordenSeleccionado = ref('destacados')
 const cart = useCartStore()
-const promociones = ref<ComboPromo[]>([])
+
 const isSortDropdownOpen = ref(false)
 const toastComboAgregado = ref<string | null>(null)
 
@@ -52,38 +52,6 @@ const sortOptions = [
   { value: 'precio_desc', label: 'Precio: mayor a menor' },
   { value: 'nombre', label: 'Nombre: A a Z' },
 ]
-
-function comboToProducto(c: ComboPromo): Producto {
-  return {
-    id: c.id + 100000,
-    plataformaId: c.plataformas[0]?.id || 1,
-    plataforma: {
-      id: c.plataformas[0]?.id || 1,
-      nombre: c.plataformas.map((p: any) => p.nombre).join(' + '),
-      slug: 'combo',
-      color: '#8b6cff',
-      logoUrl: c.plataformas[0]?.logoUrl || null,
-      coverUrl: c.imagenUrl || null,
-    },
-    nombre: c.nombre,
-    tipo: 'CUENTA_COMPLETA',
-    duracionDias: c.duracionDias,
-    precio: c.precioPromo,
-    stock: 10,
-    activo: c.activo,
-  }
-}
-
-function agregarComboAlCarrito(combo: ComboPromo) {
-  const prod = comboToProducto(combo)
-  const res = cart.addItem(prod)
-  if (res.success) {
-    toastComboAgregado.value = `¡${combo.nombre} agregado al carrito!`
-    setTimeout(() => {
-      toastComboAgregado.value = null
-    }, 3000)
-  }
-}
 
 function onDocumentClick(e: MouseEvent) {
   const target = e.target as HTMLElement
@@ -104,14 +72,15 @@ async function loadData() {
   loading.value = true
   error.value = null
   try {
-    const [plats, prods, prom] = await Promise.all([
+    const [plats, prods] = await Promise.all([
       productService.getPlataformas(),
-      productService.getProductos(),
-      productService.getPromociones(),
+      productService.getProductos({
+        plataforma: plataformaSeleccionada.value || undefined,
+        tipo: (tipoSeleccionado.value as TipoProducto) || undefined,
+      }),
     ])
     plataformas.value = plats
     productos.value = prods
-    promociones.value = prom.filter((p) => p.activo)
   } catch (err: any) {
     error.value = err?.message || 'Error al cargar los productos del catálogo.'
   } finally {
@@ -121,11 +90,24 @@ async function loadData() {
 
 watch(
   () => [plataformaSeleccionada.value, tipoSeleccionado.value],
-  () => {
+  async () => {
     const query: Record<string, string> = {}
     if (plataformaSeleccionada.value) query.plataforma = plataformaSeleccionada.value
     if (tipoSeleccionado.value) query.tipo = tipoSeleccionado.value
     router.replace({ query })
+
+    try {
+      loading.value = true
+      error.value = null
+      productos.value = await productService.getProductos({
+        plataforma: plataformaSeleccionada.value || undefined,
+        tipo: (tipoSeleccionado.value as TipoProducto) || undefined,
+      })
+    } catch (err: any) {
+      error.value = err?.message || 'Error al filtrar productos.'
+    } finally {
+      loading.value = false
+    }
   }
 )
 
@@ -137,87 +119,23 @@ function resetFiltros() {
   ordenSeleccionado.value = 'destacados'
 }
 
-// Combina productos normales y combos promocionales como entidades de producto integradas
-const todosLosProductos = computed<Producto[]>(() => {
-  const prods = [...productos.value]
-
-  const combosComoProductos: Producto[] = promociones.value
-    .filter((c) => c.activo)
-    .map((c) => {
-      const platPrincipal = c.plataformas[0]
-      return {
-        id: 100000 + c.id,
-        plataformaId: platPrincipal?.id || 1,
-        plataforma: {
-          id: platPrincipal?.id || 1,
-          nombre: c.plataformas.map((p) => p.nombre).join(' + '),
-          slug: platPrincipal?.slug || 'combo',
-          color: platPrincipal?.color || '#8b6cff',
-          logoUrl: platPrincipal?.logoUrl || null,
-          coverUrl: c.imagenUrl || (platPrincipal as any)?.coverUrl || null,
-        },
-        nombre: c.nombre,
-        tipo: 'COMBO' as TipoProducto,
-        esCombo: true,
-        etiquetaPromo: c.etiquetaPromo || 'COMBO OFERTA',
-        precioRegular: Number(c.precioRegular),
-        duracionDias: c.duracionDias,
-        precio: Number(c.precioPromo),
-        stock: 10,
-        activo: c.activo,
-        descripcion: c.descripcion || null,
-        plataformasCombo: c.plataformas,
-      }
-    })
-
-  return [...prods, ...combosComoProductos]
-})
-
-// Filtrado reactivo en memoria: si filtras por Netflix, ves productos de Netflix Y además
-// combos que incluyan Netflix. Si filtras por Disney, ves Disney Y combos que incluyan Disney.
+// Filtrado reactivo en cliente para precio y orden
 const productosFiltrados = computed(() => {
-  let list = todosLosProductos.value
+  let list = [...productos.value]
 
-  // 1. Filtro por plataforma cruzado
-  if (plataformaSeleccionada.value) {
-    const slugFiltro = plataformaSeleccionada.value.toLowerCase().trim()
-    list = list.filter((p) => {
-      const pSlug = (p.plataforma?.slug || p.plataforma?.nombre || '').toLowerCase().trim()
-      if (pSlug === slugFiltro || pSlug.includes(slugFiltro)) return true
-
-      if (p.esCombo && p.plataformasCombo?.length) {
-        return p.plataformasCombo.some((plat) => {
-          const platSlug = (plat.slug || plat.nombre || '').toLowerCase().trim()
-          return platSlug === slugFiltro || platSlug.includes(slugFiltro) || slugFiltro.includes(platSlug)
-        })
-      }
-
-      return false
-    })
-  }
-
-  // 2. Filtro por tipo de plan (con tag Promociones y Combos)
-  if (tipoSeleccionado.value) {
-    if (tipoSeleccionado.value === 'PROMO') {
-      list = list.filter((p) => p.esCombo || p.tipo === 'COMBO')
-    } else {
-      list = list.filter((p) => p.tipo === tipoSeleccionado.value && !p.esCombo)
-    }
-  }
-
-  // 3. Filtro por precio mínimo
+  // Filtro por precio mínimo
   if (precioMin.value && !isNaN(Number(precioMin.value))) {
     const min = Number(precioMin.value)
     list = list.filter((p) => p.precio >= min)
   }
 
-  // 4. Filtro por precio máximo
+  // Filtro por precio máximo
   if (precioMax.value && !isNaN(Number(precioMax.value))) {
     const max = Number(precioMax.value)
     list = list.filter((p) => p.precio <= max)
   }
 
-  // 5. Ordenamiento
+  // Ordenamiento
   if (ordenSeleccionado.value === 'precio_asc') {
     list.sort((a, b) => a.precio - b.precio)
   } else if (ordenSeleccionado.value === 'precio_desc') {
@@ -367,14 +285,7 @@ onMounted(() => {
               <div class="space-y-0.5">
                 <label class="flex min-h-9 cursor-pointer items-center gap-2.5 rounded-lg px-2 text-sm text-[#d7dcf0] hover:bg-white/5">
                   <input v-model="tipoSeleccionado" type="radio" name="tipo" value="" class="size-4 accent-[#8b6cff]" />
-                  Todos los planes
-                </label>
-                <label class="flex min-h-9 cursor-pointer items-center gap-2.5 rounded-lg px-2 text-sm text-[#d7dcf0] hover:bg-white/5">
-                  <input v-model="tipoSeleccionado" type="radio" name="tipo" value="PROMO" class="size-4 accent-red-500" />
-                  <span class="inline-flex items-center gap-1.5 font-bold text-red-300">
-                    <Flame class="size-3.5 text-red-400" />
-                    Promociones y Combos
-                  </span>
+                  Todos
                 </label>
                 <label class="flex min-h-9 cursor-pointer items-center gap-2.5 rounded-lg px-2 text-sm text-[#d7dcf0] hover:bg-white/5">
                   <input v-model="tipoSeleccionado" type="radio" name="tipo" value="PANTALLA_INDIVIDUAL" class="size-4 accent-[#8b6cff]" />

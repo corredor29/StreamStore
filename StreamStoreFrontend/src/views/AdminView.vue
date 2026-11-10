@@ -6,8 +6,6 @@ import { useAuthStore } from '@/stores/auth'
 import { adminService } from '@/services/adminService'
 import { productService } from '@/services/productService'
 import type { Compra, CuentaAdmin, Plataforma, ResumenAdmin, ServicioAdmin, ComboPromo } from '@/types'
-import AdminCombosTable from '@/components/admin/AdminCombosTable.vue'
-import PromotionCreateModal from '@/components/admin/PromotionCreateModal.vue'
 import DeliverCredentialsModal from '@/components/admin/DeliverCredentialsModal.vue'
 import AdminSummaryCards from '@/components/admin/AdminSummaryCards.vue'
 import AccountsTable from '@/components/admin/AccountsTable.vue'
@@ -30,8 +28,8 @@ const activeTab = ref<TabKey>('inventario')
 // Estado de modales en 2 pasos
 const isPlatformModalOpen = ref(false)
 const isAccountModalOpen = ref(false)
-const isPromoModalOpen = ref(false)
-const combos = ref<ComboPromo[]>([])
+
+
 const selectedPlatformIdForAccount = ref<number | null>(null)
 
 const isCronExecuting = ref(false)
@@ -90,22 +88,6 @@ const servicios = ref<ServicioAdmin[]>([])
 const servicioAEntregar = ref<ServicioAdmin | null>(null)
 const entregasPendientes = computed(() => servicios.value.filter((s) => s.estadoEntrega === 'PENDIENTE' && s.estado !== 'VENCIDO').length)
 
-
-async function onPromoCreated() {
-  combos.value = await adminService.combos().catch(() => combos.value)
-}
-
-async function onToggleCombo(id: number) {
-  await adminService.toggleCombo(id).catch(() => {})
-  combos.value = await adminService.combos().catch(() => combos.value)
-}
-
-async function onEliminarCombo(id: number) {
-  if (!confirm('¿Seguro que deseas eliminar esta promoción?')) return
-  await adminService.eliminarCombo(id).catch(() => {})
-  combos.value = await adminService.combos().catch(() => combos.value)
-}
-
 async function onEntregado(mensaje: string) {
   servicioAEntregar.value = null
   cronMessage.value = mensaje
@@ -153,13 +135,12 @@ async function loadAdminData() {
         fallos.push(`${que}: ${e?.message || 'error desconocido'}`)
         return vacio
       })
-    const [res, cuents, plats, comps, servs, cmbs] = await Promise.all([
+    const [res, cuents, plats, comps, servs] = await Promise.all([
       seguro(adminService.resumen(), 'Resumen', null as ResumenAdmin | null),
       seguro(adminService.cuentas(), 'Cuentas', [] as CuentaAdmin[]),
       seguro(productService.getPlataformas(), 'Plataformas', [] as Plataforma[]),
       seguro(adminService.compras(), 'Ventas', [] as Compra[]),
       seguro(adminService.servicios(), 'Clientes y entregas', [] as ServicioAdmin[]),
-      seguro(adminService.combos(), 'Promociones', [] as ComboPromo[]),
     ])
     conectado.value = fallos.length === 0
     ultimaSync.value = new Date()
@@ -169,8 +150,7 @@ async function loadAdminData() {
     plataformas.value = plats
     compras.value = comps
     servicios.value = servs
-    combos.value = cmbs
-    if (res) resumen.value = res
+        if (res) resumen.value = res
   } catch (err: any) {
     console.error('Error cargando datos de administración:', err)
   } finally {
@@ -359,16 +339,7 @@ onMounted(() => {
             />
           </div>
 
-                    <!-- Tab: Promociones -->
-          <div v-else-if="activeTab === 'promociones'">
-            <AdminCombosTable
-              :combos="combos"
-              :plataformas="plataformas"
-              @abrir-modal-combo="isPromoModalOpen = true"
-              @toggle-activo="onToggleCombo"
-              @eliminar-combo="onEliminarCombo"
-            />
-          </div>
+                    
 
           <!-- Tab 3: Servicios a Clientes -->
           <div v-else-if="activeTab === 'servicios'">
@@ -389,12 +360,7 @@ onMounted(() => {
       />
 
             <!-- Modal Crear Promoción -->
-      <PromotionCreateModal
-        :is-open="isPromoModalOpen"
-        :plataformas="plataformas"
-        @close="isPromoModalOpen = false"
-        @created="onPromoCreated"
-      />
+      
 
       <!-- Modal Paso 1: Registrar Plataforma de Streaming -->
       <PlatformCreateModal
