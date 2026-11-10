@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue'
+import CustomSelect from '@/components/common/CustomSelect.vue'
 import { 
   Check, 
   ChevronDown, 
@@ -111,6 +112,26 @@ function getEstadoBadge(estado: CuentaAdmin['estado']) {
   }
 }
 
+
+const opcionesPlataforma = computed(() => [
+  { value: 'TODAS', label: `Todas las plataformas (${props.cuentas.length})` },
+  ...props.plataformas.map((p: Plataforma) => ({ value: p.slug || p.nombre, label: p.nombre })),
+])
+
+const opcionesEstadoCuentas = [
+  { value: 'TODOS', label: 'Todos los estados' },
+  { value: 'DISPONIBLE', label: 'Disponibles' },
+  { value: 'PARCIAL', label: 'En uso parcial' },
+  { value: 'VENDIDA', label: 'Agotadas' },
+]
+
+const opcionesSortCuentas = [
+  { value: 'id-desc', label: 'Más recientes primero' },
+  { value: 'disponibles-desc', label: 'Mayor stock libre' },
+  { value: 'disponibles-asc', label: 'Menor stock libre' },
+  { value: 'plataforma', label: 'Nombre (A-Z)' },
+]
+
 // Filtro y Ordenamiento
 const cuentasFiltradas = computed(() => {
   const q = searchQuery.value.toLowerCase().trim()
@@ -209,37 +230,25 @@ function irAPagina(pagina: number) {
       <!-- Filtros Dropdown -->
       <div class="flex flex-wrap items-center gap-2 text-xs">
         <!-- Selector Plataforma -->
-        <select
+        <CustomSelect
           v-model="plataformaFiltro"
-          class="rounded-xl border border-ad-line bg-ad-panel px-3 py-2 text-xs text-ad-text focus:border-ad-accent focus:outline-none cursor-pointer"
-        >
-          <option value="TODAS">Todas las plataformas ({{ props.cuentas.length }})</option>
-          <option v-for="plat in plataformas" :key="plat.id" :value="plat.slug || plat.nombre">
-            {{ plat.nombre }}
-          </option>
-        </select>
+          :options="opcionesPlataforma"
+          aria-label="Filtrar por plataforma"
+        />
 
         <!-- Selector Estado -->
-        <select
+        <CustomSelect
           v-model="estadoFiltro"
-          class="rounded-xl border border-ad-line bg-ad-panel px-3 py-2 text-xs text-ad-text focus:border-ad-accent focus:outline-none cursor-pointer"
-        >
-          <option value="TODOS">Todos los estados</option>
-          <option value="DISPONIBLE">Disponibles</option>
-          <option value="PARCIAL">En uso parcial</option>
-          <option value="VENDIDA">Agotadas</option>
-        </select>
+          :options="opcionesEstadoCuentas"
+          aria-label="Filtrar por estado"
+        />
 
         <!-- Selector Orden -->
-        <select
+        <CustomSelect
           v-model="sortBy"
-          class="rounded-xl border border-ad-line bg-ad-panel px-3 py-2 text-xs text-ad-text focus:border-ad-accent focus:outline-none cursor-pointer"
-        >
-          <option value="id-desc">Más recientes primero</option>
-          <option value="disponibles-desc">Mayor stock libre</option>
-          <option value="disponibles-asc">Menor stock libre</option>
-          <option value="plataforma">Nombre (A-Z)</option>
-        </select>
+          :options="opcionesSortCuentas"
+          aria-label="Ordenar cuentas"
+        />
 
         <span class="text-ad-dim tabular-nums text-[11px] ml-1 hidden sm:inline">
           {{ cuentasFiltradas.length }} en total

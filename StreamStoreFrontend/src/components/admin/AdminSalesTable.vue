@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
 import { Receipt, Search, X } from '@lucide/vue'
+import CustomSelect from '@/components/common/CustomSelect.vue'
 import type { Compra } from '@/types'
 import { formatPrice } from '@/composables/useFormat'
 
@@ -10,6 +11,14 @@ type FiltroEstado = 'TODOS' | Compra['estado']
 
 const searchQuery = ref('')
 const estadoFiltro = ref<FiltroEstado>('TODOS')
+
+const opcionesEstado = [
+  { value: 'TODOS', label: 'Todos los estados' },
+  { value: 'PAGADA', label: 'Pagadas' },
+  { value: 'PENDIENTE', label: 'Pendientes' },
+  { value: 'RECHAZADA', label: 'Rechazadas' },
+  { value: 'CANCELADA', label: 'Canceladas' },
+]
 
 const ESTADOS: Record<string, { label: string; dot: string; text: string }> = {
   PAGADA: { label: 'Pagada', dot: 'bg-ad-ok', text: 'text-ad-text' },
@@ -79,17 +88,11 @@ const comprasFiltradas = computed(() => {
             <X class="size-3.5" />
           </button>
         </div>
-        <select
+        <CustomSelect
           v-model="estadoFiltro"
+          :options="opcionesEstado"
           aria-label="Filtrar por estado"
-          class="rounded-md border border-ad-line bg-ad-raised px-2.5 py-1.5 text-[13px] text-ad-text focus:border-ad-accent focus:outline-none cursor-pointer"
-        >
-          <option value="TODOS">Todos los estados</option>
-          <option value="PAGADA">Pagadas</option>
-          <option value="PENDIENTE">Pendientes</option>
-          <option value="RECHAZADA">Rechazadas</option>
-          <option value="CANCELADA">Canceladas</option>
-        </select>
+        />
       </div>
     </div>
 

@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
+import CustomSelect from '@/components/common/CustomSelect.vue'
 import { 
   Check, 
   CheckCircle2, 
@@ -70,6 +71,13 @@ const conteos = computed(() => {
   const inactivos = total - activos
   return { total, activos, inactivos }
 })
+
+const opcionesEstadoCombos = computed(() => [
+  { value: 'TODOS', label: `Todos los combos (${conteos.value.total})` },
+  { value: 'ACTIVOS', label: `Activos (${conteos.value.activos})` },
+  { value: 'INACTIVOS', label: `Pausados (${conteos.value.inactivos})` },
+])
+
 </script>
 
 <template>
@@ -114,14 +122,11 @@ const conteos = computed(() => {
     <!-- Filtros de Combos -->
     <div class="hud-panel p-3 flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3">
       <div class="flex items-center gap-1.5 overflow-x-auto text-xs">
-        <select
+        <CustomSelect
           v-model="estadoFiltro"
-          class="rounded-lg border border-ad-line bg-ad-raised px-3 py-2 text-xs text-ad-text focus:border-ad-accent focus:outline-none cursor-pointer"
-        >
-          <option value="TODOS">Todos los combos ({{ conteos.total }})</option>
-          <option value="ACTIVOS">Activos ({{ conteos.activos }})</option>
-          <option value="INACTIVOS">Pausados ({{ conteos.inactivos }})</option>
-        </select>
+          :options="opcionesEstadoCombos"
+          aria-label="Filtrar combos"
+        />
 
         <span class="text-ad-dim tabular-nums text-[11px] ml-1">
           {{ combosFiltrados.length }} combos

@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
+import CustomSelect from '@/components/common/CustomSelect.vue'
 import { RouterLink } from 'vue-router'
 import { Check, Clock, ShoppingCart, Tv, Users } from '@lucide/vue'
 import type { Producto } from '@/types'
@@ -128,13 +129,12 @@ function onAgregar() {
       <div class="flex items-center gap-2 border-t border-white/10 pt-3">
         <div v-if="!isAgotado && maxSeleccionable > 1" class="w-[4.5rem] shrink-0">
           <label :for="`qty-${producto.id}`" class="sr-only">Cantidad de {{ producto.nombre }}</label>
-          <select
-            :id="`qty-${producto.id}`"
-            v-model.number="cantidad"
-            class="h-11 w-full rounded-lg border border-white/20 bg-[#0a0d1c] px-2 text-sm font-semibold text-white hover:border-white/40"
-          >
-            <option v-for="n in maxSeleccionable" :key="n" :value="n">{{ n }}</option>
-          </select>
+          <CustomSelect
+            v-model="cantidad"
+            :options="Array.from({ length: maxSeleccionable }, (_, i) => ({ value: i + 1, label: `${i + 1} ud` }))"
+            compact
+            aria-label="Cantidad"
+          />
         </div>
 
         <button

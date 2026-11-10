@@ -227,14 +227,13 @@ watch(
             <div class="ss-field">
               <label :for="`product-detail-qty-${producto.id}`" class="ss-label">Cantidad</label>
               <div class="flex flex-col gap-3 min-[420px]:flex-row">
-                <select
-                  :id="`product-detail-qty-${producto.id}`"
-                  v-model.number="cantidad"
+                <CustomSelect
+                  v-model="cantidad"
+                  :options="Array.from({ length: maxSeleccionable }, (_, i) => ({ value: i + 1, label: `${i + 1} unidad${i > 0 ? 'es' : ''}` }))"
                   :disabled="isAgotado"
-                  class="ss-input min-[420px]:!w-24"
-                >
-                  <option v-for="n in maxSeleccionable" :key="n" :value="n">{{ n }}</option>
-                </select>
+                  compact
+                  aria-label="Cantidad"
+                />
                 <button
                   type="button"
                   class="ss-btn flex-1"

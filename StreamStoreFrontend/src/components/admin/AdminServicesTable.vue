@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
+import CustomSelect from '@/components/common/CustomSelect.vue'
 import { Check, Clock, Copy, Eye, EyeOff, PackageCheck, Search, Send, Users, X } from '@lucide/vue'
 import type { ServicioAdmin } from '@/types'
 import { formatDate } from '@/composables/useFormat'
@@ -68,6 +69,15 @@ const serviciosFiltrados = computed(() => {
     // Los pendientes de entrega primero: son los que requieren acción
     .sort((a, b) => Number(b.estadoEntrega === 'PENDIENTE' && b.estado !== 'VENCIDO') - Number(a.estadoEntrega === 'PENDIENTE' && a.estado !== 'VENCIDO'))
 })
+
+const opcionesFiltroServicios = computed(() => [
+  { value: 'TODOS', label: `Todos (${conteos.value.total})` },
+  { value: 'PENDIENTE', label: `Por entregar (${conteos.value.pendientes})` },
+  { value: 'ENTREGADO', label: `Entregados (${conteos.value.entregados})` },
+  { value: 'POR_VENCER', label: `Por vencer (${conteos.value.porVencer})` },
+  { value: 'VENCIDO', label: `Vencidos (${conteos.value.vencidos})` },
+])
+
 </script>
 
 <template>
@@ -111,17 +121,11 @@ const serviciosFiltrados = computed(() => {
         </button>
       </div>
       <div class="flex items-center gap-2">
-        <select
+        <CustomSelect
           v-model="filtro"
+          :options="opcionesFiltroServicios"
           aria-label="Filtrar servicios"
-          class="rounded-lg border border-ad-line bg-ad-raised px-3 py-2 text-xs text-ad-text focus:border-ad-accent focus:outline-none cursor-pointer"
-        >
-          <option value="TODOS">Todos ({{ conteos.total }})</option>
-          <option value="PENDIENTE">Por entregar ({{ conteos.pendientes }})</option>
-          <option value="ENTREGADO">Entregados ({{ conteos.entregados }})</option>
-          <option value="POR_VENCER">Por vencer ({{ conteos.porVencer }})</option>
-          <option value="VENCIDO">Vencidos ({{ conteos.vencidos }})</option>
-        </select>
+        />
         <span class="text-ad-dim tabular-nums text-[11px] hidden sm:inline">{{ serviciosFiltrados.length }} servicios</span>
       </div>
     </div>
