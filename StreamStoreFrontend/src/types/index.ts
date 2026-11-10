@@ -38,7 +38,7 @@ export interface Plataforma {
   activa: boolean
 }
 
-export type TipoProducto = 'CUENTA_COMPLETA' | 'PANTALLA'
+export type TipoProducto = 'CUENTA_COMPLETA' | 'PANTALLA' | 'COMBO'
 
 export interface Producto {
   id: number
@@ -51,6 +51,10 @@ export interface Producto {
   stock: number
   descripcion?: string | null
   activo: boolean
+  esCombo?: boolean
+  etiquetaPromo?: string | null
+  precioRegular?: number | null
+  plataformasCombo?: Pick<Plataforma, 'id' | 'nombre' | 'slug' | 'color' | 'logoUrl' | 'coverUrl'>[]
 }
 
 export interface ProductoFiltros {

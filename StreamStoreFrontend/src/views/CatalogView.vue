@@ -104,15 +104,14 @@ async function loadData() {
   loading.value = true
   error.value = null
   try {
-    const [plats, prods] = await Promise.all([
+    const [plats, prods, prom] = await Promise.all([
       productService.getPlataformas(),
-      productService.getProductos({
-        plataforma: plataformaSeleccionada.value || undefined,
-        tipo: (tipoSeleccionado.value as TipoProducto) || undefined,
-      }),
+      productService.getProductos(),
+      productService.getPromociones(),
     ])
     plataformas.value = plats
     productos.value = prods
+    promociones.value = prom.filter((p) => p.activo)
   } catch (err: any) {
     error.value = err?.message || 'Error al cargar los productos del catálogo.'
   } finally {
@@ -122,25 +121,11 @@ async function loadData() {
 
 watch(
   () => [plataformaSeleccionada.value, tipoSeleccionado.value],
-  async () => {
+  () => {
     const query: Record<string, string> = {}
     if (plataformaSeleccionada.value) query.plataforma = plataformaSeleccionada.value
     if (tipoSeleccionado.value) query.tipo = tipoSeleccionado.value
-
     router.replace({ query })
-
-    try {
-      loading.value = true
-      error.value = null
-      productos.value = await productService.getProductos({
-        plataforma: plataformaSeleccionada.value || undefined,
-        tipo: (tipoSeleccionado.value as TipoProducto) || undefined,
-      })
-    } catch (err: any) {
-      error.value = err?.message || 'Error al filtrar productos.'
-    } finally {
-      loading.value = false
-    }
   }
 )
 
@@ -152,23 +137,87 @@ function resetFiltros() {
   ordenSeleccionado.value = 'destacados'
 }
 
-// Filtrado y ordenamiento en cliente para precio y orden
-const productosFiltrados = computed(() => {
-  let list = [...productos.value]
+// Combina productos normales y combos promocionales como entidades de producto integradas
+const todosLosProductos = computed<Producto[]>(() => {
+  const prods = [...productos.value]
 
-  // Filtro por precio mínimo
+  const combosComoProductos: Producto[] = promociones.value
+    .filter((c) => c.activo)
+    .map((c) => {
+      const platPrincipal = c.plataformas[0]
+      return {
+        id: 100000 + c.id,
+        plataformaId: platPrincipal?.id || 1,
+        plataforma: {
+          id: platPrincipal?.id || 1,
+          nombre: c.plataformas.map((p) => p.nombre).join(' + '),
+          slug: platPrincipal?.slug || 'combo',
+          color: platPrincipal?.color || '#8b6cff',
+          logoUrl: platPrincipal?.logoUrl || null,
+          coverUrl: c.imagenUrl || (platPrincipal as any)?.coverUrl || null,
+        },
+        nombre: c.nombre,
+        tipo: 'COMBO' as TipoProducto,
+        esCombo: true,
+        etiquetaPromo: c.etiquetaPromo || 'COMBO OFERTA',
+        precioRegular: Number(c.precioRegular),
+        duracionDias: c.duracionDias,
+        precio: Number(c.precioPromo),
+        stock: 10,
+        activo: c.activo,
+        descripcion: c.descripcion || null,
+        plataformasCombo: c.plataformas,
+      }
+    })
+
+  return [...prods, ...combosComoProductos]
+})
+
+// Filtrado reactivo en memoria: si filtras por Netflix, ves productos de Netflix Y además
+// combos que incluyan Netflix. Si filtras por Disney, ves Disney Y combos que incluyan Disney.
+const productosFiltrados = computed(() => {
+  let list = todosLosProductos.value
+
+  // 1. Filtro por plataforma cruzado
+  if (plataformaSeleccionada.value) {
+    const slugFiltro = plataformaSeleccionada.value.toLowerCase().trim()
+    list = list.filter((p) => {
+      const pSlug = (p.plataforma?.slug || p.plataforma?.nombre || '').toLowerCase().trim()
+      if (pSlug === slugFiltro || pSlug.includes(slugFiltro)) return true
+
+      if (p.esCombo && p.plataformasCombo?.length) {
+        return p.plataformasCombo.some((plat) => {
+          const platSlug = (plat.slug || plat.nombre || '').toLowerCase().trim()
+          return platSlug === slugFiltro || platSlug.includes(slugFiltro) || slugFiltro.includes(platSlug)
+        })
+      }
+
+      return false
+    })
+  }
+
+  // 2. Filtro por tipo de plan (con tag Promociones y Combos)
+  if (tipoSeleccionado.value) {
+    if (tipoSeleccionado.value === 'PROMO') {
+      list = list.filter((p) => p.esCombo || p.tipo === 'COMBO')
+    } else {
+      list = list.filter((p) => p.tipo === tipoSeleccionado.value && !p.esCombo)
+    }
+  }
+
+  // 3. Filtro por precio mínimo
   if (precioMin.value && !isNaN(Number(precioMin.value))) {
     const min = Number(precioMin.value)
     list = list.filter((p) => p.precio >= min)
   }
 
-  // Filtro por precio máximo
+  // 4. Filtro por precio máximo
   if (precioMax.value && !isNaN(Number(precioMax.value))) {
     const max = Number(precioMax.value)
     list = list.filter((p) => p.precio <= max)
   }
 
-  // Ordenamiento
+  // 5. Ordenamiento
   if (ordenSeleccionado.value === 'precio_asc') {
     list.sort((a, b) => a.precio - b.precio)
   } else if (ordenSeleccionado.value === 'precio_desc') {
@@ -263,133 +312,9 @@ onMounted(() => {
         </div>
       </header>
 
-            <!-- Toast Alerta Combo Agregado -->
-      <div
-        v-if="toastComboAgregado"
-        class="fixed bottom-6 right-6 z-50 flex items-center gap-2 rounded-2xl border border-emerald-400/40 bg-neutral-900/95 px-5 py-3 text-xs font-bold text-emerald-300 shadow-[0_15px_40px_rgba(0,0,0,0.9)] backdrop-blur-xl animate-in slide-in-from-bottom-3"
-      >
-        <Sparkles class="size-4 text-emerald-400" />
-        <span>{{ toastComboAgregado }}</span>
-      </div>
+            
 
-      <!-- SECCIÓN DESTACADA DE PROMOCIONES Y COMBOS ACTIVOS -->
-      <section v-if="promociones.length > 0" class="mb-10 rounded-3xl border border-white/15 bg-gradient-to-r from-purple-950/40 via-neutral-900/60 to-cyan-950/40 p-5 sm:p-7 backdrop-blur-xl relative overflow-hidden shadow-2xl">
-        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6">
-          <div class="space-y-1">
-            <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-rose-500/20 border border-rose-500/30 text-rose-300 text-xs font-mono font-bold uppercase">
-              <Flame class="size-3.5" />
-              <span>Ofertas del Administrador</span>
-            </div>
-            <h2 class="font-display text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
-              Combos y Promociones Exclusivas
-            </h2>
-            <p class="text-xs sm:text-sm text-slate-300">
-              Paquetes combinados con descuento especial y entrega automática inmediata.
-            </p>
-          </div>
-          <span class="text-xs font-mono text-cyan-300 font-bold self-start sm:self-auto px-3 py-1 rounded-full bg-white/5 border border-white/10">
-            {{ promociones.length }} {{ promociones.length === 1 ? 'oferta activa' : 'ofertas activas' }}
-          </span>
-        </div>
-
-        <!-- Tarjetas de Promociones -->
-        <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
-          <article
-            v-for="c in promociones"
-            :key="c.id"
-            class="rounded-2xl border border-white/15 bg-neutral-900/90 overflow-hidden shadow-xl flex flex-col justify-between transition-all duration-300 hover:border-cyan-400/50 hover:shadow-[0_15px_35px_rgba(6,182,212,0.15)] group"
-          >
-            <!-- Portada de la Promoción -->
-            <div class="relative aspect-video w-full overflow-hidden bg-black">
-              <img
-                :src="c.imagenUrl || '/hbo_max_mosaic_bg.jpg'"
-                :alt="c.nombre"
-                class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-              />
-              <div class="absolute inset-0 bg-gradient-to-t from-black via-black/25 to-black/40 pointer-events-none" />
-
-              <!-- Badge Oferta -->
-              <div class="absolute top-3 left-3 z-10 flex items-center gap-1.5 px-3 py-1 rounded-full bg-red-600 text-white text-[10px] font-mono font-black uppercase tracking-wider shadow-lg">
-                <Flame class="size-3" />
-                <span>{{ c.etiquetaPromo || 'PROMO' }}</span>
-              </div>
-
-              <!-- Logos de Plataformas Combinadas -->
-              <div class="absolute bottom-3 left-3 z-10 flex items-center -space-x-2">
-                <div
-                  v-for="(plat, idx) in c.plataformas"
-                  :key="plat.id"
-                  class="size-8 rounded-lg border-2 border-black bg-neutral-900 overflow-hidden shadow-lg flex items-center justify-center font-bold text-xs text-white"
-                  :style="{ backgroundColor: plat.color || '#8057FF', zIndex: 10 - idx }"
-                  :title="plat.nombre"
-                >
-                  <img v-if="plat.logoUrl" :src="plat.logoUrl" :alt="plat.nombre" class="w-full h-full object-contain" />
-                  <span v-else>{{ plat.nombre.slice(0, 2) }}</span>
-                </div>
-              </div>
-
-              <!-- Porcentaje de Ahorro -->
-              <div
-                v-if="c.precioRegular > c.precioPromo"
-                class="absolute top-3 right-3 z-10 px-2.5 py-1 rounded-md bg-emerald-500 text-black text-[10px] font-black uppercase font-mono shadow-md"
-              >
-                -{{ Math.round(((c.precioRegular - c.precioPromo) / c.precioRegular) * 100) }}% OFF
-              </div>
-            </div>
-
-            <!-- Información -->
-            <div class="p-5 space-y-3 flex-1 flex flex-col justify-between">
-              <div class="space-y-2">
-                <h3 class="font-display font-extrabold text-base text-white group-hover:text-cyan-300 transition-colors">
-                  {{ c.nombre }}
-                </h3>
-                <p class="text-xs text-slate-300 line-clamp-2 leading-relaxed">
-                  {{ c.descripcion || 'Acceso multi-servicio garantizado.' }}
-                </p>
-                <div class="flex items-center gap-2 text-[11px] text-slate-400 pt-1">
-                  <span class="inline-flex items-center gap-1">
-                    <Tv class="size-3 text-cyan-400" />
-                    {{ c.pantallasPorPlataforma }} pantalla c/u
-                  </span>
-                  <span>·</span>
-                  <span class="text-purple-300 font-semibold">
-                    {{ c.duracionDias }} días
-                  </span>
-                </div>
-              </div>
-
-              <!-- Precios y Botón de Compra -->
-              <div class="pt-4 border-t border-white/10 space-y-3">
-                <div class="flex items-baseline justify-between">
-                  <div>
-                    <span class="text-[10px] text-slate-500 block line-through">
-                      ${{ Number(c.precioRegular).toLocaleString('es-CO') }}
-                    </span>
-                    <span class="font-display text-2xl font-black text-cyan-300">
-                      ${{ Number(c.precioPromo).toLocaleString('es-CO') }}
-                    </span>
-                  </div>
-                  <span
-                    v-if="c.precioRegular > c.precioPromo"
-                    class="text-[10px] font-mono font-bold text-emerald-400 bg-emerald-950/60 border border-emerald-500/30 px-2 py-0.5 rounded"
-                  >
-                    Ahorras ${ (c.precioRegular - c.precioPromo).toLocaleString('es-CO') }
-                  </span>
-                </div>
-
-                <button
-                  type="button"
-                  class="w-full py-2.5 px-4 rounded-xl bg-gradient-to-r from-cyan-400 to-cyan-300 hover:brightness-110 active:scale-[0.99] text-black font-black text-xs uppercase tracking-wider transition-all shadow-md flex items-center justify-center gap-1.5 cursor-pointer"
-                  @click="agregarComboAlCarrito(c)"
-                >
-                  <Plus class="size-4 stroke-[3]" />
-                  <span>Agregar al carrito</span>
-                </button>
-              </div>
-            </div>
-          </article>
-        </div>
-      </section>
+      
 
       <div class="flex flex-col items-start gap-6 lg:flex-row lg:gap-8">
         <!-- Filtros: desplegables en móvil, siempre visibles en escritorio -->
@@ -442,7 +367,14 @@ onMounted(() => {
               <div class="space-y-0.5">
                 <label class="flex min-h-9 cursor-pointer items-center gap-2.5 rounded-lg px-2 text-sm text-[#d7dcf0] hover:bg-white/5">
                   <input v-model="tipoSeleccionado" type="radio" name="tipo" value="" class="size-4 accent-[#8b6cff]" />
-                  Todos
+                  Todos los planes
+                </label>
+                <label class="flex min-h-9 cursor-pointer items-center gap-2.5 rounded-lg px-2 text-sm text-[#d7dcf0] hover:bg-white/5">
+                  <input v-model="tipoSeleccionado" type="radio" name="tipo" value="PROMO" class="size-4 accent-red-500" />
+                  <span class="inline-flex items-center gap-1.5 font-bold text-red-300">
+                    <Flame class="size-3.5 text-red-400" />
+                    Promociones y Combos
+                  </span>
                 </label>
                 <label class="flex min-h-9 cursor-pointer items-center gap-2.5 rounded-lg px-2 text-sm text-[#d7dcf0] hover:bg-white/5">
                   <input v-model="tipoSeleccionado" type="radio" name="tipo" value="PANTALLA_INDIVIDUAL" class="size-4 accent-[#8b6cff]" />

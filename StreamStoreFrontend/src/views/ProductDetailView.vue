@@ -6,6 +6,7 @@ import {
   Check, 
   CheckCircle2, 
   Clock, 
+  Flame, 
   ShieldCheck, 
   ShoppingCart, 
   Tv, 
@@ -42,7 +43,14 @@ const maxSeleccionable = computed(() => {
 })
 
 const tipoBadge = computed(() => {
-  if (!producto.value) return { label: '', icon: Tv }
+  if (!producto.value) return { label: '', icon: Tv, desc: '' }
+  if (producto.value.esCombo || producto.value.tipo === 'COMBO') {
+    return {
+      label: producto.value.etiquetaPromo || 'Combo Promocional Multi-Plataforma',
+      icon: Flame,
+      desc: 'Paquete de streaming combinado con precio especial y entrega inmediata.',
+    }
+  }
   return producto.value.tipo === 'CUENTA_COMPLETA'
     ? { label: 'Cuenta completa', icon: Users, desc: 'Adquieres la cuenta total con todas las pantallas disponibles.' }
     : { label: 'Pantalla individual', icon: Tv, desc: 'Adquieres un perfil exclusivo dentro de una cuenta compartida.' }
