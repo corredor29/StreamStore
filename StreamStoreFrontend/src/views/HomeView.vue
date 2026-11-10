@@ -39,7 +39,14 @@ import {
   VolumeX, 
   Zap,
   CheckCircle2,
-  X
+  X,
+  Play,
+  Pause,
+  Maximize2,
+  Sparkles,
+  Star,
+  Users,
+  Tv
 } from '@lucide/vue'
 import type { TipoProducto } from '@/types'
 import { useCartStore } from '@/stores/cart'
@@ -821,6 +828,146 @@ const formatCOP = (val: number) => {
     maximumFractionDigits: 0,
   }).format(val)
 }
+
+interface FamilyVideo {
+  id: number
+  title: string
+  subtitle: string
+  quote: string
+  client: string
+  city: string
+  platformTag: string
+  duration: string
+  videoSrc: string
+  badge: string
+}
+
+const familyVideos: FamilyVideo[] = [
+  {
+    id: 1,
+    title: 'Noche de Películas en Familia',
+    subtitle: 'Estrenos en 4K Ultra HD en la sala de casa',
+    quote: 'StreamStore cambió nuestras noches de fin de semana. Todo carga al instante y la calidad 4K es impresionante.',
+    client: 'Familia Restrepo',
+    city: 'Medellín',
+    platformTag: 'Netflix 4K · Cuenta Completa',
+    duration: '0:48',
+    videoSrc: '/videos/familia%201.mp4',
+    badge: 'HISTORIA DESTACADA',
+  },
+  {
+    id: 2,
+    title: 'Maratón de Series Juntos',
+    subtitle: 'Risas, emoción y cero interrupciones',
+    quote: 'Llevamos más de 6 meses con el servicio y nunca se ha caído. El soporte por WhatsApp es inmediato.',
+    client: 'Familia Ramírez',
+    city: 'Bogotá',
+    platformTag: 'Max & Prime Video · Pantalla con PIN',
+    duration: '0:28',
+    videoSrc: '/videos/familia%202.mp4',
+    badge: 'CLIENTE VERIFICADO',
+  },
+  {
+    id: 3,
+    title: 'Tardes de Niños y Animación',
+    subtitle: 'Contenido seguro con control parental y perfiles propios',
+    quote: 'Mis hijos adoran sus series en Disney+ y yo estoy tranquila porque cada uno tiene su perfil protegido.',
+    client: 'Familia Mendoza',
+    city: 'Cali',
+    platformTag: 'Disney+ Total · Pantalla Individual',
+    duration: '0:39',
+    videoSrc: '/videos/familia%203.mp4',
+    badge: 'FAMILIA & NIÑOS',
+  },
+  {
+    id: 4,
+    title: 'Cine en Casa sin Límites',
+    subtitle: 'La magia de la pantalla grande en tu hogar',
+    quote: 'El ahorro frente a pagar cada plataforma por separado es brutal. 100% recomendado.',
+    client: 'Familia Osorio',
+    city: 'Barranquilla',
+    platformTag: 'Combo Familiar Ultra HD',
+    duration: '0:52',
+    videoSrc: '/videos/familia%204.mp4',
+    badge: 'EXPERIENCIA 4K',
+  },
+  {
+    id: 5,
+    title: 'Compartiendo lo que más Amamos',
+    subtitle: 'Entretenimiento para todas las edades al mejor precio',
+    quote: 'Activación en menos de un minuto. Compré con Nequi y al momento ya estábamos viendo nuestras series.',
+    client: 'Familia Cárdenas',
+    city: 'Bucaramanga',
+    platformTag: 'Suscripción Anual · Verificada',
+    duration: '0:33',
+    videoSrc: '/videos/familia%205.mp4',
+    badge: 'ENTREGA INMEDIATA',
+  },
+]
+
+const selectedVideoIndex = ref(0)
+const selectedVideo = computed(() => familyVideos[selectedVideoIndex.value])
+const isMainVideoPlaying = ref(true)
+const isMainVideoMuted = ref(true)
+const mainVideoRef = ref<HTMLVideoElement | null>(null)
+const mainVideoProgress = ref(0)
+
+function selectVideo(index: number) {
+  selectedVideoIndex.value = index
+  mainVideoProgress.value = 0
+  if (mainVideoRef.value) {
+    mainVideoRef.value.currentTime = 0
+    mainVideoRef.value.play().then(() => {
+      isMainVideoPlaying.value = true
+    }).catch(() => {})
+  }
+}
+
+function toggleMainVideoPlay() {
+  if (!mainVideoRef.value) return
+  if (mainVideoRef.value.paused) {
+    mainVideoRef.value.play().catch(() => {})
+    isMainVideoPlaying.value = true
+  } else {
+    mainVideoRef.value.pause()
+    isMainVideoPlaying.value = false
+  }
+}
+
+function toggleMainVideoMute() {
+  if (!mainVideoRef.value) return
+  mainVideoRef.value.muted = !mainVideoRef.value.muted
+  isMainVideoMuted.value = mainVideoRef.value.muted
+}
+
+function toggleMainVideoFullscreen() {
+  if (!mainVideoRef.value) return
+  const container = mainVideoRef.value.parentElement
+  if (!document.fullscreenElement) {
+    if (container && container.requestFullscreen) {
+      container.requestFullscreen().catch(() => {})
+    } else if (mainVideoRef.value.requestFullscreen) {
+      mainVideoRef.value.requestFullscreen().catch(() => {})
+    }
+  } else {
+    document.exitFullscreen().catch(() => {})
+  }
+}
+
+function onMainVideoTimeUpdate() {
+  if (!mainVideoRef.value || !mainVideoRef.value.duration) return
+  mainVideoProgress.value = (mainVideoRef.value.currentTime / mainVideoRef.value.duration) * 100
+}
+
+function seekMainVideo(event: MouseEvent) {
+  if (!mainVideoRef.value || !mainVideoRef.value.duration) return
+  const target = event.currentTarget as HTMLElement
+  const rect = target.getBoundingClientRect()
+  const clickX = event.clientX - rect.left
+  const pct = Math.max(0, Math.min(1, clickX / rect.width))
+  mainVideoRef.value.currentTime = pct * mainVideoRef.value.duration
+}
+
 </script>
 
 <template>
@@ -1281,6 +1428,258 @@ const formatCOP = (val: number) => {
       </section>
       </template>
     </div>
+
+    <!-- ================= 4. HISTORIAS REALES · FAMILIAS FELICES ================= -->
+    <section class="relative bg-black py-20 overflow-hidden border-t border-white/10" aria-label="Historias de familias felices">
+      <!-- Resplandor ambiental de fondo -->
+      <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[450px] bg-gradient-to-tr from-purple-600/15 via-cyan-500/15 to-transparent blur-[130px] pointer-events-none" />
+
+      <div class="container-app relative z-10 max-w-6xl mx-auto space-y-12">
+        <!-- Encabezado de la Sección -->
+        <div class="text-center max-w-3xl mx-auto space-y-4">
+          <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-cyan-400/30 bg-cyan-950/40 backdrop-blur-md shadow-[0_0_20px_rgba(6,182,212,0.2)]">
+            <Sparkles class="size-3.5 text-cyan-300" aria-hidden="true" />
+            <span class="text-xs font-mono font-bold tracking-[0.2em] text-cyan-300 uppercase">
+              Historias Reales · Familias StreamStore
+            </span>
+          </div>
+
+          <h2 class="font-display text-3xl sm:text-5xl lg:text-6xl font-extrabold uppercase tracking-tight leading-[1.05]">
+            <span class="title-metal">Familias felices,</span><br />
+            <span class="bg-gradient-to-r from-[#9B7BFF] via-[#B26BFF] to-[#22D3EE] bg-clip-text text-transparent drop-shadow-[0_0_35px_rgba(6,182,212,0.4)]">
+              momentos inolvidables
+            </span>
+          </h2>
+
+          <p class="text-sm sm:text-base text-slate-300 max-w-2xl mx-auto leading-relaxed">
+            Mira cómo hogares reales disfrutan de sus películas, series y deportes favoritos en 4K Ultra HD, con entrega inmediata y garantía total.
+          </p>
+        </div>
+
+        <!-- REPRODUCTOR CINEMÁTICO PRINCIPAL (TEATRO STREAMSTORE) -->
+        <div class="relative rounded-3xl border border-white/20 bg-neutral-950/90 backdrop-blur-2xl overflow-hidden shadow-[0_20px_70px_rgba(0,0,0,0.95)] group">
+          <!-- Aspect ratio video container -->
+          <div class="relative aspect-video w-full max-h-[640px] bg-black overflow-hidden flex items-center justify-center">
+            <video
+              ref="mainVideoRef"
+              :key="selectedVideo.id"
+              :src="selectedVideo.videoSrc"
+              class="w-full h-full object-cover transition-opacity duration-500"
+              autoplay
+              loop
+              :muted="isMainVideoMuted"
+              playsinline
+              preload="auto"
+              @play="isMainVideoPlaying = true"
+              @pause="isMainVideoPlaying = false"
+              @timeupdate="onMainVideoTimeUpdate"
+            />
+
+            <!-- Viñeta degradada superior e inferior -->
+            <div class="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 via-60% to-black/60 pointer-events-none" />
+
+            <!-- Insignias Superiores -->
+            <div class="absolute top-4 sm:top-6 inset-x-4 sm:inset-x-6 flex items-center justify-between z-20 pointer-events-none">
+              <div class="flex items-center gap-2">
+                <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-black/70 border border-white/20 text-[11px] font-mono font-bold text-white backdrop-blur-md shadow-lg">
+                  <span class="size-2 rounded-full bg-red-500 animate-pulse" />
+                  4K ULTRA HD
+                </span>
+                <span class="hidden sm:inline-flex items-center px-2.5 py-1 rounded-full bg-white/10 border border-white/15 text-[11px] font-mono text-cyan-300 font-semibold backdrop-blur-md">
+                  {{ selectedVideo.badge }}
+                </span>
+              </div>
+
+              <div class="flex items-center gap-1.5 px-3 py-1 rounded-full bg-black/70 border border-amber-400/30 text-amber-300 text-xs font-semibold backdrop-blur-md shadow-lg">
+                <div class="flex items-center">
+                  <Star v-for="s in 5" :key="s" class="size-3 fill-amber-400 text-amber-400" />
+                </div>
+                <span class="font-bold ml-1">5.0</span>
+                <span class="hidden sm:inline text-slate-300 text-[11px]">· Verificado</span>
+              </div>
+            </div>
+
+            <!-- Botón Central de Play/Pause (hover o pausa) -->
+            <button
+              type="button"
+              class="absolute z-20 size-16 sm:size-20 rounded-full bg-black/60 border border-white/30 text-white flex items-center justify-center backdrop-blur-xl transition-all duration-300 hover:scale-110 hover:bg-white hover:text-black cursor-pointer shadow-2xl"
+              :class="isMainVideoPlaying ? 'opacity-0 group-hover:opacity-100' : 'opacity-100 scale-105'"
+              :aria-label="isMainVideoPlaying ? 'Pausar video' : 'Reproducir video'"
+              @click="toggleMainVideoPlay"
+            >
+              <Pause v-if="isMainVideoPlaying" class="size-7 sm:size-8" />
+              <Play v-else class="size-7 sm:size-8 ml-1" />
+            </button>
+
+            <!-- Testimonio y datos de la familia (Esquina Inferior Izquierda) -->
+            <div class="absolute bottom-14 sm:bottom-16 left-4 sm:left-8 right-4 sm:right-28 z-20 text-left pointer-events-none space-y-2">
+              <p class="font-display text-base sm:text-2xl font-bold text-white drop-shadow-[0_2px_12px_rgba(0,0,0,0.95)] max-w-2xl leading-snug">
+                “{{ selectedVideo.quote }}”
+              </p>
+              <div class="flex flex-wrap items-center gap-2 pt-1 text-xs sm:text-sm text-slate-200">
+                <span class="font-extrabold text-white">{{ selectedVideo.client }}</span>
+                <span class="text-slate-400">·</span>
+                <span class="text-cyan-300 font-medium">{{ selectedVideo.city }}</span>
+                <span class="text-slate-400">·</span>
+                <span class="px-2 py-0.5 rounded-md bg-white/10 border border-white/15 text-[11px] font-mono text-purple-200">
+                  {{ selectedVideo.platformTag }}
+                </span>
+              </div>
+            </div>
+
+            <!-- Barra de Controles Inferior -->
+            <div class="absolute bottom-0 inset-x-0 z-30 p-3 sm:p-4 bg-gradient-to-t from-black via-black/80 to-transparent flex flex-col gap-2">
+              <!-- Barra de Progreso con Scrubber Clickeable -->
+              <div
+                class="w-full h-1.5 sm:h-2 rounded-full bg-white/20 hover:h-2.5 transition-all cursor-pointer relative overflow-hidden"
+                @click="seekMainVideo"
+              >
+                <div
+                  class="h-full bg-gradient-to-r from-purple-500 via-cyan-400 to-cyan-300 rounded-full transition-all duration-100"
+                  :style="{ width: `${mainVideoProgress}%` }"
+                />
+              </div>
+
+              <!-- Fila de Controles -->
+              <div class="flex items-center justify-between text-white pt-1">
+                <div class="flex items-center gap-3">
+                  <button
+                    type="button"
+                    class="p-1.5 rounded-lg hover:bg-white/10 transition-colors cursor-pointer text-slate-200 hover:text-white"
+                    :aria-label="isMainVideoPlaying ? 'Pausar' : 'Reproducir'"
+                    @click="toggleMainVideoPlay"
+                  >
+                    <Pause v-if="isMainVideoPlaying" class="size-4 sm:size-5" />
+                    <Play v-else class="size-4 sm:size-5" />
+                  </button>
+
+                  <button
+                    type="button"
+                    class="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-white/10 hover:bg-white/20 transition-colors cursor-pointer text-xs font-semibold text-slate-200 hover:text-white"
+                    :aria-label="isMainVideoMuted ? 'Activar sonido' : 'Silenciar'"
+                    @click="toggleMainVideoMute"
+                  >
+                    <VolumeX v-if="isMainVideoMuted" class="size-4 text-red-400" />
+                    <Volume2 v-else class="size-4 text-cyan-400 animate-pulse" />
+                    <span class="text-[11px] font-mono">{{ isMainVideoMuted ? 'Sin sonido' : 'Sonido activo' }}</span>
+                  </button>
+
+                  <span class="text-xs font-mono text-slate-400 hidden sm:inline">
+                    {{ selectedVideo.title }}
+                  </span>
+                </div>
+
+                <div class="flex items-center gap-2">
+                  <span class="text-xs font-mono text-slate-300">
+                    {{ selectedVideo.duration }}
+                  </span>
+
+                  <button
+                    type="button"
+                    class="p-1.5 rounded-lg hover:bg-white/10 transition-colors cursor-pointer text-slate-200 hover:text-white"
+                    aria-label="Pantalla completa"
+                    @click="toggleMainVideoFullscreen"
+                  >
+                    <Maximize2 class="size-4 sm:size-5" />
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- LISTA / SELECTOR INTERACTIVO DE HISTORIAS DE FAMILIAS (5 VIDEOS) -->
+        <div class="space-y-4">
+          <div class="flex items-center justify-between">
+            <h3 class="font-display text-lg sm:text-xl font-bold text-white flex items-center gap-2">
+              <Users class="size-5 text-cyan-400" aria-hidden="true" />
+              <span>Selecciona una historia familiar</span>
+            </h3>
+            <span class="text-xs font-mono text-slate-400">
+              5 testimonios en video · 4K Ultra HD
+            </span>
+          </div>
+
+          <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 sm:gap-4">
+            <button
+              v-for="(vid, vIdx) in familyVideos"
+              :key="vid.id"
+              type="button"
+              class="relative rounded-2xl overflow-hidden border text-left transition-all duration-300 cursor-pointer p-2.5 group flex flex-col justify-between"
+              :class="[
+                selectedVideoIndex === vIdx
+                  ? 'border-cyan-400 bg-neutral-900/90 shadow-[0_0_25px_rgba(34,211,238,0.35)] ring-2 ring-cyan-400/50 scale-[1.02]'
+                  : 'border-white/10 bg-neutral-950/60 hover:border-white/30 hover:bg-neutral-900/60'
+              ]"
+              :aria-pressed="selectedVideoIndex === vIdx"
+              @click="selectVideo(vIdx)"
+            >
+              <!-- Miniatura de Video Looping -->
+              <div class="relative aspect-video w-full rounded-xl overflow-hidden bg-black mb-2.5">
+                <video
+                  :src="vid.videoSrc"
+                  muted
+                  loop
+                  playsinline
+                  preload="metadata"
+                  class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                />
+                <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-black/30 pointer-events-none" />
+
+                <!-- Duración -->
+                <span class="absolute bottom-1.5 right-1.5 px-1.5 py-0.5 rounded bg-black/80 text-[10px] font-mono font-bold text-white">
+                  {{ vid.duration }}
+                </span>
+
+                <!-- Indicador 'En reproducción' -->
+                <div
+                  v-if="selectedVideoIndex === vIdx"
+                  class="absolute top-1.5 left-1.5 px-2 py-0.5 rounded-full bg-cyan-400 text-black text-[9px] font-bold uppercase tracking-wider flex items-center gap-1 shadow-lg"
+                >
+                  <span class="size-1.5 rounded-full bg-black animate-ping" />
+                  Viendo
+                </div>
+              </div>
+
+              <!-- Metadatos de la tarjeta -->
+              <div class="space-y-1">
+                <p class="text-xs font-bold text-white line-clamp-1 group-hover:text-cyan-300 transition-colors">
+                  {{ vid.title }}
+                </p>
+                <p class="text-[11px] text-slate-400 line-clamp-1">
+                  {{ vid.client }} · {{ vid.city }}
+                </p>
+                <div class="flex items-center gap-1 pt-1 text-[10px] text-amber-300">
+                  <Star class="size-2.5 fill-amber-400 text-amber-400" />
+                  <span class="font-bold">5.0</span>
+                  <span class="text-slate-400">· {{ vid.badge }}</span>
+                </div>
+              </div>
+            </button>
+          </div>
+        </div>
+
+        <!-- Banner de Confianza y CTA para Familias -->
+        <div class="rounded-2xl border border-white/10 bg-gradient-to-r from-purple-950/40 via-neutral-900/60 to-cyan-950/40 p-5 sm:p-7 backdrop-blur-xl flex flex-col sm:flex-row items-center justify-between gap-4">
+          <div class="space-y-1 text-center sm:text-left">
+            <h4 class="font-display font-extrabold text-base sm:text-lg text-white">
+              ¿Listo para que tu familia disfrute del mejor streaming?
+            </h4>
+            <p class="text-xs sm:text-sm text-slate-300">
+              Más de 15.000 clientes satisfechos. Planes desde $6.500 COP con garantía y soporte total.
+            </p>
+          </div>
+
+          <a
+            href="#plataformas-showcase"
+            class="inline-flex items-center justify-center gap-2 rounded-full bg-white hover:bg-slate-200 text-neutral-950 font-extrabold text-xs sm:text-sm px-6 sm:px-8 py-3 uppercase tracking-wider shadow-[0_0_25px_rgba(255,255,255,0.35)] hover:shadow-[0_0_40px_rgba(255,255,255,0.6)] transition-all shrink-0 cursor-pointer"
+          >
+            <span>Ver planes para mi familia</span>
+            <ArrowRight class="size-3.5" aria-hidden="true" />
+          </a>
+        </div>
+      </div>
+    </section>
 
     <!-- ================= 5. GARANTÍAS Y BENEFICIOS ================= -->
     <section class="container-app pt-16">
