@@ -3,7 +3,7 @@ import { Combo } from "../../models/promos/Combo"
 import { Plataforma } from "../../models/products/Plataforma"
 import { CreateComboInput } from "../../validators/promos/ComboValidators"
 
-const conPlataformas = { model: Plataforma, attributes: ["id", "nombre", "logo_url", "portada_url", "color"], through: { attributes: [] } }
+const conPlataformas = { model: Plataforma, attributes: ["id", "nombre", "logo_url", "portada_url"], through: { attributes: [] } }
 
 type DatosCombo = Omit<Partial<CreateComboInput>, "plataforma_ids">
 
