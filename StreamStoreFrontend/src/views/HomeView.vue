@@ -633,10 +633,9 @@ function getVideoParallax(idx: number) {
     const t = Math.max(0, Math.min(1, (p - 0.55) / 0.30))
     fade = Math.max(0, 1 - easeInCubic(t))
   }
-  const panY = Math.max(-20, Math.min(20, (p - 0.5) * 35))
   return {
     opacity: (fade * 0.90).toFixed(2),
-    transform: `translate3d(0, ${panY.toFixed(1)}px, 0) scale(1.05)`,
+    willChange: 'opacity',
   }
 }
 
@@ -686,7 +685,62 @@ function ensureHomeFonts() {
   document.head.appendChild(link)
 }
 
+// ================= OPTIMIZACIÓN DE RENDIMIENTO: INTERSECTION OBSERVER DE VIDEOS =================
+// Solo se decodifica y reproduce el video visible en pantalla.
+// Todos los videos fuera de vista se pausan de inmediato para garantizar 60 FPS sin tirones.
+let videoObserver: IntersectionObserver | null = null
+const registeredVideos = new Set<HTMLVideoElement>()
+
+function setupVideoObserver() {
+  if (typeof window === 'undefined' || !('IntersectionObserver' in window)) return
+
+  videoObserver = new IntersectionObserver(
+    (entries) => {
+      entries.forEach((entry) => {
+        const video = entry.target as HTMLVideoElement
+        if (entry.isIntersecting && entry.intersectionRatio >= 0.20) {
+          if (video.preload === 'none') {
+            video.preload = 'metadata'
+          }
+          if (video.paused) {
+            video.play().catch(() => {})
+          }
+        } else {
+          if (!video.paused) {
+            video.pause()
+          }
+        }
+      })
+    },
+    {
+      threshold: [0, 0.20, 0.50],
+      rootMargin: '100px 0px 100px 0px',
+    }
+  )
+
+  registeredVideos.forEach((v) => videoObserver?.observe(v))
+}
+
+function registerVideoElement(el: any) {
+  if (!el || typeof window === 'undefined') return
+  const video = el as HTMLVideoElement
+  registeredVideos.add(video)
+  if (videoObserver) {
+    videoObserver.observe(video)
+  }
+}
+
+function cleanupVideoObserver() {
+  if (videoObserver) {
+    videoObserver.disconnect()
+    videoObserver = null
+  }
+  registeredVideos.clear()
+}
+
+
 onMounted(() => {
+    setupVideoObserver()
   if (typeof window !== 'undefined') {
     ensureHomeFonts()
     motionQuery = window.matchMedia('(prefers-reduced-motion: reduce)')
@@ -721,6 +775,7 @@ watch(
 )
 
 onUnmounted(() => {
+    cleanupVideoObserver()
   if (typeof window !== 'undefined') {
     window.removeEventListener('scroll', handleScroll)
     window.removeEventListener('resize', updateScrollTargets)
@@ -871,6 +926,7 @@ interface FamilyVideo {
   platformTag: string
   duration: string
   videoSrc: string
+  poster: string
   badge: string
 }
 
@@ -885,6 +941,7 @@ const familyVideos: FamilyVideo[] = [
     platformTag: 'Netflix 4K · Cuenta Completa',
     duration: '0:48',
     videoSrc: '/videos/familia%201.mp4',
+    poster: '/watching_netflix.jpg',
     badge: 'HISTORIA DESTACADA',
   },
   {
@@ -897,6 +954,7 @@ const familyVideos: FamilyVideo[] = [
     platformTag: 'Max & Prime Video · Pantalla con PIN',
     duration: '0:28',
     videoSrc: '/videos/familia%202.mp4',
+    poster: '/watching_max.jpg',
     badge: 'CLIENTE VERIFICADO',
   },
   {
@@ -909,6 +967,7 @@ const familyVideos: FamilyVideo[] = [
     platformTag: 'Disney+ Total · Pantalla Individual',
     duration: '0:39',
     videoSrc: '/videos/familia%203.mp4',
+    poster: '/watching_disney.jpg',
     badge: 'FAMILIA & NIÑOS',
   },
   {
@@ -921,6 +980,7 @@ const familyVideos: FamilyVideo[] = [
     platformTag: 'Combo Familiar Ultra HD',
     duration: '0:52',
     videoSrc: '/videos/familia%204.mp4',
+    poster: '/hero_cinema_wall.jpg',
     badge: 'EXPERIENCIA 4K',
   },
   {
@@ -933,6 +993,7 @@ const familyVideos: FamilyVideo[] = [
     platformTag: 'Suscripción Anual · Verificada',
     duration: '0:33',
     videoSrc: '/videos/familia%205.mp4',
+    poster: '/hbo_max_mosaic_bg.jpg',
     badge: 'ENTREGA INMEDIATA',
   },
 ]
@@ -948,6 +1009,7 @@ function selectVideo(index: number) {
   selectedVideoIndex.value = index
   mainVideoProgress.value = 0
   if (mainVideoRef.value) {
+    registerVideoElement(mainVideoRef.value)
     mainVideoRef.value.currentTime = 0
     mainVideoRef.value.play().then(() => {
       isMainVideoPlaying.value = true
@@ -1293,13 +1355,14 @@ function seekMainVideo(event: MouseEvent) {
         <!-- VIDEO O FOTO DE REFERENCIA CINEMÁTICA DE FONDO -->
         <video
           v-if="sp.bgVideo"
+          :ref="registerVideoElement"
           :src="sp.bgVideo"
-          autoplay
+          :poster="sp.bgImage"
           loop
           muted
           playsinline
-          preload="auto"
-          class="absolute inset-0 w-full h-full object-cover opacity-85 sm:opacity-90 saturate-[1.12] contrast-[1.06] brightness-[0.92] pointer-events-none"
+          preload="none"
+          class="absolute inset-0 w-full h-full object-cover opacity-85 sm:opacity-90 saturate-[1.12] contrast-[1.06] brightness-[0.92] pointer-events-none will-change-opacity transition-opacity duration-700"
           :style="getVideoParallax(idx)"
         />
         <div
@@ -1517,12 +1580,12 @@ function seekMainVideo(event: MouseEvent) {
               ref="mainVideoRef"
               :key="selectedVideo.id"
               :src="selectedVideo.videoSrc"
-              class="w-full h-full object-cover transition-opacity duration-500"
-              autoplay
+              :poster="selectedVideo.poster"
+              class="w-full h-full object-cover transition-opacity duration-500 will-change-opacity"
               loop
               :muted="isMainVideoMuted"
               playsinline
-              preload="auto"
+              preload="none"
               @play="isMainVideoPlaying = true"
               @pause="isMainVideoPlaying = false"
               @timeupdate="onMainVideoTimeUpdate"
@@ -1667,17 +1730,22 @@ function seekMainVideo(event: MouseEvent) {
               :aria-pressed="selectedVideoIndex === vIdx"
               @click="selectVideo(vIdx)"
             >
-              <!-- Miniatura de Video Looping -->
-              <div class="relative aspect-video w-full rounded-xl overflow-hidden bg-black mb-2.5">
-                <video
-                  :src="vid.videoSrc"
-                  muted
-                  loop
-                  playsinline
-                  preload="metadata"
-                  class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+              <!-- Miniatura Optimizada con Poster y Play Hover -->
+              <div class="relative aspect-video w-full rounded-xl overflow-hidden bg-neutral-900 mb-2.5">
+                <img
+                  :src="vid.poster"
+                  :alt="vid.title"
+                  class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105 opacity-80 group-hover:opacity-100"
+                  loading="lazy"
                 />
-                <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-black/30 pointer-events-none" />
+                <div class="absolute inset-0 bg-gradient-to-t from-black/85 via-black/25 to-transparent pointer-events-none" />
+
+                <!-- Ícono Play en Hover -->
+                <div class="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
+                  <div class="size-8 rounded-full bg-cyan-400/90 text-black flex items-center justify-center shadow-lg">
+                    <Play class="size-4 ml-0.5 fill-black" />
+                  </div>
+                </div>
 
                 <!-- Duración -->
                 <span class="absolute bottom-1.5 right-1.5 px-1.5 py-0.5 rounded bg-black/80 text-[10px] font-mono font-bold text-white">
