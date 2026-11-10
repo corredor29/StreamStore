@@ -16,6 +16,14 @@ export class ComboController {
         }
     }
 
+    static async listActivos(_req: Request, res: Response) {
+        try {
+            return ApiResponse.success(res, "Promociones y Combos activos", await service.listActivos())
+        } catch (error) {
+            return ApiResponse.error(res, error)
+        }
+    }
+
     static async create(req: Request, res: Response) {
         try {
             return ApiResponse.created(res, "Combo creado", await service.create(req.body))

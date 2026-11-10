@@ -65,19 +65,21 @@ function estadoCuenta(raw: unknown, libres: number, total: number): CuentaAdmin[
 }
 
 // El backend responde en snake_case y con DECIMAL como texto
-function normalizeCombo(raw: unknown): ComboPromo {
+export function normalizeCombo(raw: unknown): ComboPromo {
   const c = raw as Record<string, any>
   return {
     id: Number(c.id),
     nombre: c.nombre,
     descripcion: c.descripcion ?? null,
+    imagenUrl: c.imagen_url ?? c.imagenUrl ?? null,
+    plantilla: c.plantilla ?? null,
     plataformas: Array.isArray(c.plataformas) ? c.plataformas.map(normalizePlataforma) : [],
-    precioPromo: Number(c.precio_promo ?? c.precioPromo),
-    precioRegular: Number(c.precio_regular ?? c.precioRegular),
+    precioPromo: Number(c.precio_promo ?? c.precioPromo ?? 0),
+    precioRegular: Number(c.precio_regular ?? c.precioRegular ?? 0),
     pantallasPorPlataforma: Number(c.pantallas_por_plataforma ?? c.pantallasPorPlataforma ?? 1),
     duracionDias: Number(c.duracion_dias ?? c.duracionDias ?? 30),
-    etiquetaPromo: c.etiqueta_promo ?? c.etiquetaPromo ?? '',
-    activo: Boolean(c.activo),
+    etiquetaPromo: c.etiqueta_promo ?? c.etiquetaPromo ?? 'OFERTA',
+    activo: Boolean(c.activo ?? true),
     creadoEn: c.created_at ?? c.createdAt ?? c.creadoEn,
   }
 }
@@ -664,29 +666,27 @@ export const adminService = {
   },
 
   async crearCombo(payload: CrearComboPayload): Promise<ComboPromo> {
-    if (!USE_MOCKS) {
-      const { data } = await api.post<unknown>('/admin/combos', {
-        nombre: payload.nombre,
-        descripcion: payload.descripcion || null,
-        plataforma_ids: payload.plataformaIds,
-        precio_promo: payload.precioPromo,
-        precio_regular: payload.precioRegular,
-        pantallas_por_plataforma: payload.pantallasPorPlataforma,
-        duracion_dias: payload.duracionDias,
-        etiqueta_promo: payload.etiquetaPromo,
-        activo: payload.activo ?? true,
-      })
-      return normalizeCombo(data)
+    let finalImagenUrl = payload.imagenUrl || null
+    if (payload.imagenFile) {
+      try {
+        const subida = await this.subirPortada(payload.imagenFile)
+        if (subida) finalImagenUrl = subida
+      } catch (err) {
+        console.warn('No se pudo subir la imagen local del combo:', err)
+      }
     }
 
     const plats = (payload.plataformaIds || []).map((id: number) => {
       const found = mockPlataformas.find((p) => p.id === id)
       return found || { id, nombre: `Plataforma #${id}`, slug: `plat-${id}`, color: '#8057FF', activa: true }
     })
+
     const nuevo: ComboPromo = {
       id: Math.floor(100 + Math.random() * 900),
       nombre: payload.nombre,
       descripcion: payload.descripcion || 'Acceso combinado multi-servicio.',
+      imagenUrl: finalImagenUrl,
+      plantilla: payload.plantilla || null,
       plataformas: plats,
       precioPromo: payload.precioPromo,
       precioRegular: payload.precioRegular,
@@ -696,6 +696,30 @@ export const adminService = {
       activo: payload.activo !== undefined ? payload.activo : true,
       creadoEn: new Date().toISOString(),
     }
+
+    if (!USE_MOCKS) {
+      try {
+        const { data } = await api.post<unknown>('/admin/combos', {
+          nombre: payload.nombre,
+          descripcion: payload.descripcion || null,
+          imagen_url: finalImagenUrl,
+          plantilla: payload.plantilla || null,
+          plataforma_ids: payload.plataformaIds,
+          precio_promo: payload.precioPromo,
+          precio_regular: payload.precioRegular,
+          pantallas_por_plataforma: payload.pantallasPorPlataforma,
+          duracion_dias: payload.duracionDias,
+          etiqueta_promo: payload.etiquetaPromo,
+          activo: payload.activo ?? true,
+        })
+        const comboFromBack = normalizeCombo(data)
+        mockCombosPromocionales.unshift(comboFromBack)
+        return comboFromBack
+      } catch (err) {
+        console.warn('Fallo backend en crear combo, guardando en memoria mock:', err)
+      }
+    }
+
     mockCombosPromocionales.unshift(nuevo)
     return mockDelay(nuevo, 300)
   },

@@ -8,6 +8,7 @@ import { CompraRoutes } from "./orders/CompraRoutes"
 import { PlataformaRoutes } from "./products/PlataformaRoutes"
 import { ProductoRoutes } from "./products/ProductoRoutes"
 import { ServicioRoutes } from "./orders/ServicioRoutes"
+import { ComboController } from "../controllers/promos/ComboController"
 
 export const router = Router()
 
@@ -24,6 +25,7 @@ router.get("/health", async (_req, res) => {
 router.use("/auth", AuthRoutes)
 router.use("/plataformas", PlataformaRoutes)
 router.use("/productos", ProductoRoutes)
+router.get("/combos", ComboController.listActivos)
 router.use("/carrito", CarritoRoutes)
 router.use("/compras", CompraRoutes)
 router.use("/servicios", ServicioRoutes)

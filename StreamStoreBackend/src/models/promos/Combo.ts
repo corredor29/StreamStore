@@ -8,6 +8,8 @@ export class Combo extends Model {
     @Column(ID) declare id: number
     @Column({ type: DataType.STRING(120), allowNull: false }) declare nombre: string
     @Column({ type: DataType.STRING(255) }) declare descripcion: string | null
+    @Column({ type: DataType.STRING(500) }) declare imagen_url: string | null
+    @Column({ type: DataType.STRING(60) }) declare plantilla: string | null
     @Column({ type: DataType.DECIMAL(12, 2), allowNull: false }) declare precio_promo: string
     @Column({ type: DataType.DECIMAL(12, 2), allowNull: false }) declare precio_regular: string
     @Column({ type: DataType.INTEGER.UNSIGNED, allowNull: false, defaultValue: 1 }) declare pantallas_por_plataforma: number

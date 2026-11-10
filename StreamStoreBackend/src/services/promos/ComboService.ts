@@ -15,6 +15,10 @@ export class ComboService {
         return this.repository.findAll()
     }
 
+    listActivos() {
+        return this.repository.findAllActivos()
+    }
+
     async create({ plataforma_ids, ...datos }: CreateComboInput) {
         await this.validarPlataformas(plataforma_ids)
         const id = await withTransaction(async (t) => {

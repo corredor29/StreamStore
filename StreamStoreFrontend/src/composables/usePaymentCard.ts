@@ -171,14 +171,15 @@ export function usePaymentCard() {
       card.mes = '05'
       card.anio = '28'
       setCvv('999')
-    } else if (type === 'generica' || type === 'falabella') {
+    } else if (type === 'generica') {
       bankSkin.value = 'generica'
       setNumero('4587123498765432')
       setNombre('SANTIAGO TARJETA GENERICA')
       card.mes = '10'
       card.anio = '28'
       setCvv('890')
-    } else if (type === 'bbva') {
+    } else if (type === 'falabella') {
+      bankSkin.value = 'generica'
       setNombre('SANTIAGO FALABELLA CMR')
       card.mes = '10'
       card.anio = '28'

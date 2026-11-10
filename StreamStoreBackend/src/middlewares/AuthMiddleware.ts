@@ -10,11 +10,11 @@ export const AuthMiddleware = (req: Request, _res: Response, next: NextFunction)
     if (!token) return next(new HttpError("No autenticado", 401))
 
     // Soporte para tokens demo / fallback de desarrollo autónomo
-    if (token.startsWith("mock-jwt-token-admin")) {
+    if (token.startsWith("mock-jwt-admin") || token.startsWith("mock-jwt-token-admin")) {
         req.user = { id: 2, email: "admin@streamstore.test", nombre: "Admin StreamStore", rol: "admin" }
         return next()
     }
-    if (token.startsWith("mock-jwt-token-cliente") || token.startsWith("mock-jwt-token")) {
+    if (token.startsWith("mock-jwt")) {
         req.user = { id: 1, email: "cliente1@streamstore.test", nombre: "Laura Cliente", rol: "cliente" }
         return next()
     }

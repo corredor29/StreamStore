@@ -35,6 +35,7 @@ const start = async () => {
     try {
         await sequelize.authenticate()
         logger.info(`Conectado a MySQL: ${config.db.name}`)
+        await sequelize.sync({ alter: true }).catch((err) => logger.warn(`Sync DB alter warning: ${err?.message || err}`))
         startAlertasJob()
     } catch (error) {
         logger.error(`No se pudo conectar a MySQL (${config.db.name}): ${error instanceof Error ? error.message : error}`)

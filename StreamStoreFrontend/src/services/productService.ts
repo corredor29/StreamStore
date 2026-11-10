@@ -1,6 +1,7 @@
 import { api, mockDelay, normalizeError, USE_MOCKS } from './api'
 import { mockPlataformas, mockProductos } from '@/mocks/mockData'
-import type { Plataforma, Producto, ProductoFiltros } from '@/types'
+import type { Plataforma, Producto, ProductoFiltros, ComboPromo } from '@/types'
+import { normalizeCombo, mockCombosPromocionales } from './adminService'
 
 export function normalizePlataforma(p: any): Plataforma {
   const rawSlug = p.slug || p.nombre || 'streaming'
@@ -117,6 +118,22 @@ export const productService = {
       return okPlat && okTipo
     })
     return mockDelay(result.map(normalizeProducto), 200)
+  },
+
+    async getPromociones(): Promise<ComboPromo[]> {
+    if (!USE_MOCKS) {
+      try {
+        const response = await api.get<any>('/combos')
+        const raw = response.data
+        const list = Array.isArray(raw) ? raw : Array.isArray(raw?.data) ? raw.data : []
+        if (list.length > 0) {
+          return list.map(normalizeCombo)
+        }
+      } catch (e) {
+        // Fallback a los combos en memoria
+      }
+    }
+    return mockDelay([...mockCombosPromocionales], 150)
   },
 
   async getProducto(id: number): Promise<Producto> {

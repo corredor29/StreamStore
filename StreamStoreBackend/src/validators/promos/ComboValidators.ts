@@ -3,7 +3,9 @@ import { z } from "../../config/zod"
 const camposCombo = {
     nombre: z.string().trim().min(3).max(120),
     descripcion: z.string().trim().max(255).nullable().optional(),
-    plataforma_ids: z.array(z.coerce.number().int().positive()).min(2).max(10)
+    imagen_url: z.string().trim().max(500).nullable().optional(),
+    plantilla: z.string().trim().max(60).nullable().optional(),
+    plataforma_ids: z.array(z.coerce.number().int().positive()).min(1).max(10)
         .refine((ids) => new Set(ids).size === ids.length, { message: "Las plataformas no se pueden repetir" }),
     precio_promo: z.coerce.number().positive(),
     precio_regular: z.coerce.number().positive(),

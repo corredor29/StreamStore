@@ -306,6 +306,8 @@ export interface ComboPromo {
   pantallasPorPlataforma: number
   duracionDias: number
   etiquetaPromo: string
+  imagenUrl?: string | null
+  plantilla?: string | null
   activo: boolean
   creadoEn?: string
 }
@@ -319,6 +321,9 @@ export interface CrearComboPayload {
   pantallasPorPlataforma: number
   duracionDias: number
   etiquetaPromo: string
+  imagenUrl?: string | null
+  plantilla?: string | null
+  imagenFile?: File | null
   activo?: boolean
 }
 

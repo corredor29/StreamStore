@@ -153,8 +153,13 @@ const conteos = computed(() => {
       <div
         v-for="c in combosFiltrados"
         :key="c.id"
-        class="hud-panel flex flex-col justify-between hover:border-white/25 transition-all group"
+        class="hud-panel flex flex-col justify-between hover:border-white/25 transition-all group overflow-hidden"
       >
+        <!-- Portada de la Promoción si existe -->
+        <div v-if="c.imagenUrl" class="relative h-28 w-full overflow-hidden bg-black">
+          <img :src="c.imagenUrl" :alt="c.nombre" class="h-full w-full object-cover group-hover:scale-105 transition-transform duration-500" />
+          <div class="absolute inset-0 bg-gradient-to-t from-ad-panel via-ad-panel/40 to-transparent pointer-events-none" />
+        </div>
         <!-- Encabezado de la Tarjeta Combo -->
         <div class="p-4 space-y-3">
           <!-- Insignia de Oferta y Switch Activo -->
